@@ -27,8 +27,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/api/v1alpha1"
-	"github.com/caicloud/temp-model-registry/controllers"
+	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/api/v1alpha1"
+	"github.com/caicloud/temp-model-registry/pkg/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -68,9 +68,10 @@ func main() {
 	}
 
 	if err = (&controllers.ModelJobReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("ModelJob"),
-		Scheme: mgr.GetScheme(),
+		Client:        mgr.GetClient(),
+		Log:           ctrl.Log.WithName(controllers.ControllerName).WithName("ModelJob"),
+		EventRecorder: mgr.GetEventRecorderFor(controllers.ControllerName),
+		Scheme:        mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ModelJob")
 		os.Exit(1)
