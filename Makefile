@@ -4,6 +4,40 @@ IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
+# Container registries.
+REGISTRY ?= cargo.dev.caicloud.xyz/release
+
+# Container registry for base images.
+BASE_REGISTRY ?= cargo.caicloud.xyz/library
+
+#
+# These variables should not need tweaking.
+#
+
+# It's necessary to set this because some environments don't link sh -> bash.
+export SHELL := /bin/bash
+
+# It's necessary to set the errexit flags for the bash shell.
+export SHELLOPTS := errexit
+
+# This repo's root import path (under GOPATH).
+ROOT := github.com/caicloud/temp-model-registry
+
+# Target binaries. You can build multiple binaries for a single project.
+TARGETS := model-registry-controller
+
+# Project main package location (can be multiple ones).
+CMD_DIR := ./cmd
+
+# Project output directory.
+OUTPUT_DIR := ./bin
+
+# Current version of the project.
+VERSION ?= $(shell git describe --tags --always --dirty)
+
+# Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.
+CPUS ?= $(shell /bin/bash hack/read_cpus_available.sh)
+
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -17,9 +51,38 @@ all: model-registry-controller
 test: generate fmt vet manifests
 	go test ./... -coverprofile cover.out
 
+build: build-local
+
+build-local:
+	@for target in $(TARGETS); do                                                      \
+	  CGO_ENABLED="0" go build -i -v -o $(OUTPUT_DIR)/$${target} -p $(CPUS)            \
+	  -ldflags "-s -w -X $(ROOT)/pkg/version.VERSION=$(VERSION)                        \
+	    -X $(ROOT)/pkg/version.REPOROOT=$(ROOT)"                                       \
+	  $(CMD_DIR)/$${target};                                                           \
+	done
+
+build-linux:
+	@docker run --rm                                                                   \
+	  -v $(PWD):/go/src/$(ROOT)                                                        \
+	  -w /go/src/$(ROOT)                                                               \
+	  -e GOOS=linux                                                                    \
+	  -e GOARCH=amd64                                                                  \
+	  -e GOPATH=/go                                                                    \
+	  -e SHELLOPTS=$(SHELLOPTS)                                                        \
+	  -e CGO_ENABLED="0"                                                               \
+	  -e GO111MODULE=on                                                                \
+	  -e GOFLAGS=" -mod=vendor"                                                        \
+	  $(BASE_REGISTRY)/golang:1.12.9-stretch                                           \
+	    /bin/bash -c 'for target in $(TARGETS); do                                     \
+	      go build -i -v -o $(OUTPUT_DIR)/$${target} -p $(CPUS)                        \
+	        -ldflags "-s -w -X $(ROOT)/pkg/version.VERSION=$(VERSION)                  \
+	          -X $(ROOT)/pkg/version.REPOROOT=$(ROOT)"                                 \
+	        $(CMD_DIR)/$${target};                                                     \
+	    done'
+
 # Build model-registry-controller binary
 model-registry-controller: generate fmt vet
-	go build -o bin/model-registry-controller ./cmd/model-registry-controller/main.go
+	go build -mod vendor -i -v -o bin/model-registry-controller ./cmd/model-registry-controller/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
