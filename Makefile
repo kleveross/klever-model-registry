@@ -5,10 +5,10 @@ IMG ?= controller:latest
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 # Container registries.
-REGISTRY ?= cargo.dev.caicloud.xyz/release
+REGISTRY ?= cleveross
 
 # Container registry for base images.
-BASE_REGISTRY ?= cargo.caicloud.xyz/library
+BASE_REGISTRY ?= docker.io
 
 #
 # These variables should not need tweaking.
