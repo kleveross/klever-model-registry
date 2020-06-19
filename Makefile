@@ -1,6 +1,4 @@
 
-# Image URL to use all building/pushing image targets
-IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -9,6 +7,9 @@ REGISTRY ?= cleveross
 
 # Container registry for base images.
 BASE_REGISTRY ?= docker.io
+
+# Image URL to use all building/pushing image targets
+IMG ?= cleveross/model-registry-controller:latest
 
 #
 # These variables should not need tweaking.
@@ -23,8 +24,16 @@ export SHELLOPTS := errexit
 # This repo's root import path (under GOPATH).
 ROOT := github.com/caicloud/temp-model-registry
 
+MODEL_OPERATOR := modeljob-operator
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := model-registry-controller
+TARGETS := $$MODEL_OPERATOR
+
+# Container image prefix and suffix added to targets.
+# The final built images are:
+#   $[REGISTRY]/$[IMAGE_PREFIX]$[TARGET]$[IMAGE_SUFFIX]:$[VERSION]
+# $[REGISTRY] is an item from $[REGISTRIES], $[TARGET] is an item from $[TARGETS].
+IMAGE_PREFIX ?= $(strip )
+IMAGE_SUFFIX ?= $(strip )
 
 # Project main package location (can be multiple ones).
 CMD_DIR := ./cmd
@@ -32,11 +41,17 @@ CMD_DIR := ./cmd
 # Project output directory.
 OUTPUT_DIR := ./bin
 
+# Build direcotory.
+BUILD_DIR := ./build
+
 # Current version of the project.
 VERSION ?= $(shell git describe --tags --always --dirty)
 
 # Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.
 CPUS ?= $(shell /bin/bash hack/read_cpus_available.sh)
+
+# Track code version with Docker Label.
+DOCKER_LABELS ?= git-describe="$(shell date -u +v%Y%m%d)-$(shell git describe --tags --always --dirty)"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -80,13 +95,13 @@ build-linux:
 	        $(CMD_DIR)/$${target};                                                     \
 	    done'
 
-# Build model-registry-controller binary
-model-registry-controller: generate fmt vet
-	go build -mod vendor -i -v -o bin/model-registry-controller ./cmd/model-registry-controller/main.go
+# Build modeljob-operator binary
+$MODEL_OPERATOR: generate fmt vet
+	go build -mod vendor -i -v -o bin/$$MODEL_OPERATOR ./cmd/$$MODEL_OPERATOR/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	go run ./cmd/model-registry-controller/main.go
+	go run ./cmd/$$MODEL_OPERATOR/main.go
 
 # Install CRDs into a cluster
 install: manifests kustomize
@@ -98,7 +113,7 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image model-registry-controller=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
@@ -118,8 +133,13 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
-docker-build: test
-	docker build . -t ${IMG}
+docker-build: 
+	@for target in $(TARGETS); do                                                      \
+	  image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);                                  \
+	  docker build -t $(REGISTRY)/$${image}:$(VERSION)                                 \
+	    --label $(DOCKER_LABELS)                                                       \
+	    -f $(BUILD_DIR)/$${target}/Dockerfile .;                                       \
+	done
 
 # Push the docker image
 docker-push:

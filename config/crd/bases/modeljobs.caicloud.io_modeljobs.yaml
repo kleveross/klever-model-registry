@@ -36,13 +36,37 @@ spec:
         spec:
           description: ModelJobSpec defines the desired state of ModelJob
           properties:
-            foo:
-              description: Foo is an example field of ModelJob. Edit ModelJob_types.go
-                to remove/update
+            conversion:
+              properties:
+                mmdnn:
+                  properties:
+                    from:
+                      description: 'Format is model format, eg: SaveModel.'
+                      type: string
+                    to:
+                      description: 'Format is model format, eg: SaveModel.'
+                      type: string
+                  type: object
+              type: object
+            desiredTag:
+              description: DesiredTag is the target tag of model convert.
+              type: string
+            model:
+              description: 'Model is model ref, eg: caicloud/resnet:v1.'
               type: string
           type: object
         status:
           description: ModelJobStatus defines the observed state of ModelJob
+          properties:
+            message:
+              description: Human readable message indicating the reason for Failure
+              type: string
+            phase:
+              description: ModelJobPhase is model status.
+              type: string
+          required:
+          - message
+          - phase
           type: object
       type: object
   version: v1alpha1

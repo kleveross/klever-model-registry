@@ -2,33 +2,46 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: model-registry-controller
-  name: system
+    control-plane: controller-manager
+  name: kube-system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: model-registry-controller
-  namespace: system
+  name: controller-manager
+  namespace: kube-system
   labels:
-    control-plane: model-registry-controller
+    control-plane: controller-manager
 spec:
   selector:
     matchLabels:
-      control-plane: model-registry-controller
+      control-plane: controller-manager
   replicas: 1
   template:
     metadata:
       labels:
-        control-plane: model-registry-controller
+        control-plane: controller-manager
     spec:
       containers:
       - command:
-        - /model-registry-controller
+        - /modeljob-operator
         args:
         - --enable-leader-election
-        image: controller:latest
+        image: cleveross/model-registry-controller:latest
         name: model-registry-controller
+        env:
+        - name: HARBOR_DOMAIN
+          value: "test.harbor.com"
+        - name: HARBOR_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ormb
+              key: ormbUsername
+        - name: HARBOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ormb
+              key: ormbPassword
         resources:
           limits:
             cpu: 100m
@@ -37,3 +50,21 @@ spec:
             cpu: 100m
             memory: 20Mi
       terminationGracePeriodSeconds: 10
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ormb
+type: Opaque
+data:
+  # base64 formatted username `ormbtest`
+  ormbUsername: b3JtYnRlc3Q=
+  # base64 formatted password `ORMBtest12345`
+  ormbPassword: T1JNQnRlc3QxMjM0NQ==
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ormb
+secrets:
+  - name: ormb
