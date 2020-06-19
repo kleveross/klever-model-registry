@@ -1,0 +1,7 @@
+apiVersion: modeljobs.caicloud.io/v1alpha1
+kind: ModelJob
+metadata:
+  name: modeljob-sample
+spec:
+  # Add fields here
+  foo: bar
