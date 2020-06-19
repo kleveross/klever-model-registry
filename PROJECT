@@ -1,0 +1,8 @@
+domain: caicloud.io
+layout: go.kubebuilder.io/v2
+repo: github.com/caicloud/temp-model-registry
+resources:
+- group: modeljobs
+  kind: ModelJob
+  version: v1alpha1
+version: 3-alpha

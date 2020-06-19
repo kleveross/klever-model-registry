@@ -1,0 +1,24 @@
+# permissions for end users to edit modeljobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: modeljob-editor-role
+rules:
+- apiGroups:
+  - modeljobs.caicloud.io
+  resources:
+  - modeljobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - modeljobs.caicloud.io
+  resources:
+  - modeljobs/status
+  verbs:
+  - get

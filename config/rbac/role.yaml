@@ -1,0 +1,28 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - modeljobs.caicloud.io
+  resources:
+  - modeljobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - modeljobs.caicloud.io
+  resources:
+  - modeljobs/status
+  verbs:
+  - get
+  - patch
+  - update
