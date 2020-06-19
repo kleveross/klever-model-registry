@@ -33,7 +33,7 @@ import (
 
 const (
 	// ControllerName is the name of the controller.
-	ControllerName = "model-registry-controller"
+	ControllerName = "modeljob-operator"
 )
 
 // ModelJobReconciler reconciles a ModelJob object

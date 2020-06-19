@@ -24,12 +24,12 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 const (
-	// HarborDomainEnvKey is the domain of harbor
-	HarborDomainEnvKey = "HARBOR_DOMAIN"
-	// HarborUsernameEnvkey is the username of harbor
-	HarborUsernameEnvkey = "HARBOR_USERNAME"
-	// HarborPasswordEnvKey is the password of harbor
-	HarborPasswordEnvKey = "HARBOR_PASSWORD"
+	// ORMBDomainEnvKey is the domain of ORMB
+	ORMBDomainEnvKey = "ORMB_DOMAIN"
+	// HarborUsernameEnvkey is the username of ORMB
+	ORMBUsernameEnvkey = "ORMB_USERNAME"
+	// HarborPasswordEnvKey is the password of ORMB
+	ORMBPasswordEnvKey = "ORMB_PASSWORD"
 
 	// FrameworkEnvKey is the env key of framework
 	FrameworkEnvKey = "FRAMEWORK"

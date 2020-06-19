@@ -82,16 +82,16 @@ func generatePod(modeljob *modeljobsv1alpha1.ModelJob) (*corev1.Pod, error) {
 							Value: strings.ToLower(string(dstFormat)),
 						},
 						corev1.EnvVar{
-							Name:  modeljobsv1alpha1.HarborDomainEnvKey,
-							Value: viper.GetString(modeljobsv1alpha1.HarborDomainEnvKey),
+							Name:  modeljobsv1alpha1.ORMBDomainEnvKey,
+							Value: viper.GetString(modeljobsv1alpha1.ORMBDomainEnvKey),
 						},
 						corev1.EnvVar{
-							Name:  modeljobsv1alpha1.HarborUsernameEnvkey,
-							Value: viper.GetString(modeljobsv1alpha1.HarborUsernameEnvkey),
+							Name:  modeljobsv1alpha1.ORMBUsernameEnvkey,
+							Value: viper.GetString(modeljobsv1alpha1.ORMBUsernameEnvkey),
 						},
 						corev1.EnvVar{
-							Name:  modeljobsv1alpha1.HarborPasswordEnvKey,
-							Value: viper.GetString(modeljobsv1alpha1.HarborPasswordEnvKey),
+							Name:  modeljobsv1alpha1.ORMBPasswordEnvKey,
+							Value: viper.GetString(modeljobsv1alpha1.ORMBPasswordEnvKey),
 						},
 					},
 				},

@@ -30,7 +30,10 @@ func (r *ModelJobReconciler) reconcile(modeljob *modeljobsv1alpha1.ModelJob) (ct
 	// Get a local copy of modeljob's instance.
 	oldModelJob := modeljob.DeepCopy()
 
-	r.reconcileWorkerPod(modeljob)
+	err := r.reconcileWorkerPod(modeljob)
+	if err != nil {
+		return ctrl.Result{Requeue: true}, nil
+	}
 
 	// Update modeljob's status.
 	if !equality.Semantic.DeepEqual(modeljob.Status, oldModelJob.Status) {
@@ -77,10 +80,6 @@ func (r *ModelJobReconciler) reconcileWorkerPod(modeljob *modeljobsv1alpha1.Mode
 		}
 	}
 
-	if pod == nil {
-		r.Log.Info("pod is nil")
-		return nil
-	}
 	switch pod.Status.Phase {
 	case corev1.PodRunning:
 		if modeljob.Status.Phase == modeljobsv1alpha1.ModelJobPending {

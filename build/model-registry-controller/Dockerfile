@@ -3,7 +3,7 @@
 FROM gcr.io/distroless/static:nonroot
 
 WORKDIR /
-COPY bin/model-registry-controller  /model-registry-controller
+COPY bin/modeljob-operator  /modeljob-operator
 USER nonroot:nonroot
 
-ENTRYPOINT ["/model-registry-controller"]
+ENTRYPOINT ["/modeljob-operator"]

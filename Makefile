@@ -24,8 +24,9 @@ export SHELLOPTS := errexit
 # This repo's root import path (under GOPATH).
 ROOT := github.com/caicloud/temp-model-registry
 
+MODEL_OPERATOR := modeljob-operator
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := model-registry-controller
+TARGETS := $$MODEL_OPERATOR
 
 # Container image prefix and suffix added to targets.
 # The final built images are:
@@ -94,13 +95,13 @@ build-linux:
 	        $(CMD_DIR)/$${target};                                                     \
 	    done'
 
-# Build model-registry-controller binary
-model-registry-controller: generate fmt vet
-	go build -mod vendor -i -v -o bin/model-registry-controller ./cmd/model-registry-controller/main.go
+# Build modeljob-operator binary
+$MODEL_OPERATOR: generate fmt vet
+	go build -mod vendor -i -v -o bin/$$MODEL_OPERATOR ./cmd/$$MODEL_OPERATOR/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	go run ./cmd/model-registry-controller/main.go
+	go run ./cmd/$$MODEL_OPERATOR/main.go
 
 # Install CRDs into a cluster
 install: manifests kustomize

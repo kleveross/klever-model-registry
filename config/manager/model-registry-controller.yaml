@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - command:
-        - /model-registry-controller
+        - /modeljob-operator
         args:
         - --enable-leader-election
         image: cleveross/model-registry-controller:latest
