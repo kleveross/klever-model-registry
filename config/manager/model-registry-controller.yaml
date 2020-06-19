@@ -2,32 +2,32 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: model-registry-controller
-  name: system
+    control-plane: controller-manager
+  name: kube-system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: model-registry-controller
-  namespace: system
+  name: controller-manager
+  namespace: kube-system
   labels:
-    control-plane: model-registry-controller
+    control-plane: controller-manager
 spec:
   selector:
     matchLabels:
-      control-plane: model-registry-controller
+      control-plane: controller-manager
   replicas: 1
   template:
     metadata:
       labels:
-        control-plane: model-registry-controller
+        control-plane: controller-manager
     spec:
       containers:
       - command:
         - /model-registry-controller
         args:
         - --enable-leader-election
-        image: controller:latest
+        image: cleveross/model-registry-controller:latest
         name: model-registry-controller
         env:
         - name: HARBOR_DOMAIN
