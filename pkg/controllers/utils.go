@@ -11,10 +11,6 @@ import (
 	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/api/v1alpha1"
 )
 
-func init() {
-	viper.AutomaticEnv()
-}
-
 func getPodName(modeljobName string) string {
 	return fmt.Sprintf("modeljob-%v", modeljobName)
 }
@@ -24,15 +20,22 @@ func getFrameworkByFormat(format modeljobsv1alpha1.Format) modeljobsv1alpha1.Fra
 }
 
 func generatePod(modeljob *modeljobsv1alpha1.ModelJob) (*corev1.Pod, error) {
-	dstFramework := getFrameworkByFormat(modeljobsv1alpha1.Format(modeljob.Spec.Conversion.MMdnn.From))
-	dstFormat := modeljob.Spec.Conversion.MMdnn.From
+	var dstFormat modeljobsv1alpha1.Format
+	var dstFramework modeljobsv1alpha1.Framework
 	dstTag := ""
-	if modeljob.Spec.DesiredTag != nil {
+	image := ""
+	if modeljob.Spec.Conversion != nil {
 		dstTag = *modeljob.Spec.DesiredTag
-		dstFramework = getFrameworkByFormat(modeljobsv1alpha1.Format(modeljob.Spec.Conversion.MMdnn.To))
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
-	} else {
+		dstFramework = getFrameworkByFormat(dstFormat)
+		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-convert"]
+	} else if modeljob.Spec.Extraction != nil {
 		dstTag = "empty"
+		dstFormat = modeljob.Spec.Extraction.Format
+		dstFramework = getFrameworkByFormat(dstFormat)
+		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-extract"]
+	} else {
+		return nil, fmt.Errorf("%v", "not support source")
 	}
 
 	pod := &corev1.Pod{
@@ -43,9 +46,8 @@ func generatePod(modeljob *modeljobsv1alpha1.ModelJob) (*corev1.Pod, error) {
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
-					Name: "executor",
-					// TODO(simon): set different image for different job.
-					Image:      "harbor.caicloud.com/test/extract:v0.2",
+					Name:       "executor",
+					Image:      image,
 					WorkingDir: "/models",
 					Command:    []string{"sh"},
 					Args: []string{
