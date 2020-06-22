@@ -99,8 +99,13 @@ type ConversionSource struct {
 	MMdnn *MMdnnSpec `json:"mmdnn,omitempty"`
 }
 
+type ExtractionSource struct {
+	Format Format `json:"format,omitempty"`
+}
+
 // ModelJobSource defines the modeljob source information
 type ModelJobSource struct {
+	Extraction *ExtractionSource `json:"extraction,omitempty"`
 	Conversion *ConversionSource `json:"conversion,omitempty"`
 }
 

@@ -27,17 +27,17 @@ spec:
         - /modeljob-operator
         args:
         - --enable-leader-election
-        image: cleveross/model-registry-controller:latest
-        name: model-registry-controller
+        image: harbor.caicloud.com/release/modeljob-operator:4066990-dirty
+        name: modeljob-operator
         env:
-        - name: HARBOR_DOMAIN
-          value: "test.harbor.com"
-        - name: HARBOR_USERNAME
+        - name: ORMB_DOMAIN
+          value: "harbor.caicloud.com"
+        - name: ORMB_USERNAME
           valueFrom:
             secretKeyRef:
               name: ormb
               key: ormbUsername
-        - name: HARBOR_PASSWORD
+        - name: ORMB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: ormb
@@ -52,9 +52,29 @@ spec:
       terminationGracePeriodSeconds: 10
 ---
 apiVersion: v1
+data:
+  caffemodel-convert: 'harbor.caicloud.com/release/caffetocaffe2:v0.2'
+  caffemodel-extract: 'harbor.caicloud.com/release/caffe:v0.2'
+  netdef-extract: 'harbor.caicloud.com/release/caffe2:v0.2'
+  graphdef-extract: 'harbor.caicloud.com/release/graphdef:v0.2'
+  h5-convert: 'harbor.caicloud.com/release/keras2tf:v0.1'
+  h5-extract: 'harbor.caicloud.com/release/keras:v0.1'
+  mxnetparams-convert: 'harbor.caicloud.com/release/mxnet2onnx:v0.2'
+  mxnetparams-extract: 'harbor.caicloud.com/release/mxnet:v0.2'
+  onnx-extract: 'harbor.caicloud.com/release/onnx:v0.2'
+  savedmodel-extract: 'harbor.caicloud.com/release/savedmodel:v0.2'
+  torchscript-extract: 'harbor.caicloud.com/release/torchscript:v0.2'
+  pmml-extract: 'harbor.caicloud.com/release/openscoring:v2.0.1-1.0'
+kind: ConfigMap
+metadata:
+  name: modeljob-image-config
+  namespace: kube-system
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: ormb
+  namespace: kube-system
 type: Opaque
 data:
   # base64 formatted username `ormbtest`
@@ -66,5 +86,6 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ormb
+  namespace: kube-system
 secrets:
   - name: ormb

@@ -51,6 +51,11 @@ spec:
             desiredTag:
               description: DesiredTag is the target tag of model convert.
               type: string
+            extraction:
+              properties:
+                format:
+                  type: string
+              type: object
             model:
               description: 'Model is model ref, eg: caicloud/resnet:v1.'
               type: string
