@@ -29,13 +29,13 @@ class OnnxExtractor(BaseExtrctor):
         inputs = []
         for input in origin_inputs:
             input_value = {
-                'dims': [
+                'size': [
                     modefied_dynamic(dim.dim_value)
                     for dim in input.type.tensor_type.shape.dim
                 ],
                 'name':
                 input.name,
-                'dataType':
+                'dtype':
                 modified2np(onnx.TensorProto.DataType.keys()[
                     input.type.tensor_type.elem_type].lower())
             }
@@ -47,13 +47,13 @@ class OnnxExtractor(BaseExtrctor):
         outputs = []
         for output in origin_outputs:
             output_value = {
-                'dims': [
+                'size': [
                     modefied_dynamic(dim.dim_value)
                     for dim in output.type.tensor_type.shape.dim
                 ],
                 'name':
                 output.name,
-                'dataType':
+                'dtype':
                 modified2np(onnx.TensorProto.DataType.keys()[
                     output.type.tensor_type.elem_type].lower())
             }
