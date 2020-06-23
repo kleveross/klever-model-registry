@@ -17,10 +17,10 @@ class TensorflowExtractor(BaseExtrctor):
             if node.op == 'Placeholder':
                 origin_inputs = {}
                 origin_inputs['name'] = node.name
-                origin_inputs['dataType'] = tf.DType(
+                origin_inputs['dtype'] = tf.DType(
                     node.attr['dtype'].type).as_numpy_dtype.__name__
                 dim = node.attr['shape'].shape.dim
-                origin_inputs['dims'] = [dim[i].size for i in range(len(dim))]
+                origin_inputs['size'] = [dim[i].size for i in range(len(dim))]
                 inputs.append(origin_inputs)
         return inputs
 
@@ -42,8 +42,8 @@ class TensorflowExtractor(BaseExtrctor):
         for tensor in outputs_tensor:
             origin_outputs = {}
             origin_outputs['name'] = tensor.name.split(':')[0]
-            origin_outputs['dataType'] = tensor.dtype.as_numpy_dtype.__name__
-            origin_outputs['dims'] = [
+            origin_outputs['dtype'] = tensor.dtype.as_numpy_dtype.__name__
+            origin_outputs['size'] = [
                 i.value if i.value else -1 for i in tensor.shape
             ]
             outputs.append(origin_outputs)
