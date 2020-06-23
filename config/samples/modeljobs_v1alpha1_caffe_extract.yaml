@@ -1,0 +1,11 @@
+apiVersion: modeljobs.caicloud.io/v1alpha1
+kind: ModelJob
+metadata:
+  name: modeljob-caffe-extract
+  namespace: kube-system
+spec:
+  # Add fields here
+  model: "harbor.caicloud.com/release/caffe:v1"
+  extraction:
+    format: "CaffeModel"
+

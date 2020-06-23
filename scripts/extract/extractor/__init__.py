@@ -3,7 +3,7 @@ module = os.environ.get('EXTRACTOR','NULL')
 
 if module=='onnx':
     from .extract_onnx import OnnxExtractor as Extractor
-elif module=='caffe':
+elif module=='caffemodel':
     from .extract_caffe import CaffeExtractor as Extractor
 elif module=='netdef':
     from .extract_caffe2 import Caffe2Extractor as Extractor
