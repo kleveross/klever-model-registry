@@ -1,0 +1,11 @@
+apiVersion: modeljobs.caicloud.io/v1alpha1
+kind: ModelJob
+metadata:
+  name: modeljob-netdef-extract
+  namespace: kube-system
+spec:
+  # Add fields here
+  model: "harbor.caicloud.com/release/netdef:v1"
+  extraction:
+    format: "NetDef"
+

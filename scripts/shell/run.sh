@@ -49,7 +49,7 @@ then
     case $format in
     PMML )
         java -Dconfig.file=/opt/openscoring/application.conf -jar /opt/openscoring/openscoring-server-executable-2.0.1.jar --port 8080 &
-        sleep 10s;
+        sleep 15s;
         ;;
     NetDef )
         cp $input_dir/model/predict_net.pb $input_dir/model/model.netdef

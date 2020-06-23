@@ -1,0 +1,11 @@
+apiVersion: modeljobs.caicloud.io/v1alpha1
+kind: ModelJob
+metadata:
+  name: modeljob-graphdef-extract
+  namespace: kube-system
+spec:
+  # Add fields here
+  model: "harbor.caicloud.com/release/graphdef:v1"
+  extraction:
+    format: "GraphDef"
+
