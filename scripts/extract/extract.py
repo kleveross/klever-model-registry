@@ -34,19 +34,24 @@ def update_yaml(dir, res_dict):
     data = dict
     with open(os.path.join(dir, "ormbfile.yaml"), 'r') as f:
         data = yaml.load(f)
-        print(data)
 
     with open(os.path.join(dir, "ormbfile.yaml"), 'w') as f:
         data["framework"] = os.environ["FRAMEWORK"]
         data["format"] = os.environ["FORMAT"]
+        layersMap = dict(res_dict["Operators"])
+        layers = []
+        for (k, v) in  layersMap.items(): 
+            layers.append({"name": k})
         data["signature"] = {
-            "layers":res_dict["Operators"]
+            "layers": layers
         }
+
         if len(res_dict["Inputs"]) != 0:
             data["signature"]["inputs"] = res_dict["Inputs"]
 
         if len(res_dict["Outputs"]) != 0:
             data["signature"]["outputs"] = res_dict["Outputs"]
+        
         yaml.dump(data, f)
 
 if __name__ == "__main__":
