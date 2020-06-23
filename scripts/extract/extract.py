@@ -42,9 +42,11 @@ def update_yaml(dir, res_dict):
         layers = []
         for (k, v) in  layersMap.items(): 
             layers.append({"name": k})
-        data["signature"] = {
-            "layers": layers
-        }
+
+        if "signature" not in data:
+            data["signature"] = {}
+    
+        data["signature"]["layers"] = layers
 
         if len(res_dict["Inputs"]) != 0:
             data["signature"]["inputs"] = res_dict["Inputs"]
