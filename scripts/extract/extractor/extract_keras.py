@@ -16,8 +16,8 @@ class KerasExtractor(BaseExtrctor):
         for tensor in self.models.inputs:
             origin_inputs = {}
             origin_inputs['name'] = tensor.name.split(':')[0]
-            origin_inputs['dataType'] = tensor.dtype.as_numpy_dtype.__name__
-            origin_inputs['dims'] = [
+            origin_inputs['dtype'] = tensor.dtype.as_numpy_dtype.__name__
+            origin_inputs['size'] = [
                 i.value if i.value else -1 for i in tensor.shape
             ]
             inputs.append(origin_inputs)
@@ -28,8 +28,8 @@ class KerasExtractor(BaseExtrctor):
         for tensor in self.models.outputs:
             origin_outputs = {}
             origin_outputs['name'] = tensor.name.split(':')[0]
-            origin_outputs['dataType'] = tensor.dtype.as_numpy_dtype.__name__
-            origin_outputs['dims'] = [
+            origin_outputs['dtype'] = tensor.dtype.as_numpy_dtype.__name__
+            origin_outputs['size'] = [
                 i.value if i.value else -1 for i in tensor.shape
             ]
             outputs.append(origin_outputs)
