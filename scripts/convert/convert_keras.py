@@ -16,6 +16,7 @@ class KerasToTensorFlow(BaseConvert):
 
         self.args = self.parser.parse_args()
         self.input_dir = self.args.input_dir
+        self.ormbfile_output_dir = self.args.output_dir
         self.output_dir = os.path.join(self.args.output_dir, 'model')
         self.model_name = self.args.model_name
 
@@ -42,6 +43,7 @@ class KerasToTensorFlow(BaseConvert):
             model = tf_keras.models.load_model(self.model_path)
             tf.contrib.saved_model.save_keras_model(model, self.output_dir)
             os.system('mv  %s/*/* %s' % (self.output_dir, self.output_dir))
+            super().write_output_ormbfile(self.input_dir, self.ormbfile_output_dir)
         except Exception as ea:
             try:
                 tf.reset_default_graph()
@@ -60,8 +62,7 @@ class KerasToTensorFlow(BaseConvert):
                                            export_dir=self.output_dir,
                                            inputs=input_tensor,
                                            outputs=output_tensor)
-
-                super().write.write_output_ormbfile(self.input_dir, self.output_dir)
+                super().write_output_ormbfile(self.input_dir, self.ormbfile_output_dir)
             except Exception as eb:
                 raise eb
 
