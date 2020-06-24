@@ -28,7 +28,7 @@ func generatePod(modeljob *modeljobsv1alpha1.ModelJob) (*corev1.Pod, error) {
 		dstTag = *modeljob.Spec.DesiredTag
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
 		dstFramework = getFrameworkByFormat(dstFormat)
-		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-convert"]
+		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(modeljob.Spec.Conversion.MMdnn.From))+"-convert"]
 	} else if modeljob.Spec.Extraction != nil {
 		dstTag = "empty"
 		dstFormat = modeljob.Spec.Extraction.Format
