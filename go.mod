@@ -8,6 +8,7 @@ require (
 	github.com/go-logr/logr v0.1.0
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.3.2
 	k8s.io/api v0.18.2
 	k8s.io/apimachinery v0.18.2

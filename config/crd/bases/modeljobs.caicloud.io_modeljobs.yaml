@@ -54,6 +54,7 @@ spec:
             extraction:
               properties:
                 format:
+                  description: 'Format is model format, eg: SaveModel.'
                   type: string
               type: object
             model:

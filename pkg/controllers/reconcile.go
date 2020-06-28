@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,7 +30,7 @@ func (r *ModelJobReconciler) reconcile(modeljob *modeljobsv1alpha1.ModelJob) (ct
 	// Get a local copy of modeljob's instance.
 	oldModelJob := modeljob.DeepCopy()
 
-	err := r.reconcileWorkerPod(modeljob)
+	err := r.reconcileJob(modeljob)
 	if err != nil {
 		return ctrl.Result{Requeue: true}, nil
 	}
@@ -45,52 +45,72 @@ func (r *ModelJobReconciler) reconcile(modeljob *modeljobsv1alpha1.ModelJob) (ct
 	return reconcile.Result{}, nil
 }
 
-func (r *ModelJobReconciler) reconcileWorkerPod(modeljob *modeljobsv1alpha1.ModelJob) error {
+func (r *ModelJobReconciler) reconcileJob(modeljob *modeljobsv1alpha1.ModelJob) error {
 	var err error
 
-	pod := &corev1.Pod{}
-	err = r.Get(context.TODO(), types.NamespacedName{Namespace: modeljob.Namespace, Name: getPodName(modeljob.Name)}, pod)
+	job := &batchv1.Job{}
+	err = r.Get(context.TODO(), types.NamespacedName{Namespace: modeljob.Namespace, Name: getJobName(modeljob.Name)}, job)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			pod, err := generatePod(modeljob)
+			job, err := generateJobResource(modeljob)
 			if err != nil {
 				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-				r.Log.Error(err, "New pod failed")
-				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("New pod failed"))
+				r.Log.Error(err, "New job failed")
+				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("New jod failed"))
 				return nil
 			}
 
-			if err := controllerutil.SetControllerReference(modeljob, pod, r.Scheme); err != nil {
+			if err := controllerutil.SetControllerReference(modeljob, job, r.Scheme); err != nil {
 				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-				r.Log.Error(err, "Set pod ownreference failed")
-				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Set pod ownreference failed"))
+				r.Log.Error(err, "Set job ownreference failed")
+				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Set job ownreference failed"))
 				return nil
 			}
 
-			if err := r.Create(context.TODO(), pod); err != nil {
+			if err := r.Create(context.TODO(), job); err != nil {
 				if errors.IsAlreadyExists(err) {
 					return nil
 				}
 				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-				r.Log.Error(err, "Create pod failed")
-				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Create pod failed"))
+				r.Log.Error(err, "Create job failed")
+				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Create job failed"))
 			}
 
 			modeljob.Status.Phase = modeljobsv1alpha1.ModelJobPending
 		}
 	}
 
-	switch pod.Status.Phase {
-	case corev1.PodRunning:
-		if modeljob.Status.Phase == modeljobsv1alpha1.ModelJobPending {
-			modeljob.Status.Phase = modeljobsv1alpha1.ModelJobRunning
-		}
-	case corev1.PodSucceeded:
-		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobSucceeded
-	case corev1.PodFailed, corev1.PodUnknown:
-		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-		modeljob.Status.Message = pod.Status.Message
+	r.updateModelJobStatus(job, modeljob)
 
-	}
 	return nil
+}
+
+func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *modeljobsv1alpha1.ModelJob) {
+
+	if job == nil || modeljob == nil {
+		return
+	}
+
+	if job.Status.StartTime == nil {
+		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobPending
+		return
+	}
+
+	if job.Status.Active != 0 {
+		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobRunning
+		return
+	}
+
+	if job.Status.Succeeded != 0 {
+		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobSucceeded
+		return
+	}
+
+	if job.Status.Failed != 0 {
+		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
+		// TODO(chenjun): Update failed reason.
+		return
+	}
+
+	return
 }
