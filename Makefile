@@ -9,7 +9,7 @@ REGISTRY ?= cleveross
 BASE_REGISTRY ?= docker.io
 
 # Image URL to use all building/pushing image targets
-IMG ?= cleveross/model-registry-controller:latest
+IMG ?= cleveross/modeljob-operator:latest
 
 #
 # These variables should not need tweaking.
@@ -24,9 +24,8 @@ export SHELLOPTS := errexit
 # This repo's root import path (under GOPATH).
 ROOT := github.com/caicloud/temp-model-registry
 
-MODEL_OPERATOR := modeljob-operator
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := $$MODEL_OPERATOR
+TARGETS := modeljob-operator
 
 # Container image prefix and suffix added to targets.
 # The final built images are:
@@ -46,6 +45,7 @@ BUILD_DIR := ./build
 
 # Current version of the project.
 VERSION ?= $(shell git describe --tags --always --dirty)
+GITSHA ?= $(shell git rev-parse --short HEAD)
 
 # Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.
 CPUS ?= $(shell /bin/bash hack/read_cpus_available.sh)
@@ -60,8 +60,6 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: model-registry-controller
-
 # Run tests
 test: generate fmt vet manifests
 	go test ./... -coverprofile cover.out
@@ -72,6 +70,7 @@ build-local:
 	@for target in $(TARGETS); do                                                      \
 	  CGO_ENABLED="0" go build -i -v -o $(OUTPUT_DIR)/$${target} -p $(CPUS)            \
 	  -ldflags "-s -w -X $(ROOT)/pkg/version.VERSION=$(VERSION)                        \
+	  	-X $(ROOT)/pkg/version.COMMIT=$(GITSHA)                                        \
 	    -X $(ROOT)/pkg/version.REPOROOT=$(ROOT)"                                       \
 	  $(CMD_DIR)/$${target};                                                           \
 	done
@@ -87,21 +86,14 @@ build-linux:
 	  -e CGO_ENABLED="0"                                                               \
 	  -e GO111MODULE=on                                                                \
 	  -e GOFLAGS=" -mod=vendor"                                                        \
-	  $(BASE_REGISTRY)/golang:1.12.9-stretch                                           \
+	  $(BASE_REGISTRY)/golang:1.13.9                                                   \
 	    /bin/bash -c 'for target in $(TARGETS); do                                     \
 	      go build -i -v -o $(OUTPUT_DIR)/$${target} -p $(CPUS)                        \
 	        -ldflags "-s -w -X $(ROOT)/pkg/version.VERSION=$(VERSION)                  \
+			  -X $(ROOT)/pkg/version.COMMIT=$(GITSHA)                                  \
 	          -X $(ROOT)/pkg/version.REPOROOT=$(ROOT)"                                 \
 	        $(CMD_DIR)/$${target};                                                     \
 	    done'
-
-# Build modeljob-operator binary
-$MODEL_OPERATOR: generate fmt vet
-	go build -mod vendor -i -v -o bin/$$MODEL_OPERATOR ./cmd/$$MODEL_OPERATOR/main.go
-
-# Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet manifests
-	go run ./cmd/$$MODEL_OPERATOR/main.go
 
 # Install CRDs into a cluster
 install: manifests kustomize
@@ -113,7 +105,7 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
-	cd config/manager && $(KUSTOMIZE) edit set image model-registry-controller=${IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image modeljob-operator=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
@@ -133,7 +125,7 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
-docker-build: 
+docker-build: build-linux
 	@for target in $(TARGETS); do                                                      \
 	  image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);                                  \
 	  docker build -t $(REGISTRY)/$${image}:$(VERSION)                                 \

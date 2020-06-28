@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	corev1 "k8s.io/api/core/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -71,6 +71,6 @@ func (r *ModelJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 func (r *ModelJobReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&modeljobsv1alpha1.ModelJob{}).
-		Owns(&corev1.Pod{}).
+		Owns(&batchv1.Job{}).
 		Complete(r)
 }
