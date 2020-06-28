@@ -2,6 +2,13 @@
 
 echo "10.9.4.55 harbor.caicloud.com" >> /etc/hosts
 
+ormb_login_err=10000
+ormb_pull_model_err=10001
+ormb_export_model_err=10002
+ormb_run_task_err=10003
+ormb_save_model_err=10004
+ormb_push_model_err=10005
+
 src_tag=$SOURCE_MODEL_TAG
 dst_tag=$DESTINATION_MODEL_TAG
 input_dir=$SOURCE_MODEL_PATH
@@ -33,15 +40,15 @@ mkdir -p $output_dir/model
 
 # login to harbor.
 ormb login  --insecure $ORMB_DOMAIN -u $ORMB_USERNAME -p $ORMB_PASSWORD
-checkOrExit $? 10000
+checkOrExit $? $ormb_login_err
 
 # pull source model.
 ormb pull $src_tag --plain-http
-checkOrExit $? 10001
+checkOrExit $? $ormb_pull_model_err
 
 # export source model.
 ormb export -d $input_dir $src_tag
-checkOrExit $? 10002
+checkOrExit $? $ormb_export_model_err
 
 if [ $dst_tag == "empty" ]
 then
@@ -65,7 +72,7 @@ then
 
     # execute python script to extract
     python3 /scripts/extract.py -d $input_dir
-    checkOrExit $? 10003
+    checkOrExit $? $ormb_run_task_err
 
     case $format in
     NetDef )
@@ -103,8 +110,8 @@ fi
 
 # save model 
 ormb save $output_dir $dst_tag
-checkOrExit $? 10004
+checkOrExit $? $ormb_save_model_err
 
 # push model to registry
 ormb push $dst_tag --plain-http
-checkOrExit $? 10005
+checkOrExit $? $ormb_push_model_err
