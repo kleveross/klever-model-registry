@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -108,7 +109,33 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 
 	if job.Status.Failed != 0 {
 		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-		// TODO(chenjun): Update failed reason.
+
+		pod := &corev1.Pod{}
+		err := r.Get(context.TODO(), types.NamespacedName{Namespace: job.Namespace, Name: job.ObjectMeta.Labels["job-name"]}, pod)
+		if err != nil {
+			r.Log.Error(err, fmt.Sprintf("Get pod for modeljob %v", modeljob.Name))
+			return
+		}
+
+		cs := pod.Status.ContainerStatuses
+		if cs != nil && cs[0].State.Terminated != nil {
+			switch cs[0].State.Terminated.ExitCode {
+			case ErrORMBLogin:
+				modeljob.Status.Message = fmt.Sprintf("ormb login error")
+			case ErrORMBPullModel:
+				modeljob.Status.Message = fmt.Sprintf("ormb pull model error")
+			case ErrORMBExportModel:
+				modeljob.Status.Message = fmt.Sprintf("ormb export model error")
+			case ErrRunTask:
+				modeljob.Status.Message = fmt.Sprintf("run task error")
+			case ErrORMBSaveModel:
+				modeljob.Status.Message = fmt.Sprintf("ormb save model error")
+			case ErrORMBPushModel:
+				modeljob.Status.Message = fmt.Sprintf("ormb push model error")
+			default:
+				modeljob.Status.Message = fmt.Sprintf("unknow error, error code: %v", cs[0].State.Terminated.ExitCode)
+			}
+		}
 		return
 	}
 
