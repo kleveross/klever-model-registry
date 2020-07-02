@@ -26,9 +26,9 @@ import (
 const (
 	// ORMBDomainEnvKey is the domain of ORMB
 	ORMBDomainEnvKey = "ORMB_DOMAIN"
-	// HarborUsernameEnvkey is the username of ORMB
+	// ORMBUsernameEnvkey is the username of ORMB
 	ORMBUsernameEnvkey = "ORMB_USERNAME"
-	// HarborPasswordEnvKey is the password of ORMB
+	// ORMBPasswordEnvKey is the password of ORMB
 	ORMBPasswordEnvKey = "ORMB_PASSWORD"
 
 	// FrameworkEnvKey is the env key of framework
