@@ -16,7 +16,6 @@ limitations under the License.
 package modeljob
 
 import (
-	"context"
 	"encoding/json"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,8 +41,8 @@ func (m *modeljobController) Create() {
 		return
 	}
 
-	_, err = client.KubeCRDClient.ModeljobsV1alpha1().
-		ModelJobs(common.KubeSystemNamespace).Create(context.Background(), modeljob, metav1.CreateOptions{})
+	_, err = client.KubeModelJobClient.ModeljobsV1alpha1().
+		ModelJobs(common.KubeSystemNamespace).Create(modeljob)
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 		return
@@ -56,8 +55,8 @@ func (m *modeljobController) Create() {
 func (m *modeljobController) Get() {
 	modeljobID := m.Ctx.Input.Param(":modeljob_id")
 
-	modeljob, err := client.KubeCRDClient.ModeljobsV1alpha1().
-		ModelJobs(common.KubeSystemNamespace).Get(context.Background(), modeljobID, metav1.GetOptions{})
+	modeljob, err := client.KubeModelJobClient.ModeljobsV1alpha1().
+		ModelJobs(common.KubeSystemNamespace).Get(modeljobID, metav1.GetOptions{})
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 	}
@@ -69,8 +68,8 @@ func (m *modeljobController) Get() {
 func (m *modeljobController) Delete() {
 	modeljobID := m.Ctx.Input.Param(":modeljob_id")
 
-	err := client.KubeCRDClient.ModeljobsV1alpha1().
-		ModelJobs(common.KubeSystemNamespace).Delete(context.Background(), modeljobID, metav1.DeleteOptions{})
+	err := client.KubeModelJobClient.ModeljobsV1alpha1().
+		ModelJobs(common.KubeSystemNamespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 		return
@@ -81,7 +80,7 @@ func (m *modeljobController) Delete() {
 }
 
 func (m *modeljobController) List() {
-	modeljobs, err := client.KubeCRDClient.ModeljobsV1alpha1().ModelJobs(common.KubeSystemNamespace).List(context.Background(), metav1.ListOptions{})
+	modeljobs, err := client.KubeModelJobClient.ModeljobsV1alpha1().ModelJobs(common.KubeSystemNamespace).List(metav1.ListOptions{})
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 		return

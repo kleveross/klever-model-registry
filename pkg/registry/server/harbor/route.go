@@ -21,6 +21,9 @@ import (
 
 // RegisterRoutes for harbor APIs
 func RegisterRoutes() {
-	beego.Any("/api/v2.0/projects", projectAPIs)
+	beego.Any("/api/*", harborProxyAPIs)
+	beego.Any("/service/*", harborProxyAPIs)
+	beego.Any("/c/*", harborProxyAPIs)
+	beego.Any("/v2/*", harborProxyAPIs)
 	beego.Post("/webhook", webhookAPI)
 }

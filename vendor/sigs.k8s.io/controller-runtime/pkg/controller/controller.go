@@ -24,7 +24,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/internal/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/controller-runtime/pkg/ratelimiter"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -36,11 +35,6 @@ type Options struct {
 
 	// Reconciler reconciles an object
 	Reconciler reconcile.Reconciler
-
-	// RateLimiter is used to limit how frequently requests may be queued.
-	// Defaults to MaxOfRateLimiter which has both overall and per-item rate limiting.
-	// The overall is a token bucket and the per-item is exponential.
-	RateLimiter ratelimiter.RateLimiter
 }
 
 // Controller implements a Kubernetes API.  A Controller manages a work queue fed reconcile.Requests
@@ -67,18 +61,6 @@ type Controller interface {
 // New returns a new Controller registered with the Manager.  The Manager will ensure that shared Caches have
 // been synced before the Controller is Started.
 func New(name string, mgr manager.Manager, options Options) (Controller, error) {
-	c, err := NewUnmanaged(name, mgr, options)
-	if err != nil {
-		return nil, err
-	}
-
-	// Add the controller as a Manager components
-	return c, mgr.Add(c)
-}
-
-// NewUnmanaged returns a new controller without adding it to the manager. The
-// caller is responsible for starting the returned controller.
-func NewUnmanaged(name string, mgr manager.Manager, options Options) (Controller, error) {
 	if options.Reconciler == nil {
 		return nil, fmt.Errorf("must specify Reconciler")
 	}
@@ -89,10 +71,6 @@ func NewUnmanaged(name string, mgr manager.Manager, options Options) (Controller
 
 	if options.MaxConcurrentReconciles <= 0 {
 		options.MaxConcurrentReconciles = 1
-	}
-
-	if options.RateLimiter == nil {
-		options.RateLimiter = workqueue.DefaultControllerRateLimiter()
 	}
 
 	// Inject dependencies into Reconciler
@@ -109,12 +87,12 @@ func NewUnmanaged(name string, mgr manager.Manager, options Options) (Controller
 		Client:   mgr.GetClient(),
 		Recorder: mgr.GetEventRecorderFor(name),
 		MakeQueue: func() workqueue.RateLimitingInterface {
-			return workqueue.NewNamedRateLimitingQueue(options.RateLimiter, name)
+			return workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), name)
 		},
 		MaxConcurrentReconciles: options.MaxConcurrentReconciles,
-		SetFields:               mgr.SetFields,
 		Name:                    name,
 	}
 
-	return c, nil
+	// Add the controller as a Manager components
+	return c, mgr.Add(c)
 }

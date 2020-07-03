@@ -17,11 +17,9 @@ package server
 
 import (
 	"github.com/caicloud/temp-model-registry/pkg/registry/server/harbor"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/modeljob"
 )
 
 // RegisterRoutes register all routes
 func RegisterRoutes() {
-	harbor.RegisterRoutes()   // Register harbor route
-	modeljob.RegisterRoutes() // Register modeljob route
+	harbor.RegisterRoutes() // Register harbor route
 }

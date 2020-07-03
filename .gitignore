@@ -1,5 +1,6 @@
 # Output folder of build
 bin
+dist
 
 # Output file of unit test coverage
 coverage.out

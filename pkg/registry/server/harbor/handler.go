@@ -39,11 +39,12 @@ func webhookAPI(c *context.Context) {
 	c.ResponseWriter.Write([]byte("OK"))
 }
 
-func projectAPIs(c *context.Context) {
+func harborProxyAPIs(c *context.Context) {
 	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
 	ormbUserName := viper.GetString(common.ORMBUsernameEnvkey)
 	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
-	auth := "basic " + base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v", ormbUserName, ormbPassword)))
+	authBytes := []byte(fmt.Sprintf("%v:%v", ormbUserName, ormbPassword))
+	auth := "basic " + base64.StdEncoding.EncodeToString(authBytes)
 
 	proxy := httputil.NewSingleHostReverseProxy(c.Request.URL)
 	proxy.Director = func(req *http.Request) {
@@ -54,5 +55,6 @@ func projectAPIs(c *context.Context) {
 		req.URL.Scheme = "http"
 		req.URL.Path = c.Request.URL.Path
 	}
+
 	proxy.ServeHTTP(c.ResponseWriter, c.Request)
 }

@@ -19,7 +19,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
 	time "time"
 
 	modeljobv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
@@ -62,13 +61,13 @@ func NewFilteredModelJobInformer(client versioned.Interface, namespace string, r
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ModeljobsV1alpha1().ModelJobs(namespace).List(context.TODO(), options)
+				return client.ModeljobsV1alpha1().ModelJobs(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ModeljobsV1alpha1().ModelJobs(namespace).Watch(context.TODO(), options)
+				return client.ModeljobsV1alpha1().ModelJobs(namespace).Watch(options)
 			},
 		},
 		&modeljobv1alpha1.ModelJob{},
