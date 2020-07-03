@@ -25,7 +25,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/caicloud/temp-model-registry/cmd/modeljob-operator/app/options"
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/api/v1alpha1"
+	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/caicloud/temp-model-registry/pkg/controllers"
 	"github.com/caicloud/temp-model-registry/pkg/version"
 )

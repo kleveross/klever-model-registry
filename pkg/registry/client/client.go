@@ -13,15 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package server
+package client
 
 import (
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/harbor"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/modeljob"
+	"github.com/spf13/viper"
+	"k8s.io/client-go/tools/clientcmd"
+
+	clientset "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
 )
 
-// RegisterRoutes register all routes
-func RegisterRoutes() {
-	harbor.RegisterRoutes()   // Register harbor route
-	modeljob.RegisterRoutes() // Register modeljob route
+var (
+	KubeCRDClient *clientset.Clientset
+)
+
+func init() {
+	kubeconfigPath := viper.GetString("kubeconfig")
+
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	KubeCRDClient, err = clientset.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
 }

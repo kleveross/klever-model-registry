@@ -21,10 +21,13 @@ import (
 )
 
 const (
-	BadRequestCode = http.StatusBadRequest
-	ForbiddenCode  = http.StatusForbidden
-	NotFoundCode   = http.StatusNotFound
-	GeneralCode    = http.StatusInternalServerError
+	CommonSuccessCode = http.StatusOK
+	CreateSuccessCode = http.StatusCreated
+	DeleteSuccessCode = http.StatusNoContent
+	BadRequestCode    = http.StatusBadRequest
+	ForbiddenCode     = http.StatusForbidden
+	NotFoundCode      = http.StatusNotFound
+	GeneralCode       = http.StatusInternalServerError
 )
 
 // SendError for http error response

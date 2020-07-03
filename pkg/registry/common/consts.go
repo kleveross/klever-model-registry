@@ -1,6 +1,9 @@
 package common
 
 const (
+	// KubeSystemNamespace is the default namespace for modeljob
+	KubeSystemNamespace = "kube-system"
+
 	// ORMBDomainEnvKey is the domain of ORMB
 	ORMBDomainEnvKey = "ORMB_DOMAIN"
 	// ORMBUsernameEnvkey is the username of ORMB

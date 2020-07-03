@@ -13,15 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package server
+package modeljob
 
 import (
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/harbor"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/modeljob"
+	"github.com/astaxie/beego"
 )
 
-// RegisterRoutes register all routes
+// RegisterRoutes for modeljob APIs
 func RegisterRoutes() {
-	harbor.RegisterRoutes()   // Register harbor route
-	modeljob.RegisterRoutes() // Register modeljob route
+	beego.Router("/api/modeljob/v1alpha1", &modeljobController{}, "post:Create")
+	beego.Router("/api/modeljob/v1alpha1/:modeljob_id", &modeljobController{}, "get:Get")
+	beego.Router("/api/modeljob/v1alpha1/:modeljob_id", &modeljobController{}, "delete:Delete")
+	beego.Router("/api/modeljob/v1alpha1", &modeljobController{}, "get:List")
 }

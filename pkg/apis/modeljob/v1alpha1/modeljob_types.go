@@ -149,6 +149,8 @@ type ModelJobSpec struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ModelJob is the Schema for the modeljobs API
 type ModelJob struct {
@@ -160,6 +162,8 @@ type ModelJob struct {
 }
 
 // +kubebuilder:object:root=true
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ModelJobList contains a list of ModelJob
 type ModelJobList struct {
