@@ -13,15 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package server
+package event
 
 import (
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/event"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/harbor"
+	"github.com/astaxie/beego"
 )
 
-// RegisterRoutes register all routes
+// RegisterRoutes for event APIs
 func RegisterRoutes() {
-	harbor.RegisterRoutes() // Register harbor route
-	event.RegisterRoutes() // Register event route
+	beego.Router("/api/namespaces/:namespace/modeljobs/:modeljob_id", &eventController{}, "get:GetModelJobEvents")
 }
