@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"context"
-
 	"github.com/spf13/viper"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -39,7 +37,7 @@ func Initialization() error {
 		return err
 	}
 
-	PresetAnalyzeImageConfig, err = kubeClient.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "modeljob-image-config", metav1.GetOptions{})
+	PresetAnalyzeImageConfig, err = kubeClient.CoreV1().ConfigMaps("kube-system").Get("modeljob-image-config", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

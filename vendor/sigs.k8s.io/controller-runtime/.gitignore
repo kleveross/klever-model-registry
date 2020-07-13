@@ -19,6 +19,3 @@
 
 # Vscode files
 .vscode
-
-# Tools binaries.
-hack/tools/bin

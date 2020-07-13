@@ -15,8 +15,6 @@ spec:
     plural: modeljobs
     singular: modeljob
   scope: Namespaced
-  subresources:
-    status: {}
   validation:
     openAPIV3Schema:
       description: ModelJob is the Schema for the modeljobs API

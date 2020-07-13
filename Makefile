@@ -25,7 +25,7 @@ export SHELLOPTS := errexit
 ROOT := github.com/caicloud/temp-model-registry
 
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := modeljob-operator
+TARGETS := model-registry modeljob-operator # 
 
 # Container image prefix and suffix added to targets.
 # The final built images are:

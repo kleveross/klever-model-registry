@@ -54,6 +54,56 @@ const (
 	DestinationModelPath = "/models/output"
 )
 
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ModelJob is the Schema for the modeljobs API
+type ModelJob struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   ModelJobSpec   `json:"spec,omitempty"`
+	Status ModelJobStatus `json:"status,omitempty"`
+}
+
+// ModelJobSpec defines the desired state of ModelJob
+type ModelJobSpec struct {
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+
+	// Model is model ref, eg: caicloud/resnet:v1.
+	Model string `json:"model,omitempty"`
+
+	// DesiredTag is the target tag of model convert.
+	DesiredTag *string `json:"desiredTag,omitempty"`
+
+	// ModelJobSource is model job source.
+	ModelJobSource `json:",inline"`
+}
+
+// ModelJobSource defines the modeljob source information
+type ModelJobSource struct {
+	Extraction *ExtractionSource `json:"extraction,omitempty"`
+	Conversion *ConversionSource `json:"conversion,omitempty"`
+}
+
+type ExtractionSource struct {
+	Format Format `json:"format,omitempty"`
+}
+
+type ConversionSource struct {
+	MMdnn *MMdnnSpec `json:"mmdnn,omitempty"`
+}
+
+type MMdnnSpec struct {
+	ConversionBaseSpec `json:",inline"`
+}
+
+type ConversionBaseSpec struct {
+	From Format `json:"from,omitempty"`
+	To   Format `json:"to,omitempty"`
+}
+
 // Framework is model framework, eg: TensorFlow.
 type Framework string
 
@@ -86,29 +136,6 @@ const (
 	FormatTensorRT    Format = "TensorRT"
 )
 
-type ConversionBaseSpec struct {
-	From Format `json:"from,omitempty"`
-	To   Format `json:"to,omitempty"`
-}
-
-type MMdnnSpec struct {
-	ConversionBaseSpec `json:",inline"`
-}
-
-type ConversionSource struct {
-	MMdnn *MMdnnSpec `json:"mmdnn,omitempty"`
-}
-
-type ExtractionSource struct {
-	Format Format `json:"format,omitempty"`
-}
-
-// ModelJobSource defines the modeljob source information
-type ModelJobSource struct {
-	Extraction *ExtractionSource `json:"extraction,omitempty"`
-	Conversion *ConversionSource `json:"conversion,omitempty"`
-}
-
 type ModelJobPhase string
 
 const (
@@ -132,37 +159,6 @@ type ModelJobStatus struct {
 	Message string `json:"message"`
 }
 
-// ModelJobSpec defines the desired state of ModelJob
-type ModelJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Model is model ref, eg: caicloud/resnet:v1.
-	Model string `json:"model,omitempty"`
-
-	// DesiredTag is the target tag of model convert.
-	DesiredTag *string `json:"desiredTag,omitempty"`
-
-	// ModelJobSource is model job source.
-	ModelJobSource `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// ModelJob is the Schema for the modeljobs API
-type ModelJob struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   ModelJobSpec   `json:"spec,omitempty"`
-	Status ModelJobStatus `json:"status,omitempty"`
-}
-
-// +kubebuilder:object:root=true
-// +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ModelJobList contains a list of ModelJob

@@ -16,14 +16,18 @@ limitations under the License.
 package client
 
 import (
+	seldonv1 "github.com/seldonio/seldon-core/operator/client/machinelearning.seldon.io/v1/clientset/versioned"
 	"github.com/spf13/viper"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	clientset "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
+	modeljobv1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
 )
 
 var (
-	KubeCRDClient *clientset.Clientset
+	KubeMainClient     *kubernetes.Clientset
+	KubeModelJobClient *modeljobv1alpha1.Clientset
+	KubelSeldonClient  *seldonv1.Clientset
 )
 
 func init() {
@@ -34,7 +38,17 @@ func init() {
 		panic(err)
 	}
 
-	KubeCRDClient, err = clientset.NewForConfig(config)
+	KubeMainClient, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	KubeModelJobClient, err = modeljobv1alpha1.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	KubelSeldonClient, err = seldonv1.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}

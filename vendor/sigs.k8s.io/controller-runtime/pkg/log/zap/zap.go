@@ -19,7 +19,6 @@ limitations under the License.
 package zap
 
 import (
-	"flag"
 	"io"
 	"os"
 	"time"
@@ -100,7 +99,7 @@ func Encoder(encoder zapcore.Encoder) func(o *Options) {
 
 // Level sets the the minimum enabled logging level e.g Debug, Info
 // See Options.Level
-func Level(level zapcore.LevelEnabler) func(o *Options) {
+func Level(level *zap.AtomicLevel) func(o *Options) {
 	return func(o *Options) {
 		o.Level = level
 	}
@@ -109,7 +108,7 @@ func Level(level zapcore.LevelEnabler) func(o *Options) {
 // StacktraceLevel configures the logger to record a stack trace for all messages at
 // or above a given level.
 // See Options.StacktraceLevel
-func StacktraceLevel(stacktraceLevel zapcore.LevelEnabler) func(o *Options) {
+func StacktraceLevel(stacktraceLevel *zap.AtomicLevel) func(o *Options) {
 	return func(o *Options) {
 		o.StacktraceLevel = stacktraceLevel
 	}
@@ -137,11 +136,11 @@ type Options struct {
 	DestWritter io.Writer
 	// Level configures the verbosity of the logging.  Defaults to Debug when
 	// Development is true and Info otherwise
-	Level zapcore.LevelEnabler
+	Level *zap.AtomicLevel
 	// StacktraceLevel is the level at and above which stacktraces will
 	// be recorded for all messages. Defaults to Warn when Development
 	// is true and Error otherwise
-	StacktraceLevel zapcore.LevelEnabler
+	StacktraceLevel *zap.AtomicLevel
 	// ZapOpts allows passing arbitrary zap.Options to configure on the
 	// underlying Zap logger.
 	ZapOpts []zap.Option
@@ -204,57 +203,7 @@ func NewRaw(opts ...Opts) *zap.Logger {
 	sink := zapcore.AddSync(o.DestWritter)
 
 	o.ZapOpts = append(o.ZapOpts, zap.AddCallerSkip(1), zap.ErrorOutput(sink))
-	log := zap.New(zapcore.NewCore(&KubeAwareEncoder{Encoder: o.Encoder, Verbose: o.Development}, sink, o.Level))
+	log := zap.New(zapcore.NewCore(&KubeAwareEncoder{Encoder: o.Encoder, Verbose: o.Development}, sink, *o.Level))
 	log = log.WithOptions(o.ZapOpts...)
 	return log
-}
-
-// BindFlags will parse the given flagset for zap option flags and set the log options accordingly
-//  zap-devel: Development Mode defaults(encoder=consoleEncoder,logLevel=Debug,stackTraceLevel=Warn)
-//			  Production Mode defaults(encoder=jsonEncoder,logLevel=Info,stackTraceLevel=Error)
-//  zap-encoder: Zap log encoding ('json' or 'console')
-//  zap-log-level:  Zap Level to configure the verbosity of logging. Can be one of 'debug', 'info', 'error',
-//			       or any integer value > 0 which corresponds to custom debug levels of increasing verbosity")
-//  zap-stacktrace-level: Zap Level at and above which stacktraces are captured (one of 'warn' or 'error')
-func (o *Options) BindFlags(fs *flag.FlagSet) {
-
-	// Set Development mode value
-	fs.BoolVar(&o.Development, "zap-devel", false,
-		"Development Mode defaults(encoder=consoleEncoder,logLevel=Debug,stackTraceLevel=Warn). "+
-			"Production Mode defaults(encoder=jsonEncoder,logLevel=Info,stackTraceLevel=Error)")
-
-	// Set Encoder value
-	var encVal encoderFlag
-	encVal.setFunc = func(fromFlag zapcore.Encoder) {
-		o.Encoder = fromFlag
-	}
-	fs.Var(&encVal, "zap-encoder", "Zap log encoding ('json' or 'console')")
-
-	// Set the Log Level
-	var levelVal levelFlag
-	levelVal.setFunc = func(fromFlag zapcore.LevelEnabler) {
-		o.Level = fromFlag
-	}
-	fs.Var(&levelVal, "zap-log-level",
-		"Zap Level to configure the verbosity of logging. Can be one of 'debug', 'info', 'error', "+
-			"or any integer value > 0 which corresponds to custom debug levels of increasing verbosity")
-
-	// Set the StrackTrace Level
-	var stackVal stackTraceFlag
-	stackVal.setFunc = func(fromFlag zapcore.LevelEnabler) {
-		o.StacktraceLevel = fromFlag
-	}
-	fs.Var(&stackVal, "zap-stacktrace-level",
-		"Zap Level at and above which stacktraces are captured (one of 'warn' or 'error')")
-}
-
-// UseFlagOptions configures the logger to use the Options set by parsing zap option flags from the CLI.
-//  opts := zap.Options{}
-//  opts.BindFlags(flag.CommandLine)
-//  log := zap.New(zap.UseFlagOptions(&opts))
-func UseFlagOptions(in *Options) Opts {
-	return func(o *Options) {
-		*o = *in
-		o.addDefaults()
-	}
 }
