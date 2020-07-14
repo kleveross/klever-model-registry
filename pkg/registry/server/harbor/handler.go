@@ -25,7 +25,7 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/spf13/viper"
 
-	"github.com/caicloud/temp-model-registry/pkg/registry/common"
+	"github.com/caicloud/temp-model-registry/pkg/common"
 	"github.com/caicloud/temp-model-registry/pkg/registry/types"
 )
 
