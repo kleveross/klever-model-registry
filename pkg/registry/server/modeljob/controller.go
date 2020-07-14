@@ -21,18 +21,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/caicloud/temp-model-registry/pkg/common"
 	"github.com/caicloud/temp-model-registry/pkg/registry/client"
-	"github.com/caicloud/temp-model-registry/pkg/registry/common"
 	"github.com/caicloud/temp-model-registry/pkg/registry/errors"
 	"github.com/caicloud/temp-model-registry/pkg/registry/server/basecontroller"
 )
 
-// modeljobController for modeljob APIs impl
-type modeljobController struct {
+// ModeljobController for modeljob APIs impl
+type ModeljobController struct {
 	basecontroller.BaseController
 }
 
-func (m *modeljobController) Create() {
+func (m *ModeljobController) Create() {
 	modeljob := &modeljobsv1alpha1.ModelJob{}
 
 	err := json.Unmarshal(m.Ctx.Input.RequestBody, modeljob)
@@ -41,8 +41,14 @@ func (m *modeljobController) Create() {
 		return
 	}
 
+	err = ExchangeModelJobNameAndID(&modeljob.ObjectMeta)
+	if err != nil {
+		m.RendorError(errors.GeneralCode, err.Error())
+		return
+	}
+
 	_, err = client.KubeModelJobClient.ModeljobsV1alpha1().
-		ModelJobs(common.KubeSystemNamespace).Create(modeljob)
+		ModelJobs(common.DefaultModelJobNamespace).Create(modeljob)
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 		return
@@ -52,11 +58,11 @@ func (m *modeljobController) Create() {
 	return
 }
 
-func (m *modeljobController) Get() {
+func (m *ModeljobController) Get() {
 	modeljobID := m.Ctx.Input.Param(":modeljob_id")
 
 	modeljob, err := client.KubeModelJobClient.ModeljobsV1alpha1().
-		ModelJobs(common.KubeSystemNamespace).Get(modeljobID, metav1.GetOptions{})
+		ModelJobs(common.DefaultModelJobNamespace).Get(modeljobID, metav1.GetOptions{})
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 	}
@@ -65,11 +71,11 @@ func (m *modeljobController) Get() {
 	return
 }
 
-func (m *modeljobController) Delete() {
+func (m *ModeljobController) Delete() {
 	modeljobID := m.Ctx.Input.Param(":modeljob_id")
 
 	err := client.KubeModelJobClient.ModeljobsV1alpha1().
-		ModelJobs(common.KubeSystemNamespace).Delete(modeljobID, &metav1.DeleteOptions{})
+		ModelJobs(common.DefaultModelJobNamespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 		return
@@ -79,8 +85,9 @@ func (m *modeljobController) Delete() {
 	return
 }
 
-func (m *modeljobController) List() {
-	modeljobs, err := client.KubeModelJobClient.ModeljobsV1alpha1().ModelJobs(common.KubeSystemNamespace).List(metav1.ListOptions{})
+func (m *ModeljobController) List() {
+	modeljobs, err := client.KubeModelJobClient.ModeljobsV1alpha1().
+		ModelJobs(common.DefaultModelJobNamespace).List(metav1.ListOptions{})
 	if err != nil {
 		m.RendorError(errors.GeneralCode, err.Error())
 		return

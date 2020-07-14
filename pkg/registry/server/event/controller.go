@@ -30,12 +30,12 @@ import (
 	"github.com/caicloud/temp-model-registry/pkg/registry/server/basecontroller"
 )
 
-// eventController for event APIs
-type eventController struct {
+// EventController for event APIs
+type EventController struct {
 	basecontroller.BaseController
 }
 
-func (m *eventController) GetModelJobEvents() {
+func (m *EventController) GetModelJobEvents() {
 	namespace := m.Ctx.Input.Param(":namespace")
 	modeljobID := m.Ctx.Input.Param(":modeljob_id")
 

@@ -16,12 +16,31 @@ limitations under the License.
 package server
 
 import (
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/event"
+	"fmt"
+
+	"github.com/astaxie/beego"
+
+	eventcontroller "github.com/caicloud/temp-model-registry/pkg/registry/server/event"
 	"github.com/caicloud/temp-model-registry/pkg/registry/server/harbor"
+	modeljobcontroller "github.com/caicloud/temp-model-registry/pkg/registry/server/modeljob"
 )
+
+func routePath(url string) string {
+	return fmt.Sprintf("/apis/v1alpha1%v", url)
+}
 
 // RegisterRoutes register all routes
 func RegisterRoutes() {
+
 	harbor.RegisterRoutes() // Register harbor route
-	event.RegisterRoutes() // Register event route
+
+	// Modeljob route
+	beego.Router(routePath("/modeljobs"), &modeljobcontroller.ModeljobController{}, "post:Create")
+	beego.Router(routePath("/modeljobs/:modeljob_id"), &modeljobcontroller.ModeljobController{}, "get:Get")
+	beego.Router(routePath("/modeljobs/:modeljob_id"), &modeljobcontroller.ModeljobController{}, "delete:Delete")
+	beego.Router(routePath("/modeljobs"), &modeljobcontroller.ModeljobController{}, "get:List")
+
+	// Event route
+	beego.Router(routePath("/namespaces/:namespace/modeljobs/:modeljob_id/events"),
+		&eventcontroller.EventController{}, "get:GetModelJobEvents")
 }
