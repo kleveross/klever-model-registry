@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -50,7 +51,7 @@ func (r *ModelJobReconciler) reconcileJob(modeljob *modeljobsv1alpha1.ModelJob) 
 	var err error
 
 	job := &batchv1.Job{}
-	err = r.Get(context.TODO(), types.NamespacedName{Namespace: modeljob.Namespace, Name: getJobName(modeljob.Name)}, job)
+	err = r.Get(context.TODO(), types.NamespacedName{Namespace: modeljob.Namespace, Name: modeljob.Name}, job)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			job, err := generateJobResource(modeljob)
@@ -110,14 +111,19 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 	if job.Status.Failed != 0 {
 		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
 
-		pod := &corev1.Pod{}
-		err := r.Get(context.TODO(), types.NamespacedName{Namespace: job.Namespace, Name: job.ObjectMeta.Labels["job-name"]}, pod)
+		pods := corev1.PodList{}
+		err := r.List(context.TODO(), &pods,
+			&client.MatchingLabels{"job-name": job.Name},
+			&client.MatchingFields{"involvedObject.namespace": job.ObjectMeta.Namespace})
 		if err != nil {
 			r.Log.Error(err, fmt.Sprintf("Get pod for modeljob %v", modeljob.Name))
 			return
 		}
+		if len(pods.Items) == 0 {
+			return
+		}
 
-		cs := pod.Status.ContainerStatuses
+		cs := pods.Items[0].Status.ContainerStatuses
 		if cs != nil && cs[0].State.Terminated != nil {
 			switch cs[0].State.Terminated.ExitCode {
 			case ErrORMBLogin:

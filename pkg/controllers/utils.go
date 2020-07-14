@@ -9,12 +9,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/caicloud/temp-model-registry/pkg"
 	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
 )
-
-func getJobName(modeljobName string) string {
-	return fmt.Sprintf("modeljob-%v", modeljobName)
-}
 
 func getFrameworkByFormat(format modeljobsv1alpha1.Format) modeljobsv1alpha1.Framework {
 	return ModelFormatToFrameworkMapping[format]
@@ -42,7 +39,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: modeljob.Namespace,
-			Name:      getJobName(modeljob.Name),
+			Name:      modeljob.Name,
 		},
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
@@ -87,16 +84,16 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 									Value: strings.ToLower(string(dstFormat)),
 								},
 								corev1.EnvVar{
-									Name:  modeljobsv1alpha1.ORMBDomainEnvKey,
-									Value: viper.GetString(modeljobsv1alpha1.ORMBDomainEnvKey),
+									Name:  common.ORMBDomainEnvKey,
+									Value: viper.GetString(common.ORMBDomainEnvKey),
 								},
 								corev1.EnvVar{
-									Name:  modeljobsv1alpha1.ORMBUsernameEnvkey,
-									Value: viper.GetString(modeljobsv1alpha1.ORMBUsernameEnvkey),
+									Name:  modeljobsv1acommonlpha1.ORMBUsernameEnvkey,
+									Value: viper.GetString(common.ORMBUsernameEnvkey),
 								},
 								corev1.EnvVar{
-									Name:  modeljobsv1alpha1.ORMBPasswordEnvKey,
-									Value: viper.GetString(modeljobsv1alpha1.ORMBPasswordEnvKey),
+									Name:  common.ORMBPasswordEnvKey,
+									Value: viper.GetString(common.ORMBPasswordEnvKey),
 								},
 							},
 						},
