@@ -30,7 +30,6 @@ require (
 	github.com/docker/go v0.0.0-20160303222718-d30aec9fd63c // indirect
 	github.com/docker/go-metrics v0.0.0-20181218153428-b84716841b82 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
-	github.com/elazarl/goproxy v0.0.0-20180725130230-947c36da3153 // indirect
 	github.com/emicklei/go-restful v2.13.0+incompatible // indirect
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/gin-gonic/gin v1.6.3 // indirect
@@ -92,10 +91,7 @@ require (
 	k8s.io/helm v2.16.3+incompatible // indirect
 	k8s.io/klog/v2 v2.1.0 // indirect
 	k8s.io/kubectl v0.17.2 // indirect
-	k8s.io/utils v0.0.0-20200324210504-a9aa75ae1b89 // indirect
-	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.7 // indirect
 	sigs.k8s.io/controller-runtime v0.5.0
 	sigs.k8s.io/structured-merge-diff/v2 v2.0.1 // indirect
-	sigs.k8s.io/structured-merge-diff/v3 v3.0.0 // indirect
 	sigs.k8s.io/testing_frameworks v0.1.2 // indirect
 )

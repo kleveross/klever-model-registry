@@ -24,13 +24,6 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 const (
-	// ORMBDomainEnvKey is the domain of ORMB
-	ORMBDomainEnvKey = "ORMB_DOMAIN"
-	// ORMBUsernameEnvkey is the username of ORMB
-	ORMBUsernameEnvkey = "ORMB_USERNAME"
-	// ORMBPasswordEnvKey is the password of ORMB
-	ORMBPasswordEnvKey = "ORMB_PASSWORD"
-
 	// FrameworkEnvKey is the env key of framework
 	FrameworkEnvKey = "FRAMEWORK"
 	// FormatEnvKey is the env key of format
@@ -54,6 +47,8 @@ const (
 	DestinationModelPath = "/models/output"
 )
 
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
