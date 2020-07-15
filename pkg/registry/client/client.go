@@ -21,7 +21,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	modeljobv1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
+	modeljobv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
 )
 
 var (

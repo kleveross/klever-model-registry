@@ -66,7 +66,7 @@ type ModelJobSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Model is model ref, eg: caicloud/resnet:v1.
+	// Model is model ref, eg: kleveross/resnet:v1.
 	Model string `json:"model,omitempty"`
 
 	// DesiredTag is the target tag of model convert.

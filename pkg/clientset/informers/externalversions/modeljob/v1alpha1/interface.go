@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	internalinterfaces "github.com/caicloud/temp-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

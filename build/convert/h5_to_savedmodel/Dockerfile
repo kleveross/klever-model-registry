@@ -10,7 +10,7 @@ RUN apt update -y \
     && apt install wget -y \
     && pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
     && pip install --no-cache-dir keras==2.3.1 pyyaml\
-    && wget https://github.com/caicloud/ormb/releases/download/$ormb_version/$ormb_tar_filename \
+    && wget https://github.com/kleveross/ormb/releases/download/$ormb_version/$ormb_tar_filename \
     && tar -xvf $ormb_tar_filename -C /usr/local/bin \
     && rm -rf $ormb_tar_filename
     

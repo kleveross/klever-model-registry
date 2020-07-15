@@ -21,10 +21,10 @@ package v1alpha1
 import (
 	time "time"
 
-	modeljobv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
-	versioned "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
-	internalinterfaces "github.com/caicloud/temp-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/listers/modeljob/v1alpha1"
+	modeljobv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	versioned "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
+	internalinterfaces "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/listers/modeljob/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

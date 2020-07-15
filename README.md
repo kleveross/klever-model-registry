@@ -1,11 +1,11 @@
 klever-model-registry is an open-source model registry to manage machine learning model.
 
-klever-model-registry helps you exract Machine Learning/Deep Learning models, or convert model from source format to anothner format.
+klever-model-registry helps you exract Machine Learning/Deep Learning models, or convert model from source format to another format.
 
 ## Components
 
 * klever-model-registry: a API gateway for frontend.
-* klever-model-operator: a CRD controller of ModelJob to manager extraction and conversion of model.
+* klever-modeljob-operator: a CRD controller of ModelJob to manager extraction and conversion of model.
 
 ## Support model format for extract
 

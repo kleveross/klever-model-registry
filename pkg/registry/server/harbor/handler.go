@@ -21,12 +21,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 
 	"github.com/astaxie/beego/context"
 	"github.com/spf13/viper"
 
-	"github.com/caicloud/temp-model-registry/pkg/common"
-	"github.com/caicloud/temp-model-registry/pkg/registry/types"
+	"github.com/kleveross/klever-model-registry/pkg/common"
+	"github.com/kleveross/klever-model-registry/pkg/registry/types"
 )
 
 func webhookAPI(c *context.Context) {
@@ -57,4 +58,8 @@ func harborProxyAPIs(c *context.Context) {
 	}
 
 	proxy.ServeHTTP(c.ResponseWriter, c.Request)
+
+	if c.Request.Method == "PUT" && strings.Contains(c.Request.URL.Path, "manifests") {
+		// TODO(simon-cj): impl create modeljob
+	}
 }
