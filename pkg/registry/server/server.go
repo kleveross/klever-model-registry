@@ -22,6 +22,7 @@ import (
 
 	eventcontroller "github.com/kleveross/klever-model-registry/pkg/registry/server/event"
 	"github.com/kleveross/klever-model-registry/pkg/registry/server/harbor"
+	logcontroller "github.com/kleveross/klever-model-registry/pkg/registry/server/log"
 	modeljobcontroller "github.com/kleveross/klever-model-registry/pkg/registry/server/modeljob"
 )
 
@@ -43,4 +44,7 @@ func RegisterRoutes() {
 	// Event route
 	beego.Router(routePath("/namespaces/:namespace/modeljobs/:modeljob_id/events"),
 		&eventcontroller.EventController{}, "get:GetModelJobEvents")
+
+	//Log route
+	beego.Router(routePath("/namespaces/:namespace/pods/:pod_id/log"), &logcontroller.LogController{}, "get:Get")
 }

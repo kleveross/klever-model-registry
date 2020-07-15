@@ -6,4 +6,4 @@ WORKDIR /
 COPY bin/klever-model-registry  /klever-model-registry
 USER nonroot:nonroot
 
-ENTRYPOINT ["/model-registry"]
+ENTRYPOINT ["/klever-model-registry"]
