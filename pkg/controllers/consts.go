@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 )
 
 var (

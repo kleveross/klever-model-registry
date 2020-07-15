@@ -20,9 +20,9 @@ import (
 
 	"github.com/astaxie/beego"
 
-	eventcontroller "github.com/caicloud/temp-model-registry/pkg/registry/server/event"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/harbor"
-	modeljobcontroller "github.com/caicloud/temp-model-registry/pkg/registry/server/modeljob"
+	eventcontroller "github.com/kleveross/klever-model-registry/pkg/registry/server/event"
+	"github.com/kleveross/klever-model-registry/pkg/registry/server/harbor"
+	modeljobcontroller "github.com/kleveross/klever-model-registry/pkg/registry/server/modeljob"
 )
 
 func routePath(url string) string {

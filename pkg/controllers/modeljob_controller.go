@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 )
 
 const (
@@ -44,8 +44,8 @@ type ModelJobReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=modeljobs.caicloud.io,resources=modeljobs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=modeljobs.caicloud.io,resources=modeljobs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=modeljobs.kleveross.io,resources=modeljobs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=modeljobs.kleveross.io,resources=modeljobs/status,verbs=get;update;patch
 
 func (r *ModelJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()

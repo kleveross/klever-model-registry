@@ -6,7 +6,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 )
 
 func Initialization() error {

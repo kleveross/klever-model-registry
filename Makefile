@@ -3,13 +3,13 @@
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 # Container registries.
-REGISTRY ?= cleveross
+REGISTRY ?= kleveross
 
 # Container registry for base images.
 BASE_REGISTRY ?= docker.io
 
 # Image URL to use all building/pushing image targets
-IMG ?= cleveross/modeljob-operator:latest
+IMG ?= kleveross/klever-modeljob-operator:latest
 
 #
 # These variables should not need tweaking.
@@ -22,10 +22,10 @@ export SHELL := /bin/bash
 export SHELLOPTS := errexit
 
 # This repo's root import path (under GOPATH).
-ROOT := github.com/caicloud/temp-model-registry
+ROOT := github.com/klever-model-registry
 
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := model-registry modeljob-operator # 
+TARGETS := klever-model-registry klever-modeljob-operator
 
 # Container image prefix and suffix added to targets.
 # The final built images are:
@@ -105,7 +105,7 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
-	cd config/manager && $(KUSTOMIZE) edit set image modeljob-operator=${IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image klever-modeljob-operator=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.

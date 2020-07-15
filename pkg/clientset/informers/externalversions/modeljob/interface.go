@@ -19,8 +19,8 @@ limitations under the License.
 package modeljob
 
 import (
-	internalinterfaces "github.com/caicloud/temp-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
+	internalinterfaces "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

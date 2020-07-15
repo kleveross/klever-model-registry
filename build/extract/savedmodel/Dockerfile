@@ -17,7 +17,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 RUN apt update -y \
     && apt install wget -y \
-    && wget https://github.com/caicloud/ormb/releases/download/$ormb_version/$ormb_tar_filename \
+    && wget https://github.com/kleveross/ormb/releases/download/$ormb_version/$ormb_tar_filename \
     && tar -xvf $ormb_tar_filename -C /usr/local/bin \
     && rm -rf $ormb_tar_filename
 

@@ -17,7 +17,8 @@ package basecontroller
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/caicloud/temp-model-registry/pkg/registry/errors"
+
+	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
 )
 
 type BaseController struct {

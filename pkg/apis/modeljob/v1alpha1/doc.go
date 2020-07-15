@@ -1,4 +1,4 @@
 // +k8s:deepcopy-gen=package
-// +groupName=modeljobs.caicloud.io
+// +groupName=modeljobs.kleveross.io
 
 package v1alpha1

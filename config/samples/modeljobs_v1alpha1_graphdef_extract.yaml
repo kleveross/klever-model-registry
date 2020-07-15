@@ -1,4 +1,4 @@
-apiVersion: modeljobs.caicloud.io/v1alpha1
+apiVersion: modeljobs.kleveross.io/v1alpha1
 kind: ModelJob
 metadata:
   name: modeljob-graphdef-extract

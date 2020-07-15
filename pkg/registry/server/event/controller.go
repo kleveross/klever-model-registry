@@ -24,10 +24,10 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/reference"
 
-	modeljobscheme "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned/scheme"
-	"github.com/caicloud/temp-model-registry/pkg/registry/client"
-	"github.com/caicloud/temp-model-registry/pkg/registry/errors"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/basecontroller"
+	modeljobscheme "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/scheme"
+	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
+	"github.com/kleveross/klever-model-registry/pkg/registry/server/basecontroller"
 )
 
 // EventController for event APIs

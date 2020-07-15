@@ -10,7 +10,7 @@ RUN apt update -y \
     && apt install libgomp1 wget -y \
     && pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
     && pip install --no-cache-dir grpcio grpcio-tools onnx==1.3.0 mxnet==1.5.1 pyyaml\
-    && wget https://github.com/caicloud/ormb/releases/download/$ormb_version/$ormb_tar_filename \
+    && wget https://github.com/kleveross/ormb/releases/download/$ormb_version/$ormb_tar_filename \
     && tar -xvf $ormb_tar_filename -C /usr/local/bin \
     && rm -rf $ormb_tar_filename
     

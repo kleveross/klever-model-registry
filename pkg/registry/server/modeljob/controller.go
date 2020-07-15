@@ -20,11 +20,11 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
-	"github.com/caicloud/temp-model-registry/pkg/common"
-	"github.com/caicloud/temp-model-registry/pkg/registry/client"
-	"github.com/caicloud/temp-model-registry/pkg/registry/errors"
-	"github.com/caicloud/temp-model-registry/pkg/registry/server/basecontroller"
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/common"
+	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
+	"github.com/kleveross/klever-model-registry/pkg/registry/server/basecontroller"
 )
 
 // ModeljobController for modeljob APIs impl

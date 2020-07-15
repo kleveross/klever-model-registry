@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
-	"github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned/scheme"
+	v1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 
@@ -29,7 +29,7 @@ type ModeljobsV1alpha1Interface interface {
 	ModelJobsGetter
 }
 
-// ModeljobsV1alpha1Client is used to interact with features provided by the modeljobs.caicloud.io group.
+// ModeljobsV1alpha1Client is used to interact with features provided by the modeljobs.kleveross.io group.
 type ModeljobsV1alpha1Client struct {
 	restClient rest.Interface
 }

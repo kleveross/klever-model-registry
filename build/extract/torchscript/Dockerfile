@@ -13,7 +13,7 @@ RUN apt update -y \
                 grpcio-tools\
                 https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl\ 
                 future pyyaml \
-    && wget https://github.com/caicloud/ormb/releases/download/$ormb_version/$ormb_tar_filename \
+    && wget https://github.com/kleveross/ormb/releases/download/$ormb_version/$ormb_tar_filename \
     && tar -xvf $ormb_tar_filename -C /usr/local/bin \
     && rm -rf $ormb_tar_filename
                 

@@ -7,7 +7,7 @@ import (
 )
 
 // GroupName is the group name use in this package
-const GroupName = "modeljobs.caicloud.io"
+const GroupName = "modeljobs.kleveross.io"
 
 // SchemeGroupVersion is group version used to register these objects
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}

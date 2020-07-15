@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1"
-	fakemodeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1/fake"
+	clientset "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1"
+	fakemodeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

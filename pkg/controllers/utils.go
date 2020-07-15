@@ -9,8 +9,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/caicloud/temp-model-registry/pkg"
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 func getFrameworkByFormat(format modeljobsv1alpha1.Format) modeljobsv1alpha1.Framework {
@@ -88,7 +88,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 									Value: viper.GetString(common.ORMBDomainEnvKey),
 								},
 								corev1.EnvVar{
-									Name:  modeljobsv1acommonlpha1.ORMBUsernameEnvkey,
+									Name:  common.ORMBUsernameEnvkey,
 									Value: viper.GetString(common.ORMBUsernameEnvkey),
 								},
 								corev1.EnvVar{

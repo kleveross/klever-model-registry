@@ -23,9 +23,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned"
-	internalinterfaces "github.com/caicloud/temp-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
-	modeljob "github.com/caicloud/temp-model-registry/pkg/clientset/informers/externalversions/modeljob"
+	versioned "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
+	internalinterfaces "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/internalinterfaces"
+	modeljob "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/caicloud/temp-model-registry/pkg/apis/modeljob/v1alpha1"
+	v1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -34,9 +34,9 @@ type FakeModelJobs struct {
 	ns   string
 }
 
-var modeljobsResource = schema.GroupVersionResource{Group: "modeljobs.caicloud.io", Version: "v1alpha1", Resource: "modeljobs"}
+var modeljobsResource = schema.GroupVersionResource{Group: "modeljobs.kleveross.io", Version: "v1alpha1", Resource: "modeljobs"}
 
-var modeljobsKind = schema.GroupVersionKind{Group: "modeljobs.caicloud.io", Version: "v1alpha1", Kind: "ModelJob"}
+var modeljobsKind = schema.GroupVersionKind{Group: "modeljobs.kleveross.io", Version: "v1alpha1", Kind: "ModelJob"}
 
 // Get takes name of the modelJob, and returns the corresponding modelJob object, and an error if there is any.
 func (c *FakeModelJobs) Get(name string, options v1.GetOptions) (result *v1alpha1.ModelJob, err error) {

@@ -7,7 +7,7 @@ ARG ormb_tar_filename=ormb_0.0.3_Linux_x86_64.tar.gz
 RUN rpm  --import  /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7           \
     && yum install -y java-11-openjdk python3 wget                 \
     && pip3 install --no-cache-dir requests loguru pyyaml requests \  
-    && wget https://github.com/caicloud/ormb/releases/download/$ormb_version/$ormb_tar_filename \
+    && wget https://github.com/kleveross/ormb/releases/download/$ormb_version/$ormb_tar_filename \
     && tar -xvf $ormb_tar_filename -C /usr/local/bin   \
     && rm -rf $ormb_tar_filename                       \
     && yum clean all 

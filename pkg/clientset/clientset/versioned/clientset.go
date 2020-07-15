@@ -21,7 +21,7 @@ package versioned
 import (
 	"fmt"
 
-	modeljobsv1alpha1 "github.com/caicloud/temp-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1"
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
