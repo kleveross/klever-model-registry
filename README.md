@@ -1,33 +1,46 @@
-klever-model-registry is an open-source model registry to manage machine learning model.
+# Klever Model Registry
 
-klever-model-registry helps you exract Machine Learning/Deep Learning models, or convert model from source format to another format.
+<a href="https://join.slack.com/t/kleveross/shared_invite/zt-g0eoiyq9-9OwiI7c__oV79bh_94MyTw">
+    <img src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" alt="Slack" height =30px/></a>
 
-## Components
+English | [中文](./README_zh.md)
 
-* klever-model-registry: a API gateway for frontend.
-* klever-modeljob-operator: a CRD controller of ModelJob to manager extraction and conversion of model.
+Klever Model Registry is a Cloud Native ML model registry. Use Klever Model Registry in order to:
 
-## Support model format for extract
+- Manage your ML models
+- Version and deliver your ML models with the existing infrastructures
+- Keep track of ML models' hyperparameters and so on to help decision makers
+- Convert models between different formats (e.g. TensorFlow SavedModel, ONNX)
+- Serve the model (Coming Soon!)
+- Get the standalone executable program to deploy ML model inference services on edge devices/servers (Coming Soon!)
 
-* SavedModel
-* ONNX
-* GraphDef
-* NetDef
-* Keras H5
-* CaffeModel
-* TorchScript
-* MXNetParams
-* PMML 
+Klever Model Registry's features:
 
-## Support model format for convert
+- Deploy with Docker and Kubernetes
+- Keep non-Invasive for your business
+- Manage ML models like Docker (With the help of [kleveross/ormb](https://github.com/kleveross/ormb))
+- Reuse Harbor to store models, without any new infrastructure
+- Extract models signatures for:
+    - SavedModel
+    - ONNX
+    - GraphDef
+    - NetDef
+    - Keras H5
+    - CaffeModel
+    - TorchScript
+    - MXNetParams
+    - PMML 
+- Convert models from:
+    - MXNetParams to ONNX
+    - Keras H5 to SavedModel
+    - CaffeModel to NetDef
 
-* MXNetParams to ONNX
-* Keras H5 to SavedModel
-* CaffeModel to NetDef 
+## Installation
 
-## Compile from source
+### Build the image
 
 Clone:
+
 ```
 $ git clone https://github.com/kleveross/klever-model-registry
 $ cd klever-model-registry
