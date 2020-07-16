@@ -19,7 +19,7 @@ Klever Model Registry 的特性包括：
 
 - 基于 Docker 与 Kubernetes 部署
 - 对现有工作流的零侵入性
-- 像 Docker 一样管理机器学习模型（在 [[kleveross/ormb](https://github.com/kleveross/ormb) 的帮助下）
+- 像 Docker 一样管理机器学习模型（在 [kleveross/ormb](https://github.com/kleveross/ormb) 的帮助下）
 - 复用 Harbor 进行模型管理，不引入额外的基础设施
 - 对以下格式的模型进行签名解析
     - SavedModel
