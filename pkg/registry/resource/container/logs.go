@@ -21,7 +21,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/resource/logs"
 )
@@ -95,7 +94,7 @@ func mapToLogOptions(container string, logSelector *logs.Selection, previous boo
 // Construct a request for getting the logs for a pod and retrieves the logs.
 func readRawLogs(client kubernetes.Interface, namespace, podID string, logOptions *v1.PodLogOptions) (
 	string, error) {
-	readCloser, err := openStream(client, namespace, podID, logOptions)
+	readCloser, err := client.CoreV1().Pods(namespace).GetLogs(podID, logOptions).Stream()
 	if err != nil {
 		return err.Error(), nil
 	}
@@ -119,17 +118,9 @@ func GetLogFile(client kubernetes.Interface, namespace, podID string, container 
 		Previous:   usePreviousLogs,
 		Timestamps: false,
 	}
-	logStream, err := openStream(client, namespace, podID, logOptions)
-	return logStream, err
-}
 
-func openStream(client kubernetes.Interface, namespace, podID string, logOptions *v1.PodLogOptions) (io.ReadCloser, error) {
-	return client.CoreV1().RESTClient().Get().
-		Namespace(namespace).
-		Name(podID).
-		Resource("pods").
-		SubResource("log").
-		VersionedParams(logOptions, scheme.ParameterCodec).Stream()
+	logStream, err := client.CoreV1().Pods(namespace).GetLogs(podID, logOptions).Stream()
+	return logStream, err
 }
 
 // ConstructLogDetails creates a new log details structure for given parameters.
