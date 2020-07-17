@@ -6,12 +6,23 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/astaxie/beego"
-	log "github.com/sirupsen/logrus"
+	"github.com/caicloud/nirvana/config"
+	"github.com/caicloud/nirvana/log"
+	"github.com/caicloud/nirvana/plugins/reqlog"
 	"github.com/spf13/viper"
 
-	"github.com/kleveross/klever-model-registry/pkg/registry/server"
+	"github.com/kleveross/klever-model-registry/pkg/registry/apis"
 )
+
+const (
+	// kleverModelRegistryPort is model registry default port, default 8080
+	kleverModelRegistryPort = "klever_model_registry_port"
+)
+
+func init() {
+	viper.AutomaticEnv()
+	viper.SetDefault(kleverModelRegistryPort, "8080")
+}
 
 func gracefulShutdown(closing, done chan struct{}) {
 	signals := make(chan os.Signal, 1)
@@ -28,17 +39,23 @@ func gracefulShutdown(closing, done chan struct{}) {
 }
 
 func main() {
-	viper.AutomaticEnv()
+	// Start nirvana
+	option := &config.Option{
+		Port: uint16(viper.GetInt(kleverModelRegistryPort)),
+	}
+	nirvana := config.NewNirvanaCommand(option)
+	nirvana.EnablePlugin(
+		&reqlog.Option{
+			DoubleLog:  true,
+			SourceAddr: true,
+			RequestID:  true,
+		},
+	)
 
-	beego.BConfig.CopyRequestBody = true
-
-	server.RegisterRoutes()
-
-	closing := make(chan struct{})
-	done := make(chan struct{})
-	go gracefulShutdown(closing, done)
-
-	beego.Run()
+	if err := nirvana.Execute(
+		apis.AllDescriptor...); err != nil {
+		log.Fatal(err)
+	}
 
 	return
 }
