@@ -3,7 +3,8 @@ module github.com/kleveross/klever-model-registry
 go 1.13
 
 require (
-	github.com/astaxie/beego v1.12.2
+	github.com/astaxie/beego v1.12.2 // indirect
+	github.com/caicloud/nirvana v0.2.5-0.20200717071154-a7421a7b084c
 	github.com/go-logr/logr v0.1.0
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
