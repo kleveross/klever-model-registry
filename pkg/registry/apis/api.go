@@ -49,7 +49,7 @@ func init() {
 // Descriptor contain klever model registry descriptors
 func Descriptor() definition.Descriptor {
 	return definition.Descriptor{
-		Path:        "/apis",
+		Path:        "/api",
 		Description: "It contains all api in v1alpha1",
 		Consumes:    []string{definition.MIMEAll},
 		Produces:    []string{definition.MIMEJSON},
