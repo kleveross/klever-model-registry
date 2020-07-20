@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	testclient "k8s.io/client-go/kubernetes/fake"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	modeljobfake "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/fake"
@@ -14,7 +14,7 @@ import (
 )
 
 var _ = Describe("Event", func() {
-	client.KubeMainClient = testclient.NewSimpleClientset()
+	client.KubeMainClient = k8sfake.NewSimpleClientset()
 	client.KubeModelJobClient = modeljobfake.NewSimpleClientset()
 
 	modeljobObj := &modeljobsv1alpha1.ModelJob{
