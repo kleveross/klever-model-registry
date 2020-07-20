@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis"
+	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 )
 
 const (
@@ -39,6 +40,11 @@ func gracefulShutdown(closing, done chan struct{}) {
 }
 
 func main() {
+	err := client.InitClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Start nirvana
 	option := &config.Option{
 		Port: uint16(viper.GetInt(kleverModelRegistryPort)),
