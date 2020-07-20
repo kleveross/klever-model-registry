@@ -1,3 +1,4 @@
+// +build !test
 /*
 
 
@@ -13,6 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package client
 
 import (
@@ -25,31 +27,33 @@ import (
 )
 
 var (
-	KubeMainClient     *kubernetes.Clientset
-	KubeModelJobClient *modeljobv1alpha1.Clientset
-	KubelSeldonClient  *seldonv1.Clientset
+	KubeMainClient     kubernetes.Interface
+	KubeModelJobClient modeljobv1alpha1.Interface
+	KubelSeldonClient  seldonv1.Interface
 )
 
-func init() {
+func InitClient() error {
 	kubeconfigPath := viper.GetString("kubeconfig")
 
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	KubeMainClient, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	KubeModelJobClient, err = modeljobv1alpha1.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	KubelSeldonClient, err = seldonv1.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }

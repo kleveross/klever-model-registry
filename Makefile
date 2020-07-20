@@ -22,10 +22,10 @@ export SHELL := /bin/bash
 export SHELLOPTS := errexit
 
 # This repo's root import path (under GOPATH).
-ROOT := github.com/klever-model-registry
+ROOT := github.com/kleveross/klever-model-registry
 
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := klever-model-registry klever-modeljob-operator
+TARGETS := klever-model-registry #klever-modeljob-operator
 
 # Container image prefix and suffix added to targets.
 # The final built images are:
@@ -62,7 +62,8 @@ endif
 
 # Run tests
 test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
+	@go test -p $(CPUS) $$(go list ./... | grep -v /vendor | grep -v /test) -coverprofile=coverage.out
+	@go tool cover -func coverage.out | tail -n 1 | awk '{ print "Total coverage: " $$3 }'
 
 build: build-local
 

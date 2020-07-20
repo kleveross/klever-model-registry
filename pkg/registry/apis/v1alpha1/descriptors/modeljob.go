@@ -53,7 +53,8 @@ var createModelJob = definition.Definition{
 		definition.ErrorResult(),
 	},
 	Function: func(ctx context.Context, job *modeljobsv1alpha1.ModelJob) error {
-		return modeljob.Create(job)
+		_, err := modeljob.Create(job)
+		return err
 	},
 }
 

@@ -6,6 +6,8 @@ require (
 	github.com/astaxie/beego v1.12.2 // indirect
 	github.com/caicloud/nirvana v0.2.5-0.20200717071154-a7421a7b084c
 	github.com/go-logr/logr v0.1.0
+	github.com/golang/mock v1.2.0
+	github.com/kubernetes/dashboard v1.10.1
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
 	github.com/seldonio/seldon-core/operator v0.0.0-20200714192520-b8cf277bc2ad

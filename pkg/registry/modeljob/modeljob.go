@@ -23,19 +23,19 @@ import (
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 )
 
-func Create(modeljob *modeljobsv1alpha1.ModelJob) error {
+func Create(modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
 	err := ExchangeModelJobNameAndID(&modeljob.ObjectMeta)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = client.KubeModelJobClient.ModeljobsV1alpha1().
+	result, err := client.KubeModelJobClient.ModeljobsV1alpha1().
 		ModelJobs(common.DefaultModelJobNamespace).Create(modeljob)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 func Get(modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
@@ -52,7 +52,6 @@ func Delete(modeljobID string) error {
 	err := client.KubeModelJobClient.ModeljobsV1alpha1().
 		ModelJobs(common.DefaultModelJobNamespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
-
 		return err
 	}
 
