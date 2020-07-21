@@ -4,6 +4,19 @@ language: go
 go:
 - 1.13.x
 
+before_install:
+  # get coveralls.io support
+  - go get github.com/mattn/goveralls
+  # install kubebuilder
+  - wget https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz
+  - tar -zxvf kubebuilder_2.3.1_linux_amd64.tar.gz
+  - mv kubebuilder_2.3.1_linux_amd64 kubebuilder
+  - sudo mv kubebuilder /usr/local
+
 install:
-  - make test
   - make build
+
+script:
+  - GO_COVER_PROFILE=$(mktemp -u)
+  - go test ./pkg/... -race -covermode atomic -coverprofile $GO_COVER_PROFILE
+  - goveralls -service=travis-ci -coverprofile $GO_COVER_PROFILE
