@@ -76,6 +76,7 @@ func (r *ModelJobReconciler) reconcileJob(modeljob *modeljobsv1alpha1.ModelJob) 
 				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
 				r.Log.Error(err, "Create job failed")
 				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Create job failed"))
+				return nil
 			}
 
 			modeljob.Status.Phase = modeljobsv1alpha1.ModelJobPending
@@ -114,36 +115,42 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 		pods := corev1.PodList{}
 		err := r.List(context.TODO(), &pods,
 			&client.MatchingLabels{"job-name": job.Name},
-			&client.MatchingFields{"involvedObject.namespace": job.ObjectMeta.Namespace})
+			&client.MatchingFields{"metadata.namespace": job.ObjectMeta.Namespace})
 		if err != nil {
 			r.Log.Error(err, fmt.Sprintf("Get pod for modeljob %v", modeljob.Name))
 			return
 		}
-		if len(pods.Items) == 0 {
-			return
-		}
 
-		cs := pods.Items[0].Status.ContainerStatuses
-		if cs != nil && cs[0].State.Terminated != nil {
-			switch cs[0].State.Terminated.ExitCode {
-			case ErrORMBLogin:
-				modeljob.Status.Message = fmt.Sprintf("ormb login error")
-			case ErrORMBPullModel:
-				modeljob.Status.Message = fmt.Sprintf("ormb pull model error")
-			case ErrORMBExportModel:
-				modeljob.Status.Message = fmt.Sprintf("ormb export model error")
-			case ErrRunTask:
-				modeljob.Status.Message = fmt.Sprintf("run task error")
-			case ErrORMBSaveModel:
-				modeljob.Status.Message = fmt.Sprintf("ormb save model error")
-			case ErrORMBPushModel:
-				modeljob.Status.Message = fmt.Sprintf("ormb push model error")
-			default:
-				modeljob.Status.Message = fmt.Sprintf("unknow error, error code: %v", cs[0].State.Terminated.ExitCode)
-			}
-		}
+		modeljob.Status.Message = getModelJobFailedMesage(&pods)
 		return
 	}
 
 	return
+}
+
+func getModelJobFailedMesage(pods *corev1.PodList) string {
+	if len(pods.Items) == 0 {
+		return ""
+	}
+
+	cs := pods.Items[0].Status.ContainerStatuses
+	if cs != nil && cs[0].State.Terminated != nil {
+		switch cs[0].State.Terminated.ExitCode {
+		case ErrORMBLogin:
+			return "ormb login error"
+		case ErrORMBPullModel:
+			return "ormb pull model error"
+		case ErrORMBExportModel:
+			return "ormb export model error"
+		case ErrRunTask:
+			return "run task error"
+		case ErrORMBSaveModel:
+			return "ormb save model error"
+		case ErrORMBPushModel:
+			return "ormb push model error"
+		default:
+			return fmt.Sprintf("unknow error, error code: %v", cs[0].State.Terminated.ExitCode)
+		}
+	}
+	return ""
 }
