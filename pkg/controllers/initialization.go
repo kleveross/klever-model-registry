@@ -9,9 +9,7 @@ import (
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 )
 
-func Initialization() error {
-	viper.AutomaticEnv()
-
+func initGlobalVar() {
 	ModelFormatToFrameworkMapping = map[modeljobsv1alpha1.Format]modeljobsv1alpha1.Framework{
 		modeljobsv1alpha1.FormatSavedModel:  modeljobsv1alpha1.FrameworkTensorflow,
 		modeljobsv1alpha1.FormatONNX:        modeljobsv1alpha1.FrameworkONNX,
@@ -24,6 +22,12 @@ func Initialization() error {
 		modeljobsv1alpha1.FormatGraphDef:    modeljobsv1alpha1.FrameworkTensorflow,
 		modeljobsv1alpha1.FormatTensorRT:    modeljobsv1alpha1.FrameworkTensorRT,
 	}
+}
+
+func Initialization() error {
+	viper.AutomaticEnv()
+
+	initGlobalVar()
 
 	kubeconfigPath := viper.GetString("kubeconfig")
 
