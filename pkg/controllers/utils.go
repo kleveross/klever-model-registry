@@ -23,6 +23,9 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 	dstTag := ""
 	image := ""
 	if modeljob.Spec.Conversion != nil {
+		if modeljob.Spec.DesiredTag == nil {
+			return nil, fmt.Errorf("modeljob desired tag is nil")
+		}
 		dstTag = *modeljob.Spec.DesiredTag
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
 		dstFramework = getFrameworkByFormat(dstFormat)
