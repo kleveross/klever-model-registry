@@ -41,7 +41,7 @@ func Initialization() error {
 		return err
 	}
 
-	PresetAnalyzeImageConfig, err = kubeClient.CoreV1().ConfigMaps("kube-system").Get("modeljob-image-config", metav1.GetOptions{})
+	PresetAnalyzeImageConfig, err = kubeClient.CoreV1().ConfigMaps("kleveross-system").Get("modeljob-image-config", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,7 @@ func Create(modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, 
 		return nil, err
 	}
 
-	result, err := client.KubeModelJobClient.ModeljobsV1alpha1().
+	result, err := client.KubeModelJobClient.KleverossV1alpha1().
 		ModelJobs(common.DefaultModelJobNamespace).Create(modeljob)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func Create(modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, 
 }
 
 func Get(modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
-	modeljob, err := client.KubeModelJobClient.ModeljobsV1alpha1().
+	modeljob, err := client.KubeModelJobClient.KleverossV1alpha1().
 		ModelJobs(common.DefaultModelJobNamespace).Get(modeljobID, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func Get(modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 }
 
 func Delete(modeljobID string) error {
-	err := client.KubeModelJobClient.ModeljobsV1alpha1().
+	err := client.KubeModelJobClient.KleverossV1alpha1().
 		ModelJobs(common.DefaultModelJobNamespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func Delete(modeljobID string) error {
 }
 
 func List() (*modeljobsv1alpha1.ModelJobList, error) {
-	modeljobs, err := client.KubeModelJobClient.ModeljobsV1alpha1().
+	modeljobs, err := client.KubeModelJobClient.KleverossV1alpha1().
 		ModelJobs(common.DefaultModelJobNamespace).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err

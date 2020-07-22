@@ -56,7 +56,7 @@ type modelJobs struct {
 }
 
 // newModelJobs returns a ModelJobs
-func newModelJobs(c *ModeljobsV1alpha1Client, namespace string) *modelJobs {
+func newModelJobs(c *KleverossV1alpha1Client, namespace string) *modelJobs {
 	return &modelJobs{
 		client: c.RESTClient(),
 		ns:     namespace,

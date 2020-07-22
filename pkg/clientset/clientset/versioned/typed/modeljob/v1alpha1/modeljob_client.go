@@ -24,22 +24,22 @@ import (
 	rest "k8s.io/client-go/rest"
 )
 
-type ModeljobsV1alpha1Interface interface {
+type KleverossV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	ModelJobsGetter
 }
 
-// ModeljobsV1alpha1Client is used to interact with features provided by the modeljobs.kleveross.io group.
-type ModeljobsV1alpha1Client struct {
+// KleverossV1alpha1Client is used to interact with features provided by the kleveross.io group.
+type KleverossV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ModeljobsV1alpha1Client) ModelJobs(namespace string) ModelJobInterface {
+func (c *KleverossV1alpha1Client) ModelJobs(namespace string) ModelJobInterface {
 	return newModelJobs(c, namespace)
 }
 
-// NewForConfig creates a new ModeljobsV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*ModeljobsV1alpha1Client, error) {
+// NewForConfig creates a new KleverossV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*KleverossV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -48,12 +48,12 @@ func NewForConfig(c *rest.Config) (*ModeljobsV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ModeljobsV1alpha1Client{client}, nil
+	return &KleverossV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new ModeljobsV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new KleverossV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *ModeljobsV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *KleverossV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -61,9 +61,9 @@ func NewForConfigOrDie(c *rest.Config) *ModeljobsV1alpha1Client {
 	return client
 }
 
-// New creates a new ModeljobsV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *ModeljobsV1alpha1Client {
-	return &ModeljobsV1alpha1Client{c}
+// New creates a new KleverossV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *KleverossV1alpha1Client {
+	return &KleverossV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -81,7 +81,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *ModeljobsV1alpha1Client) RESTClient() rest.Interface {
+func (c *KleverossV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

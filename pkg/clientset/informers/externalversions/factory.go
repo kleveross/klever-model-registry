@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Modeljobs() modeljob.Interface
+	Kleveross() modeljob.Interface
 }
 
-func (f *sharedInformerFactory) Modeljobs() modeljob.Interface {
+func (f *sharedInformerFactory) Kleveross() modeljob.Interface {
 	return modeljob.New(f, f.namespace, f.tweakListOptions)
 }

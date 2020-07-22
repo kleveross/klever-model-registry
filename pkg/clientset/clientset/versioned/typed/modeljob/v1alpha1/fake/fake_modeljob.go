@@ -30,13 +30,13 @@ import (
 
 // FakeModelJobs implements ModelJobInterface
 type FakeModelJobs struct {
-	Fake *FakeModeljobsV1alpha1
+	Fake *FakeKleverossV1alpha1
 	ns   string
 }
 
-var modeljobsResource = schema.GroupVersionResource{Group: "modeljobs.kleveross.io", Version: "v1alpha1", Resource: "modeljobs"}
+var modeljobsResource = schema.GroupVersionResource{Group: "kleveross.io", Version: "v1alpha1", Resource: "modeljobs"}
 
-var modeljobsKind = schema.GroupVersionKind{Group: "modeljobs.kleveross.io", Version: "v1alpha1", Kind: "ModelJob"}
+var modeljobsKind = schema.GroupVersionKind{Group: "kleveross.io", Version: "v1alpha1", Kind: "ModelJob"}
 
 // Get takes name of the modelJob, and returns the corresponding modelJob object, and an error if there is any.
 func (c *FakeModelJobs) Get(name string, options v1.GetOptions) (result *v1alpha1.ModelJob, err error) {

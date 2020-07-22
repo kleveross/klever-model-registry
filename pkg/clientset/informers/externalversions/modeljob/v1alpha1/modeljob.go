@@ -61,13 +61,13 @@ func NewFilteredModelJobInformer(client versioned.Interface, namespace string, r
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ModeljobsV1alpha1().ModelJobs(namespace).List(options)
+				return client.KleverossV1alpha1().ModelJobs(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ModeljobsV1alpha1().ModelJobs(namespace).Watch(options)
+				return client.KleverossV1alpha1().ModelJobs(namespace).Watch(options)
 			},
 		},
 		&modeljobv1alpha1.ModelJob{},
