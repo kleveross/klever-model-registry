@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "klever-model-registry.name" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "klever-model-registry.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "klever-model-registry.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "klever-model-registry.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: KLEVER_MODEL_REGISTRY_PORT
+            value: {{ .Values.service.Port }}
+          - name: ORMB_DOMAIN
+            value: {{ .Values.ormbDomain }}
+          - name: ORMB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: ormb
+                key: ormbUsername
+          - name: ORMB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ormb
+                key: ormbPassword
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.Port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

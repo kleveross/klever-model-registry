@@ -27,7 +27,7 @@ import (
 )
 
 func GetModelJobEvents(namespace, modeljobID string) (*corev1.EventList, error) {
-	modeljob, err := client.KubeModelJobClient.ModeljobsV1alpha1().
+	modeljob, err := client.KubeModelJobClient.KleverossV1alpha1().
 		ModelJobs(namespace).Get(modeljobID, metav1.GetOptions{})
 	if err != nil {
 		return nil, err

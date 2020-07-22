@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
-	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1"
-	fakemodeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1/fake"
+	kleverossv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1"
+	fakekleverossv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/typed/modeljob/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -76,7 +76,7 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 
 var _ clientset.Interface = &Clientset{}
 
-// ModeljobsV1alpha1 retrieves the ModeljobsV1alpha1Client
-func (c *Clientset) ModeljobsV1alpha1() modeljobsv1alpha1.ModeljobsV1alpha1Interface {
-	return &fakemodeljobsv1alpha1.FakeModeljobsV1alpha1{Fake: &c.Fake}
+// KleverossV1alpha1 retrieves the KleverossV1alpha1Client
+func (c *Clientset) KleverossV1alpha1() kleverossv1alpha1.KleverossV1alpha1Interface {
+	return &fakekleverossv1alpha1.FakeKleverossV1alpha1{Fake: &c.Fake}
 }
