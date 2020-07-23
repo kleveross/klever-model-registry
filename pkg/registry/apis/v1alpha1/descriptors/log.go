@@ -21,6 +21,7 @@ import (
 	"github.com/caicloud/nirvana/definition"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/log"
+	"github.com/kleveross/klever-model-registry/pkg/registry/resource/logs"
 )
 
 func init() {
@@ -44,13 +45,48 @@ var getPodLogs = definition.Definition{
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "modeljob namespace"),
 		definition.PathParameterFor("podID", "pod id"),
-		definition.QueryParameterFor("containerid", "container id"),
-		definition.QueryParameterFor("reftimestamp", "ref timestamp"),
-		definition.QueryParameterFor("reflineNum", "ref line num"),
-		definition.QueryParameterFor("userPreviousLogs", "us previous logs"),
-		definition.QueryParameterFor("offsetFrom", "offset from"),
-		definition.QueryParameterFor("offsetTo", "offset to"),
-		definition.QueryParameterFor("logFilePosition", "log file position"),
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "containerID",
+			Description: "container id",
+			Optional:    true,
+		},
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "reftimestamp",
+			Description: "ref timestamp",
+			Optional:    true,
+		},
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "reflineNum",
+			Description: "ref line num",
+			Optional:    true,
+		},
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "userPreviousLogs",
+			Description: "user previous logs",
+			Optional:    true,
+		},
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "offsetFrom",
+			Description: "offset from",
+			Optional:    true,
+		},
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "offsetTo",
+			Description: "offset to",
+			Optional:    true,
+		},
+		definition.Parameter{
+			Source:      definition.Query,
+			Name:        "logFilePosition",
+			Description: "log file position",
+			Optional:    true,
+		},
 	},
 	Results: []definition.Result{
 		definition.DataResultFor("pod logs"),
@@ -58,7 +94,7 @@ var getPodLogs = definition.Definition{
 	},
 	Function: func(ctx context.Context, namespace, podID, containerID, refTimestamp string,
 		refLineNum int, usePreviousLogs bool, offsetFrom,
-		offsetTo, logFilePosition string) (interface{}, error) {
+		offsetTo, logFilePosition string) (*logs.LogDetails, error) {
 		return log.GetPodLogs(namespace, podID, containerID, refTimestamp,
 			refLineNum, usePreviousLogs, offsetFrom, offsetTo, logFilePosition)
 	},
