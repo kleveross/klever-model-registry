@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "10.9.4.55 harbor.caicloud.com" >> /etc/hosts
+echo "$ORMB_DOMAIN_IP $ORMB_DOMAIN" >> /etc/hosts
 
 ormb_login_err=10000
 ormb_pull_model_err=10001

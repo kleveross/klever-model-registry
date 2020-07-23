@@ -65,3 +65,4 @@ tolerations: []
 affinity: {}
 
 ormbDomain: harbor.caicloud.xyz
+ormbDomainIP: 192.168.20.201
