@@ -3,6 +3,7 @@ import argparse
 import yaml
 
 from extractor import Extractor
+from config_generator.config_generator import TritonConfigGenerator
 
 ID = os.environ.get('ANALYZE_ID', 'NULL')
 IP = os.environ.get('ANALYZE_HOST', '0.0.0.0:8081')
@@ -55,6 +56,12 @@ def update_yaml(dir, res_dict):
             data["signature"]["outputs"] = res_dict["Outputs"]
         print("save ormbfile.yaml", data)
         yaml.dump(data, f)
+
+    try:
+        generator = TritonConfigGenerator()
+        generator.generate_config(data, dir)
+    except Exception as e:
+        print(str(e))
 
 if __name__ == "__main__":
 
