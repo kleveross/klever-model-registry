@@ -67,7 +67,7 @@ var listModelJob = definition.Definition{
 		definition.DataResultFor("modeljob list"),
 		definition.ErrorResult(),
 	},
-	Function: func(ctx context.Context) (interface{}, error) {
+	Function: func(ctx context.Context) (*modeljobsv1alpha1.ModelJobList, error) {
 		return modeljob.List()
 	},
 }
@@ -83,7 +83,7 @@ var getModelJob = definition.Definition{
 		definition.DataResultFor("modeljob"),
 		definition.ErrorResult(),
 	},
-	Function: func(ctx context.Context, modeljobID string) (interface{}, error) {
+	Function: func(ctx context.Context, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 		return modeljob.Get(modeljobID)
 	},
 }

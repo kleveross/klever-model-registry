@@ -19,6 +19,7 @@ import (
 	"context"
 
 	"github.com/caicloud/nirvana/definition"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/event"
 )
@@ -49,7 +50,7 @@ var getModelJobEvents = definition.Definition{
 		definition.DataResultFor("modeljob events"),
 		definition.ErrorResult(),
 	},
-	Function: func(ctx context.Context, namespace, modeljobID string) (interface{}, error) {
+	Function: func(ctx context.Context, namespace, modeljobID string) (*corev1.EventList, error) {
 		return event.GetModelJobEvents(namespace, modeljobID)
 	},
 }

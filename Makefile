@@ -25,7 +25,7 @@ export SHELLOPTS := errexit
 ROOT := github.com/kleveross/klever-model-registry
 
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := klever-model-registry #klever-modeljob-operator
+TARGETS := klever-model-registry klever-modeljob-operator
 
 # Container image prefix and suffix added to targets.
 # The final built images are:
@@ -98,11 +98,11 @@ build-linux:
 
 # Install CRDs into a cluster
 install: manifests kustomize
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+	$(KUSTOMIZE) build manifests/klever-modeljob-operator/crds | kubectl apply -f -
 
 # Uninstall CRDs from a cluster
 uninstall: manifests kustomize
-	$(KUSTOMIZE) build config/crd | kubectl delete -f -
+	$(KUSTOMIZE) build manifests/klever-modeljob-operator/crds | kubectl delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
@@ -111,7 +111,7 @@ deploy: manifests kustomize
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=kleveross-role webhook paths="./..." output:crd:artifacts:config=manifests/klever-modeljob-operator/crds
 
 # Run go fmt against code
 fmt:
@@ -169,3 +169,7 @@ KUSTOMIZE=$(GOBIN)/kustomize
 else
 KUSTOMIZE=$(shell which kustomize)
 endif
+
+apidoc:
+	go get github.com/caicloud/nirvana/cmd/nirvana@master
+	nirvana api pkg/registry/apis --output docs/api

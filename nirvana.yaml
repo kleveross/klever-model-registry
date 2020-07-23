@@ -1,0 +1,23 @@
+
+#
+# project is project name
+#
+project: klever-model-registry
+
+#
+# project is project description
+#
+description: "This is the API for klever model registry"
+
+#
+# schemes is serve protocol
+#
+schemes:
+- http
+
+hosts:
+- localhost:8080
+  
+versions:
+- name: v1alpha1
+  description: "The v1alpha1 version is the first version of klever model registry"
