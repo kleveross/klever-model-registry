@@ -6,6 +6,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/caicloud/nirvana"
 	"github.com/caicloud/nirvana/config"
 	"github.com/caicloud/nirvana/log"
 	"github.com/caicloud/nirvana/plugins/reqlog"
@@ -13,6 +14,8 @@ import (
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	"github.com/kleveross/klever-model-registry/pkg/registry/filters"
+	"github.com/kleveross/klever-model-registry/pkg/registry/modifiers"
 )
 
 const (
@@ -49,8 +52,8 @@ func main() {
 	option := &config.Option{
 		Port: uint16(viper.GetInt(kleverModelRegistryPort)),
 	}
-	nirvana := config.NewNirvanaCommand(option)
-	nirvana.EnablePlugin(
+	cmd := config.NewNirvanaCommand(option)
+	cmd.EnablePlugin(
 		&reqlog.Option{
 			DoubleLog:  true,
 			SourceAddr: true,
@@ -58,10 +61,16 @@ func main() {
 		},
 	)
 
-	if err := nirvana.Execute(
-		apis.AllDescriptor...); err != nil {
+	serverConfig := nirvana.NewConfig()
+	serverConfig.Configure(
+		nirvana.Logger(log.DefaultLogger()),
+		nirvana.Filter(filters.Filters()...),
+		nirvana.Modifier(modifiers.Modifiers()...),
+		nirvana.Descriptor(apis.AllDescriptor...),
+	)
+
+	if err := cmd.ExecuteWithConfig(serverConfig); err != nil {
 		log.Fatal(err)
 	}
-
 	return
 }

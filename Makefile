@@ -172,4 +172,4 @@ endif
 
 apidoc:
 	go get github.com/caicloud/nirvana/cmd/nirvana@master
-	nirvana api pkg/registry/apis --output docs/api
+	nirvana api pkg/registry --output docs/api
