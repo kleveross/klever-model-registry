@@ -1,6 +1,4 @@
 /*
-
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,6 +11,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package descriptors
 
 import (
@@ -47,7 +46,11 @@ var createModelJob = definition.Definition{
 	Summary:     "Create modeljob",
 	Description: "Create modeljob",
 	Parameters: []definition.Parameter{
-		definition.BodyParameterFor("modeljob body"),
+		{
+			Source:      definition.Body,
+			Name:        "job",
+			Description: "modeljob body",
+		},
 	},
 	Results: []definition.Result{
 		definition.ErrorResult(),
@@ -63,10 +66,7 @@ var listModelJob = definition.Definition{
 	Summary:     "List modeljob",
 	Description: "List modeljob",
 	Parameters:  []definition.Parameter{},
-	Results: []definition.Result{
-		definition.DataResultFor("modeljob list"),
-		definition.ErrorResult(),
-	},
+	Results:     definition.DataErrorResults("modeljob list"),
 	Function: func(ctx context.Context) (*modeljobsv1alpha1.ModelJobList, error) {
 		return modeljob.List()
 	},
@@ -79,10 +79,7 @@ var getModelJob = definition.Definition{
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("modeljobID", "modeljob id"),
 	},
-	Results: []definition.Result{
-		definition.DataResultFor("modeljob"),
-		definition.ErrorResult(),
-	},
+	Results: definition.DataErrorResults("modeljob"),
 	Function: func(ctx context.Context, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 		return modeljob.Get(modeljobID)
 	},
