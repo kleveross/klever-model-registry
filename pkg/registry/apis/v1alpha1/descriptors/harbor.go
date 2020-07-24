@@ -16,32 +16,73 @@ limitations under the License.
 package descriptors
 
 import (
-	"encoding/base64"
-	"fmt"
 	"net/http"
-	"net/http/httputil"
 
-	"github.com/spf13/viper"
+	"github.com/caicloud/nirvana/definition"
 
-	"github.com/kleveross/klever-model-registry/pkg/common"
+	"github.com/kleveross/klever-model-registry/pkg/registry/harbor"
 )
 
-func HarborProxy(w http.ResponseWriter, r *http.Request) {
-	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
-	ormbUserName := viper.GetString(common.ORMBUsernameEnvkey)
-	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
-	authBytes := []byte(fmt.Sprintf("%v:%v", ormbUserName, ormbPassword))
-	auth := "basic " + base64.StdEncoding.EncodeToString(authBytes)
-
-	proxy := httputil.NewSingleHostReverseProxy(r.URL)
-	proxy.Director = func(req *http.Request) {
-		req.Header = r.Header
-		req.Header["Authorization"] = []string{auth}
-		req.Host = ormbDomain
-		req.URL.Host = ormbDomain
-		req.URL.Scheme = "http"
-		req.URL.Path = r.URL.Path
+// HarborAPIDescriptor contain horbor /api/* descriptors
+func HarborAPIDescriptor() definition.Descriptor {
+	return definition.Descriptor{
+		Path:        "/api/{path:*}",
+		Description: "It contains all harbor /api/*",
+		Consumes:    []string{definition.MIMEAll},
+		Produces:    []string{definition.MIMEJSON},
+		Definitions: []definition.Definition{
+			{
+				Method:  definition.Any,
+				Handler: http.HandlerFunc(harbor.HarborProxy),
+			},
+		},
 	}
+}
 
-	proxy.ServeHTTP(w, r)
+// HarborServiceDescriptor contain horbor /service/* descriptors
+func HarborServiceDescriptor() definition.Descriptor {
+	return definition.Descriptor{
+		Path:        "/service/{path:*}",
+		Description: "It contains all api in /service/*",
+		Consumes:    []string{definition.MIMEAll},
+		Produces:    []string{definition.MIMEJSON},
+		Definitions: []definition.Definition{
+			{
+				Method:  definition.Any,
+				Handler: http.HandlerFunc(harbor.HarborProxy),
+			},
+		},
+	}
+}
+
+// HarborCDescriptor contain horbor /c/* descriptors
+func HarborCDescriptor() definition.Descriptor {
+	return definition.Descriptor{
+		Path:        "/c/{path:*}",
+		Description: "It contains all api in /c/*",
+		Consumes:    []string{definition.MIMEAll},
+		Produces:    []string{definition.MIMEJSON},
+		Definitions: []definition.Definition{
+			{
+				Method:  definition.Any,
+				Handler: http.HandlerFunc(harbor.HarborProxy),
+			},
+		},
+	}
+}
+
+// HarborV2Descriptor contain horbor /v2/* descriptors
+func HarborV2Descriptor() definition.Descriptor {
+	return definition.Descriptor{
+		Path:        "/v2/{path:*}",
+		Description: "It contains all api in /v2/*",
+		Consumes:    []string{definition.MIMEAll},
+		Produces:    []string{definition.MIMEJSON},
+		Definitions: []definition.Definition{
+			{
+				Method:  definition.Any,
+				Handler: http.HandlerFunc(harbor.HarborProxy),
+			},
+		},
+	}
 }
