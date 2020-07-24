@@ -50,6 +50,12 @@ GITSHA ?= $(shell git rev-parse --short HEAD)
 # Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.
 CPUS ?= $(shell /bin/bash hack/read_cpus_available.sh)
 
+# Default golang flags used in build and test
+# -mod=vendor: force go to use the vendor files instead of using the `$GOPATH/pkg/mod`
+# -p: the number of programs that can be run in parallel
+# -count: run each test and benchmark 1 times. Set this flag to disable test cache
+export GOFLAGS ?= -mod=vendor -p=$(CPUS) -count=1
+
 # Track code version with Docker Label.
 DOCKER_LABELS ?= git-describe="$(shell date -u +v%Y%m%d)-$(shell git describe --tags --always --dirty)"
 
@@ -62,14 +68,14 @@ endif
 
 # Run tests
 test: generate fmt vet manifests
-	@go test -p $(CPUS) $$(go list ./... | grep -v /vendor | grep -v /test) -coverprofile=coverage.out
+	@go test -race -coverprofile=coverage.out ./...
 	@go tool cover -func coverage.out | tail -n 1 | awk '{ print "Total coverage: " $$3 }'
 
 build: build-local
 
 build-local:
 	@for target in $(TARGETS); do                                                      \
-	  CGO_ENABLED="0" go build -i -v -o $(OUTPUT_DIR)/$${target} -p $(CPUS)            \
+	  CGO_ENABLED="0" go build -i -v -o $(OUTPUT_DIR)/$${target}                       \
 	  -ldflags "-s -w -X $(ROOT)/pkg/version.VERSION=$(VERSION)                        \
 	  	-X $(ROOT)/pkg/version.COMMIT=$(GITSHA)                                        \
 	    -X $(ROOT)/pkg/version.REPOROOT=$(ROOT)"                                       \
@@ -86,10 +92,10 @@ build-linux:
 	  -e SHELLOPTS=$(SHELLOPTS)                                                        \
 	  -e CGO_ENABLED="0"                                                               \
 	  -e GO111MODULE=on                                                                \
-	  -e GOFLAGS=" -mod=vendor"                                                        \
+	  -e GOFLAGS="$(GOFLAGS)"                                                          \
 	  $(BASE_REGISTRY)/golang:1.13.9                                                   \
 	    /bin/bash -c 'for target in $(TARGETS); do                                     \
-	      go build -i -v -o $(OUTPUT_DIR)/$${target} -p $(CPUS)                        \
+	      go build -i -v -o $(OUTPUT_DIR)/$${target}                                   \
 	        -ldflags "-s -w -X $(ROOT)/pkg/version.VERSION=$(VERSION)                  \
 			  -X $(ROOT)/pkg/version.COMMIT=$(GITSHA)                                  \
 	          -X $(ROOT)/pkg/version.REPOROOT=$(ROOT)"                                 \
@@ -171,5 +177,4 @@ KUSTOMIZE=$(shell which kustomize)
 endif
 
 apidoc:
-	go get github.com/caicloud/nirvana/cmd/nirvana@master
-	nirvana api pkg/registry --output docs/api
+	@nirvana api pkg/registry --output docs/api
