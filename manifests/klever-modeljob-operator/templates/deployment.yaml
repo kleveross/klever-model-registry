@@ -31,6 +31,8 @@ spec:
           env:
             - name: ORMB_DOMAIN
               value: {{ .Values.ormbDomain }}
+            - name: ORMB_DOMAIN_IP
+              value: {{ .Values.ormbDomainIP }}
             - name: ORMB_USERNAME
               valueFrom:
                 secretKeyRef:
