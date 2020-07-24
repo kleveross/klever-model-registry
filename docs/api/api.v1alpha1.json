@@ -4,8 +4,12 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This project uses nirvana as API framework\u003cbr/\u003eThe v1alpha1 version is the first version of klever model registry",
+    "description": "This is the API for klever model registry\u003cbr/\u003eThe v1alpha1 version is the first version of klever model registry",
     "title": "klever-model-registry APIs\n",
+    "contact": {
+      "name": "Jun Chen",
+      "email": "chenjun@caicloud.io"
+    },
     "version": "v1alpha1"
   },
   "host": "localhost:8080",
@@ -14,7 +18,8 @@
       "get": {
         "description": "List modeljob",
         "consumes": [
-          "*/*"
+          "*/*",
+          ""
         ],
         "produces": [
           "*/*"
@@ -41,12 +46,12 @@
         "parameters": [
           {
             "description": "modeljob body",
+            "name": "job",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "undefined",
-              "format": "interface{}",
-              "title": "Context"
+              "title": "ModelJob",
+              "$ref": "#/definitions/github.com_kleveross_klever-model-registry_pkg_apis_modeljob_v1alpha1.ModelJob"
             }
           }
         ],
@@ -61,7 +66,8 @@
       "get": {
         "description": "Get modeljob",
         "consumes": [
-          "*/*"
+          "*/*",
+          ""
         ],
         "produces": [
           "*/*"
@@ -69,8 +75,8 @@
         "summary": "Get modeljob",
         "parameters": [
           {
-            "type": "undefined",
-            "format": "interface{}",
+            "type": "string",
+            "format": "string",
             "description": "modeljob id",
             "name": "modeljobID",
             "in": "path",
@@ -89,16 +95,18 @@
       "delete": {
         "description": "Delete modeljob",
         "consumes": [
-          "*/*"
+          "*/*",
+          ""
         ],
         "produces": [
-          "*/*"
+          "*/*",
+          ""
         ],
         "summary": "Delete modeljob",
         "parameters": [
           {
-            "type": "undefined",
-            "format": "interface{}",
+            "type": "string",
+            "format": "string",
             "description": "modeljob id",
             "name": "modeljobID",
             "in": "path",
@@ -116,7 +124,8 @@
       "get": {
         "description": "Get modeljob events",
         "consumes": [
-          "*/*"
+          "*/*",
+          ""
         ],
         "produces": [
           "*/*"
@@ -124,8 +133,8 @@
         "summary": "Get modeljob events",
         "parameters": [
           {
-            "type": "undefined",
-            "format": "interface{}",
+            "type": "string",
+            "format": "string",
             "description": "modeljob namespace",
             "name": "namespace",
             "in": "path",
@@ -154,7 +163,8 @@
       "get": {
         "description": "Get pod logs",
         "consumes": [
-          "*/*"
+          "*/*",
+          ""
         ],
         "produces": [
           "*/*"
@@ -162,8 +172,8 @@
         "summary": "Get pod logs",
         "parameters": [
           {
-            "type": "undefined",
-            "format": "interface{}",
+            "type": "string",
+            "format": "string",
             "description": "modeljob namespace",
             "name": "namespace",
             "in": "path",
@@ -192,22 +202,22 @@
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "string",
+            "type": "number",
+            "format": "int",
             "description": "ref line num",
             "name": "reflineNum",
             "in": "query"
           },
           {
-            "type": "number",
-            "format": "int",
+            "type": "boolean",
+            "format": "bool",
             "description": "user previous logs",
             "name": "userPreviousLogs",
             "in": "query"
           },
           {
-            "type": "boolean",
-            "format": "bool",
+            "type": "string",
+            "format": "string",
             "description": "offset from",
             "name": "offsetFrom",
             "in": "query"
