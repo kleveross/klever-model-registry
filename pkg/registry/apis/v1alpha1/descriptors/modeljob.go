@@ -31,11 +31,11 @@ var modeljobAPI = definition.Descriptor{
 	Description: "APIs for modeljob",
 	Children: []definition.Descriptor{
 		{
-			Path:        "/modeljobs",
+			Path:        "/namespaces/{namespace}/modeljobs",
 			Definitions: []definition.Definition{createModelJob, listModelJob},
 		},
 		{
-			Path:        "/modeljobs/{modeljobID}",
+			Path:        "/namespaces/{namespace}/modeljobs/{modeljobID}",
 			Definitions: []definition.Definition{deleteModelJob, getModelJob},
 		},
 	},
@@ -46,6 +46,7 @@ var createModelJob = definition.Definition{
 	Summary:     "Create modeljob",
 	Description: "Create modeljob",
 	Parameters: []definition.Parameter{
+		definition.PathParameterFor("namespace", "namespace"),
 		{
 			Source:      definition.Body,
 			Name:        "job",
@@ -55,8 +56,8 @@ var createModelJob = definition.Definition{
 	Results: []definition.Result{
 		definition.ErrorResult(),
 	},
-	Function: func(ctx context.Context, job *modeljobsv1alpha1.ModelJob) error {
-		_, err := modeljob.Create(job)
+	Function: func(ctx context.Context, namespace string, job *modeljobsv1alpha1.ModelJob) error {
+		_, err := modeljob.Create(namespace, job)
 		return err
 	},
 }
@@ -65,10 +66,12 @@ var listModelJob = definition.Definition{
 	Method:      definition.List,
 	Summary:     "List modeljob",
 	Description: "List modeljob",
-	Parameters:  []definition.Parameter{},
+	Parameters:  []definition.Parameter{
+		definition.PathParameterFor("namespace", "namespace"),
+	},
 	Results:     definition.DataErrorResults("modeljob list"),
-	Function: func(ctx context.Context) (*modeljobsv1alpha1.ModelJobList, error) {
-		return modeljob.List()
+	Function: func(ctx context.Context, namespace string) (*modeljobsv1alpha1.ModelJobList, error) {
+		return modeljob.List(namespace)
 	},
 }
 
@@ -77,11 +80,12 @@ var getModelJob = definition.Definition{
 	Summary:     "Get modeljob",
 	Description: "Get modeljob",
 	Parameters: []definition.Parameter{
+		definition.PathParameterFor("namespace", "namespace"),
 		definition.PathParameterFor("modeljobID", "modeljob id"),
 	},
 	Results: definition.DataErrorResults("modeljob"),
-	Function: func(ctx context.Context, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
-		return modeljob.Get(modeljobID)
+	Function: func(ctx context.Context, namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
+		return modeljob.Get(namespace, modeljobID)
 	},
 }
 
@@ -91,12 +95,13 @@ var deleteModelJob = definition.Definition{
 	Description: "Delete modeljob",
 
 	Parameters: []definition.Parameter{
+		definition.PathParameterFor("namespace", "namespace"),
 		definition.PathParameterFor("modeljobID", "modeljob id"),
 	},
 	Results: []definition.Result{
 		definition.ErrorResult(),
 	},
-	Function: func(ctx context.Context, modeljobID string) error {
-		return modeljob.Delete(modeljobID)
+	Function: func(ctx context.Context, namespace, modeljobID string) error {
+		return modeljob.Delete(namespace, modeljobID)
 	},
 }

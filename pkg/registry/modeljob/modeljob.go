@@ -19,18 +19,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
-	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 )
 
-func Create(modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
+func Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
 	err := ExchangeModelJobNameAndID(&modeljob.ObjectMeta)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(common.DefaultModelJobNamespace).Create(modeljob)
+		ModelJobs(namespace).Create(modeljob)
 	if err != nil {
 		return nil, err
 	}
@@ -38,9 +37,9 @@ func Create(modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, 
 	return result, nil
 }
 
-func Get(modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
+func Get(namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 	modeljob, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(common.DefaultModelJobNamespace).Get(modeljobID, metav1.GetOptions{})
+		ModelJobs(namespace).Get(modeljobID, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -48,9 +47,9 @@ func Get(modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 	return modeljob, err
 }
 
-func Delete(modeljobID string) error {
+func Delete(namespace, modeljobID string) error {
 	err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(common.DefaultModelJobNamespace).Delete(modeljobID, &metav1.DeleteOptions{})
+		ModelJobs(namespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -58,9 +57,9 @@ func Delete(modeljobID string) error {
 	return nil
 }
 
-func List() (*modeljobsv1alpha1.ModelJobList, error) {
+func List(namespace string) (*modeljobsv1alpha1.ModelJobList, error) {
 	modeljobs, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(common.DefaultModelJobNamespace).List(metav1.ListOptions{})
+		ModelJobs(namespace).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
