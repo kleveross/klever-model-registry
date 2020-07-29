@@ -11,7 +11,6 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-namespace: kleveross-system
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -68,4 +67,14 @@ tolerations: []
 
 affinity: {}
 
-ormbDomain: harbor.caicloud.xyz
+# Format: domain[:port]. Usually:
+# 1) if harbor "expose.type" is "ingress", the "domain" should be
+# the value of "expose.ingress.hosts.core" in harbor
+# 3) if harbor "expose.type" is "nodePort", the "domain" should be
+# the IP address of k8s node
+#
+# If Harbor is deployed behind the proxy, set it as the URL of proxy
+#
+# If "port" is not 80, you must set port, eg: 192.168.1.2:30002
+ormb:
+  domain: 192.168.22.160:30002

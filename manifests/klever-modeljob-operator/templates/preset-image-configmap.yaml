@@ -1,17 +1,17 @@
 apiVersion: v1
 data:
-  caffemodel-convert: '{{ .Values.ormbDomain }}/release/caffetocaffe2:v0.2'
-  caffemodel-extract: '{{ .Values.ormbDomain }}/release/caffe:v0.2'
-  netdef-extract: '{{ .Values.ormbDomain }}/release/caffe2:v0.2'
-  graphdef-extract: '{{ .Values.ormbDomain }}/release/graphdef:v0.2'
-  h5-convert: '{{ .Values.ormbDomain }}/release/keras2tf:v0.2'
-  h5-extract: '{{ .Values.ormbDomain }}/release/keras:v0.2'
-  mxnetparams-convert: '{{ .Values.ormbDomain }}/release/mxnet2onnx:v0.2'
-  mxnetparams-extract: '{{ .Values.ormbDomain }}/release/mxnet:v0.2'
-  onnx-extract: '{{ .Values.ormbDomain }}/release/onnx:v0.2'
-  savedmodel-extract: '{{ .Values.ormbDomain }}/release/savedmodel:v0.2'
-  torchscript-extract: '{{ .Values.ormbDomain }}/release/torchscript:v0.2'
-  pmml-extract: '{{ .Values.ormbDomain }}/release/openscoring:v2.0.1-1.0'
+  caffemodel-convert: '{{ .Values.ormb.domain }}/release/caffetocaffe2:v0.2'
+  caffemodel-extract: '{{ .Values.ormb.domain }}/release/caffe:v0.2'
+  netdef-extract: '{{ .Values.ormb.domain }}/release/caffe2:v0.2'
+  graphdef-extract: '{{ .Values.ormb.domain }}/release/graphdef:v0.2'
+  h5-convert: '{{ .Values.ormb.domain }}/release/keras2tf:v0.2'
+  h5-extract: '{{ .Values.ormb.domain }}/release/keras:v0.2'
+  mxnetparams-convert: '{{ .Values.ormb.domain }}/release/mxnet2onnx:v0.2'
+  mxnetparams-extract: '{{ .Values.ormb.domain }}/release/mxnet:v0.2'
+  onnx-extract: '{{ .Values.ormb.domain }}/release/onnx:v0.2'
+  savedmodel-extract: '{{ .Values.ormb.domain }}/release/savedmodel:v0.2'
+  torchscript-extract: '{{ .Values.ormb.domain }}/release/torchscript:v0.2'
+  pmml-extract: '{{ .Values.ormb.domain }}/release/openscoring:v2.0.1-1.0'
 kind: ConfigMap
 metadata:
   name: modeljob-image-config
