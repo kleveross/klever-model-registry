@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "klever-model-registry.name" . }}
-  namespace: {{ .Values.namespace }}
   labels:
     {{- include "klever-model-registry.labels" . | nindent 4 }}
 spec:
@@ -31,7 +30,7 @@ spec:
           - name: KLEVER_MODEL_REGISTRY_PORT
             value: {{ .Values.service.Port }}
           - name: ORMB_DOMAIN
-            value: {{ .Values.ormbDomain }}
+            value: {{ .Values.ormb.domain }}
           - name: ORMB_USERNAME
             valueFrom:
               secretKeyRef:
@@ -44,7 +43,7 @@ spec:
                 key: ormbPassword
           ports:
             - name: http
-              containerPort: {{ .Values.service.Port }}
+              containerPort: 8080
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
