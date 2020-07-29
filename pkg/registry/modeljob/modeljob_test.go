@@ -7,9 +7,9 @@ import (
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	modeljobfake "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/fake"
+	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
-	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var _ = Describe("Modeljob API", func() {
