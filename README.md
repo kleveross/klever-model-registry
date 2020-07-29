@@ -65,7 +65,7 @@ $ make docker-build
 ### Install
 
 #### Install Harbor
-Harbor is registry for the training model in klever-model-registry, please refer to the installation of Harbor [harbor-helm installation](https://github.com/goharbor/harbor-helm)
+[Harbor](https://github.com/goharbor/harbor) is registry for the training model in klever-model-registry, please refer to the installation of Harbor [harbor-helm installation](https://github.com/goharbor/harbor-helm)
 
 #### Install klever-model-registry
 
