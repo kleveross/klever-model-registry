@@ -66,10 +66,10 @@ var listModelJob = definition.Definition{
 	Method:      definition.List,
 	Summary:     "List modeljob",
 	Description: "List modeljob",
-	Parameters:  []definition.Parameter{
+	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
 	},
-	Results:     definition.DataErrorResults("modeljob list"),
+	Results: definition.DataErrorResults("modeljob list"),
 	Function: func(ctx context.Context, namespace string) (*modeljobsv1alpha1.ModelJobList, error) {
 		return modeljob.List(namespace)
 	},

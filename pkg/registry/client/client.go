@@ -18,18 +18,24 @@ limitations under the License.
 package client
 
 import (
+	"fmt"
+
+	"github.com/kleveross/ormb/pkg/oras"
+	"github.com/kleveross/ormb/pkg/ormb"
 	seldonv1 "github.com/seldonio/seldon-core/operator/client/machinelearning.seldon.io/v1/clientset/versioned"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
 	modeljobv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
+	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var (
 	KubeMainClient     kubernetes.Interface
 	KubeModelJobClient modeljobv1alpha1.Interface
 	KubelSeldonClient  seldonv1.Interface
+	ORMBClient         ormb.Interface
 )
 
 func InitClient() error {
@@ -54,6 +60,21 @@ func InitClient() error {
 	if err != nil {
 		return err
 	}
+
+	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
+	ormbUserName := viper.GetString(common.ORMBUsernameEnvkey)
+	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
+
+	ORMBClient, err = ormb.New(oras.ClientOptPlainHTTP(true))
+	if err != nil {
+		return err
+	}
+	err = ORMBClient.Login(ormbDomain, ormbUserName, ormbPassword, true)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%v\n", ORMBClient)
 
 	return nil
 }

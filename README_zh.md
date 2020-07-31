@@ -66,7 +66,7 @@ $ make docker-build
 ### 部署
 
 #### 安装 Harbor
-klever-model-registry 使用 Harbor 存储训练模型，Harbor 的安装方式请参考 [harbor-helm 安装](https://github.com/goharbor/harbor-helm)
+klever-model-registry 使用 [Harbor](https://github.com/goharbor/harbor) 存储训练模型，Harbor 的安装方式请参考 [harbor-helm 安装](https://github.com/goharbor/harbor-helm)
 
 #### 安装 klever-model-registry
 
