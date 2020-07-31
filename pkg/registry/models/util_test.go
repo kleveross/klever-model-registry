@@ -272,14 +272,14 @@ func Test_downloadModelFromHarbor(t *testing.T) {
 		{
 			name: "downloadModelFromHarbor successfully",
 			args: args{
-				client:      ormbClient,
-				tenant:      "system-tenant",
-				user:        "admin",
-				modelName:   "test",
-				versionName: "v1",
+				client: ormbClient,
+				tenant: "system-tenant",
+				user:   "admin",
 				model: &Model{
-					Format:    "savedmodel",
-					FrameWork: "tensorflow",
+					ModelName:   "test",
+					VersionName: "v1",
+					Format:      "savedmodel",
+					FrameWork:   "tensorflow",
 				},
 			},
 			wantErr: false,
@@ -290,7 +290,7 @@ func Test_downloadModelFromHarbor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			defer os.RemoveAll(path.Join(modelTmpDir, tt.args.tenant, tt.args.user, tt.args.modelName, tt.args.versionName))
 
-			_, err := downloadModelFromHarbor(tt.args.client, tt.args.tenant, tt.args.user, tt.args.modelName, tt.args.versionName, tt.args.model)
+			_, err := downloadModelFromHarbor(tt.args.client, tt.args.tenant, tt.args.user, tt.args.model)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("downloadModelFromHarbor() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -61,15 +61,11 @@ func InitClient() error {
 		return err
 	}
 
-	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
-	ormbUserName := viper.GetString(common.ORMBUsernameEnvkey)
-	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
-
 	ORMBClient, err = ormb.New(oras.ClientOptPlainHTTP(true))
 	if err != nil {
 		return err
 	}
-	err = ORMBClient.Login(ormbDomain, ormbUserName, ormbPassword, true)
+	err = ORMBClient.Login(common.ORMBDomain, common.ORMBUserName, common.ORMBPassword, true)
 	if err != nil {
 		return err
 	}

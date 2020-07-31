@@ -16,6 +16,7 @@ import (
 	"github.com/kleveross/ormb/pkg/ormb"
 	"gopkg.in/yaml.v2"
 
+	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/util"
 )
 
@@ -146,27 +147,28 @@ func createSizedFile(path string, size int64) error {
 	return err
 }
 
-func downloadModelFromHarbor(client ormb.Interface, tenant, user, modelName,
-	versionName string, model *Model) (string, error) {
-	filePath := path.Join(modelTmpDir, tenant, user, modelName, versionName)
+func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *Model) (string, error) {
+	filePath := path.Join(modelTmpDir, tenant, user, model.ModelName, model.VersionName)
 	err := os.MkdirAll(filePath, 0755)
 	if err != nil {
 		return "", err
 	}
 	defer os.RemoveAll(filePath)
 
-	err = client.Pull(model.ModelTag)
+	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ModelName,
+		model.ModelName, model.VersionName)
+	err = client.Pull(modelRef)
 	if err != nil {
 		return "", err
 	}
 	defer func() {
-		err := client.Remove(model.ModelTag)
+		err := client.Remove(modelRef)
 		if err != nil {
 			log.Warningf("Remove model err: %v", err)
 		}
 	}()
 
-	err = client.Export(model.ModelTag, filePath)
+	err = client.Export(modelRef, filePath)
 	if err != nil {
 		return "", err
 	}
@@ -202,18 +204,20 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		return err
 	}
 
-	err = client.Save(deCompressDir, model.ModelTag)
+	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ModelName,
+		model.ModelName, model.VersionName)
+	err = client.Save(deCompressDir, modelRef)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		err := client.Remove(model.ModelTag)
+		err := client.Remove(modelRef)
 		if err != nil {
 			log.Warningf("Remove model err: %v", err)
 		}
 	}()
 
-	err = client.Push(model.ModelTag)
+	err = client.Push(modelRef)
 	if err != nil {
 		return err
 	}
@@ -268,9 +272,14 @@ func validateModelDir(dirPath string, model *Model) error {
 
 func writeORMBFile(filePath string, model *Model) error {
 	metadata := ormbmodel.Metadata{
-		Author:    "",
-		Format:    model.Format,
-		Framework: model.Format,
+		Author:      "",
+		Description: model.Description,
+		Format:      model.Format,
+		Framework:   model.Format,
+		Signature: ormbmodel.Signature{
+			Inputs:  model.Inputs,
+			Outputs: model.Outputs,
+		},
 	}
 	data, err := yaml.Marshal(metadata)
 	if err != nil {

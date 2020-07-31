@@ -33,6 +33,8 @@ func UploadFile(ctx context.Context, tenant, user, modelName, versionName string
 	if err != nil {
 		return err
 	}
+	model.ModelName = modelName
+	model.VersionName = versionName
 
 	modelDir := path.Join(modelTmpDir, tenant, user, modelName)
 	err = os.MkdirAll(modelDir, 0755)
@@ -96,7 +98,10 @@ func UploadFile(ctx context.Context, tenant, user, modelName, versionName string
 }
 
 func DownloadFile(ctx context.Context, tenant, user, modelName, versionName string, model *Model) error {
-	zipFileName, err := downloadModelFromHarbor(client.ORMBClient, tenant, user, modelName, versionName, model)
+	model.ModelName = modelName
+	model.VersionName = versionName
+
+	zipFileName, err := downloadModelFromHarbor(client.ORMBClient, tenant, user, model)
 	if err != nil {
 		return err
 	}
