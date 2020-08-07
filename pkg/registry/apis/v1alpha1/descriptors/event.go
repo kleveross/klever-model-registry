@@ -21,11 +21,23 @@ import (
 	"github.com/caicloud/nirvana/definition"
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/event"
+)
+
+var (
+	eventController *event.EventController
 )
 
 func init() {
 	register(eventAPI)
+}
+
+func InitEventController() {
+	eventController = event.New(client.GetKubeMainClient(),
+		client.GetKubeKleverOssClient(),
+		client.GetKubeKleverOssModelJobInformer(),
+	)
 }
 
 var eventAPI = definition.Descriptor{
@@ -51,6 +63,6 @@ var getModelJobEvents = definition.Definition{
 		definition.ErrorResult(),
 	},
 	Function: func(ctx context.Context, namespace, modeljobID string) (*corev1.EventList, error) {
-		return event.GetModelJobEvents(namespace, modeljobID)
+		return eventController.GetModelJobEvents(namespace, modeljobID)
 	},
 }

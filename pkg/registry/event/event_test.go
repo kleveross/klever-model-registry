@@ -1,22 +1,19 @@
 package event_test
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
-	modeljobfake "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/fake"
 	"github.com/kleveross/klever-model-registry/pkg/common"
-	"github.com/kleveross/klever-model-registry/pkg/registry/client"
-	"github.com/kleveross/klever-model-registry/pkg/registry/event"
-	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
 )
 
 var _ = Describe("Event", func() {
-	client.KubeMainClient = k8sfake.NewSimpleClientset()
-	client.KubeModelJobClient = modeljobfake.NewSimpleClientset()
+	const timeout = time.Second * 5
+	const interval = time.Second * 1
 
 	modeljobObj := &modeljobsv1alpha1.ModelJob{
 		ObjectMeta: metav1.ObjectMeta{
@@ -24,15 +21,20 @@ var _ = Describe("Event", func() {
 		},
 	}
 
-	// Create modeljob
-	modeljobCreated, err := modeljob.Create(common.DefaultModelJobNamespace, modeljobObj)
-	Expect(err).To(BeNil())
+	It("Should manager modeljob events successfully", func() {
+		// Create modeljob
+		modeljobCreated, err := modeljobController.Create(common.DefaultModelJobNamespace, modeljobObj)
+		Expect(err).To(BeNil())
 
-	// Get modeljob events
-	_, err = event.GetModelJobEvents("default", modeljobCreated.Name)
-	Expect(err).To(BeNil())
+		// Get modeljob events
+		By("Expecting get event successfully")
+		Eventually(func() error {
+			_, err := eventController.GetModelJobEvents("default", modeljobCreated.Name)
+			return err
+		}, timeout, interval).Should(Succeed())
 
-	// Get modeljob events, have error modeljob name
-	_, err = event.GetModelJobEvents("default", "nonModelJobName")
-	Expect(err).To(HaveOccurred())
+		// Get modeljob events, have error modeljob name
+		_, err = eventController.GetModelJobEvents("default", "nonModelJobName")
+		Expect(err).To(HaveOccurred())
+	})
 })

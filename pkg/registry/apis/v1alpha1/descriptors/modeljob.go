@@ -20,11 +20,18 @@ import (
 	"github.com/caicloud/nirvana/definition"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
 )
 
+var modeljobController *modeljob.ModelJobController
+
 func init() {
 	register(modeljobAPI)
+}
+
+func InitModelJobController() {
+	modeljobController = modeljob.New(client.GetKubeKleverOssClient(), client.GetKubeKleverOssModelJobInformer())
 }
 
 var modeljobAPI = definition.Descriptor{
@@ -57,7 +64,7 @@ var createModelJob = definition.Definition{
 		definition.ErrorResult(),
 	},
 	Function: func(ctx context.Context, namespace string, job *modeljobsv1alpha1.ModelJob) error {
-		_, err := modeljob.Create(namespace, job)
+		_, err := modeljobController.Create(namespace, job)
 		return err
 	},
 }
@@ -70,8 +77,8 @@ var listModelJob = definition.Definition{
 		definition.PathParameterFor("namespace", "namespace"),
 	},
 	Results: definition.DataErrorResults("modeljob list"),
-	Function: func(ctx context.Context, namespace string) (*modeljobsv1alpha1.ModelJobList, error) {
-		return modeljob.List(namespace)
+	Function: func(ctx context.Context, namespace string) ([]*modeljobsv1alpha1.ModelJob, error) {
+		return modeljobController.List(namespace)
 	},
 }
 
@@ -85,7 +92,7 @@ var getModelJob = definition.Definition{
 	},
 	Results: definition.DataErrorResults("modeljob"),
 	Function: func(ctx context.Context, namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
-		return modeljob.Get(namespace, modeljobID)
+		return modeljobController.Get(namespace, modeljobID)
 	},
 }
 
@@ -102,6 +109,6 @@ var deleteModelJob = definition.Definition{
 		definition.ErrorResult(),
 	},
 	Function: func(ctx context.Context, namespace, modeljobID string) error {
-		return modeljob.Delete(namespace, modeljobID)
+		return modeljobController.Delete(namespace, modeljobID)
 	},
 }

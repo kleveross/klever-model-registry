@@ -18,14 +18,24 @@ package log
 import (
 	"strconv"
 
-	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/resource/container"
 	"github.com/kleveross/klever-model-registry/pkg/registry/resource/logs"
+	"k8s.io/client-go/kubernetes"
 )
+
+type LogController struct {
+	kubeMainClient kubernetes.Interface
+}
+
+func New(kubeMainClient kubernetes.Interface) *LogController {
+	return &LogController{
+		kubeMainClient: kubeMainClient,
+	}
+}
 
 // GetPodLogs is get pod log, now only get one container log.
 // If need, we can support containerID param in the furture.
-func GetPodLogs(namespace, podID, containerID, refTimestamp string, refLineNum int,
+func (l LogController) GetPodLogs(namespace, podID, containerID, refTimestamp string, refLineNum int,
 	usePreviousLogs bool, offsetFrom, offsetTo, logFilePosition string) (*logs.LogDetails, error) {
 	if refTimestamp == "" {
 		refTimestamp = logs.NewestTimestamp
@@ -47,7 +57,7 @@ func GetPodLogs(namespace, podID, containerID, refTimestamp string, refLineNum i
 		}
 	}
 
-	logs, err := container.GetLogDetails(client.KubeMainClient, namespace, podID,
+	logs, err := container.GetLogDetails(l.kubeMainClient, namespace, podID,
 		containerID, logSelector, usePreviousLogs)
 	if err != nil {
 		return nil, err

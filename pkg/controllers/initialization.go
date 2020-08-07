@@ -18,7 +18,7 @@ func initGlobalVar() {
 		modeljobsv1alpha1.FormatCaffeModel:  modeljobsv1alpha1.FrameworkCaffe,
 		modeljobsv1alpha1.FormatNetDef:      modeljobsv1alpha1.FrameworkCaffe2,
 		modeljobsv1alpha1.FormatMXNETParams: modeljobsv1alpha1.FrameworkMXNet,
-		modeljobsv1alpha1.FormatTouchScript: modeljobsv1alpha1.FrameworkPyTorch,
+		modeljobsv1alpha1.FormatTorchScript: modeljobsv1alpha1.FrameworkPyTorch,
 		modeljobsv1alpha1.FormatGraphDef:    modeljobsv1alpha1.FrameworkTensorflow,
 		modeljobsv1alpha1.FormatTensorRT:    modeljobsv1alpha1.FrameworkTensorRT,
 	}

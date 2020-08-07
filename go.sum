@@ -135,6 +135,8 @@ github.com/dgryski/go-sip13 v0.0.0-20181026042036-e10d5fee7954/go.mod h1:vAd38F8
 github.com/dnaeon/go-vcr v1.0.1/go.mod h1:aBB1+wY4s93YsC3HHjMBMrwTj2R9FHDzUr9KyGc8n1E=
 github.com/docker/cli v0.0.0-20200130152716-5d0cf8839492 h1:FwssHbCDJD025h+BchanCwE1Q8fyMgqDr2mOQAWOLGw=
 github.com/docker/cli v0.0.0-20200130152716-5d0cf8839492/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
+github.com/docker/compose-on-kubernetes v0.4.24 h1:VM9jOXP1ftDcz2acsHxLc+GMjoQb39Nf6WLn6rixn2A=
+github.com/docker/compose-on-kubernetes v0.4.24/go.mod h1:iT2pYfi580XlpaV4KmK0T6+4/9+XoKmk/fhoDod1emE=
 github.com/docker/distribution v0.0.0-20191216044856-a8371794149d/go.mod h1:0+TTO4EOBfRPhZXAeF1Vu+W3hHZ8eLp8PgKVZlcvtFY=
 github.com/docker/distribution v2.7.1+incompatible h1:a5mlkVzth6W5A4fOsS3D2EO5BUmsJpcB+cRlLU7cSug=
 github.com/docker/distribution v2.7.1+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
@@ -248,6 +250,7 @@ github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d/go.mod h1:SlYgWuQ5
 github.com/gogo/protobuf v1.3.0/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
 github.com/gogo/protobuf v1.3.1 h1:DqDEcV5aeaTmdFBePNpYsp3FlcVH/2ISVVM9Qf8PSls=
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
+github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/groupcache v0.0.0-20160516000752-02826c3e7903/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef h1:veQD95Isof8w9/WXiA+pa3tz3fJXkt5B7QaRBrM62gk=
@@ -899,6 +902,8 @@ k8s.io/apiserver v0.17.8/go.mod h1:XU2YBi1I/v/P1R5lb0lEwSQ1rnXE01k7yxVtdIWH4Lo=
 k8s.io/client-go v0.17.0/go.mod h1:TYgR6EUHs6k45hb6KWjVD6jFZvJV4gHDikv/It0xz+k=
 k8s.io/client-go v0.17.8 h1:cuZSfjqVrNjoZ3wViQHljFPyWMOcgxUjjmQs5Rifbxk=
 k8s.io/client-go v0.17.8/go.mod h1:SJsDS64AAtt9VZyeaQMb4Ck5etCitZ/FwajWdzua5eY=
+k8s.io/client-go v1.5.1 h1:XaX/lo2/u3/pmFau8HN+sB5C/b4dc4Dmm2eXjBH4p1E=
+k8s.io/client-go v11.0.0+incompatible h1:LBbX2+lOwY9flffWlJM7f1Ct8V2SRNiMRDFeiwnJo9o=
 k8s.io/code-generator v0.17.8/go.mod h1:iiHz51+oTx+Z9D0vB3CH3O4HDDPWrvZyUgUYaIE9h9M=
 k8s.io/component-base v0.17.8/go.mod h1:xfNNdTAMsYzdiAa8vXnqDhRVSEgkfza0iMt0FrZDY7s=
 k8s.io/gengo v0.0.0-20190128074634-0689ccc1d7d6/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=

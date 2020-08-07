@@ -1,18 +1,15 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
 	"github.com/caicloud/nirvana"
 	"github.com/caicloud/nirvana/config"
 	"github.com/caicloud/nirvana/log"
 	"github.com/caicloud/nirvana/plugins/reqlog"
 	"github.com/spf13/viper"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis"
+	"github.com/kleveross/klever-model-registry/pkg/registry/apis/v1alpha1/descriptors"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/filters"
 	"github.com/kleveross/klever-model-registry/pkg/registry/modifiers"
@@ -28,25 +25,13 @@ func init() {
 	viper.SetDefault(kleverModelRegistryPort, "8080")
 }
 
-func gracefulShutdown(closing, done chan struct{}) {
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	log.Infof("capture system signal %s, to close \"closing\" channel", <-signals)
-	close(closing)
-	select {
-	case <-done:
-		log.Infof("Goroutines exited normally")
-	case <-time.After(time.Second * 3):
-		log.Infof("Timeout waiting goroutines to exit")
-	}
-	os.Exit(0)
-}
-
 func main() {
-	err := client.InitClient()
-	if err != nil {
+	if err := client.InitClient(signals.SetupSignalHandler()); err != nil {
 		log.Fatal(err)
 	}
+	descriptors.InitModelJobController()
+	descriptors.InitLogController()
+	descriptors.InitEventController()
 
 	// Start nirvana
 	option := &config.Option{

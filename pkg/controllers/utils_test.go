@@ -74,7 +74,7 @@ func Test_getFrameworkByFormat(t *testing.T) {
 		{
 			name: "torchscript",
 			args: args{
-				format: modeljobsv1alpha1.FormatTouchScript,
+				format: modeljobsv1alpha1.FormatTorchScript,
 			},
 			want: modeljobsv1alpha1.FrameworkPyTorch,
 		},

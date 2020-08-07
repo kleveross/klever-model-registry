@@ -126,7 +126,7 @@ const (
 	FormatCaffeModel  Format = "CaffeModel"
 	FormatNetDef      Format = "NetDef"
 	FormatMXNETParams Format = "MXNETParams"
-	FormatTouchScript Format = "TouchScript"
+	FormatTorchScript Format = "TorchScript"
 	FormatGraphDef    Format = "GraphDef"
 	FormatTensorRT    Format = "TensorRT"
 )
