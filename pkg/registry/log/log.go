@@ -18,6 +18,7 @@ package log
 import (
 	"strconv"
 
+	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
 	"github.com/kleveross/klever-model-registry/pkg/registry/resource/container"
 	"github.com/kleveross/klever-model-registry/pkg/registry/resource/logs"
 	"k8s.io/client-go/kubernetes"
@@ -60,7 +61,7 @@ func (l LogController) GetPodLogs(namespace, podID, containerID, refTimestamp st
 	logs, err := container.GetLogDetails(l.kubeMainClient, namespace, podID,
 		containerID, logSelector, usePreviousLogs)
 	if err != nil {
-		return nil, err
+		return nil, errors.RenderError(err)
 	}
 
 	return logs, nil

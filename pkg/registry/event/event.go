@@ -25,6 +25,7 @@ import (
 	kleverossv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
 	modeljobscheme "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/scheme"
 	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
 )
 
 type EventController struct {
@@ -46,7 +47,7 @@ func New(kubeMainClient kubernetes.Interface, kleverossClient kleverossv1alpha1.
 func (e EventController) GetModelJobEvents(namespace, modeljobID string) (*corev1.EventList, error) {
 	modeljob, err := e.modeljobInformer.Lister().ModelJobs(namespace).Get(modeljobID)
 	if err != nil {
-		return nil, err
+		return nil, errors.RenderError(err)
 	}
 
 	var events *corev1.EventList
