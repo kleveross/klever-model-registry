@@ -12,7 +12,8 @@ import (
 func InitPresetModelImageConfigMap() *corev1.ConfigMap {
 	presetImageConfigMap := &corev1.ConfigMap{}
 	presetImageConfigMap.Data = map[string]string{
-		"savedmodel-extract": "cargo.dev.caicloud.xyz/release/savedmodel:v0.2",
+		"savedmodel-extract":       "demo.goharbor.com/release/savedmodel:v0.2",
+		"ormb-storage-initializer": "demo.goharbor.com/release/savedmodel:v0.2",
 	}
 
 	return presetImageConfigMap

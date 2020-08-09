@@ -39,6 +39,11 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		return nil, fmt.Errorf("%v", "not support source")
 	}
 
+	initContainers, err := generateInitContainers(modeljob)
+	if err != nil {
+		return nil, err
+	}
+
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: modeljob.Namespace,
@@ -47,6 +52,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
+					InitContainers: initContainers,
 					Containers: []corev1.Container{
 						{
 							Name:       "executor",
@@ -99,6 +105,20 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 									Value: viper.GetString(common.ORMBPasswordEnvKey),
 								},
 							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "model",
+									MountPath: modeljobsv1alpha1.SourceModelPath,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "model",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
@@ -108,4 +128,45 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 	}
 
 	return job, nil
+}
+
+func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Container, error) {
+	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
+	ormbUsername := viper.GetString(common.ORMBUsernameEnvkey)
+	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
+	if ormbDomain == "" || ormbUsername == "" || ormbPassword == "" {
+		return nil, nil
+	}
+
+	image, ok := PresetAnalyzeImageConfig.Data["ormb-storage-initializer"]
+	if !ok {
+		return nil, fmt.Errorf("failed get ormb-storage-initializer image")
+	}
+
+	initContainers := []corev1.Container{
+		{
+			Name:       "model-initializer",
+			Image:      image,
+			Args:       []string{modeljob.Spec.Model, modeljobsv1alpha1.SourceModelPath},
+			WorkingDir: "/models",
+			Env: []corev1.EnvVar{
+				corev1.EnvVar{
+					Name:  "AWS_ACCESS_KEY_ID",
+					Value: ormbUsername,
+				},
+				corev1.EnvVar{
+					Name:  "AWS_SECRET_ACCESS_KEY",
+					Value: ormbPassword,
+				},
+			},
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      "model",
+					MountPath: modeljobsv1alpha1.SourceModelPath,
+				},
+			},
+		},
+	}
+
+	return initContainers, nil
 }

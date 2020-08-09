@@ -40,14 +40,6 @@ mkdir -p $output_dir/model
 ormb login  --insecure $ORMB_DOMAIN -u $ORMB_USERNAME -p $ORMB_PASSWORD
 checkOrExit $? $ormb_login_err
 
-# pull source model.
-ormb pull $src_tag --plain-http
-checkOrExit $? $ormb_pull_model_err
-
-# export source model.
-ormb export -d $input_dir $src_tag
-checkOrExit $? $ormb_export_model_err
-
 if [ $dst_tag == "empty" ]
 then
 
