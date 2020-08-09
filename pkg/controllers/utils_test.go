@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/common"
 	test "github.com/kleveross/klever-model-registry/testutil"
 )
 
@@ -258,6 +260,47 @@ func Test_generateJobResource(t *testing.T) {
 			}
 			if !succ {
 				t.Errorf("generateJobResource() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_generateInitContainers(t *testing.T) {
+	os.Setenv(common.ORMBDomainEnvKey, "demo.goharbo.com")
+	os.Setenv(common.ORMBUsernameEnvkey, "ormbtest")
+	os.Setenv(common.ORMBPasswordEnvKey, "ORMBtest12345")
+	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
+
+	type args struct {
+		modeljob *modeljobsv1alpha1.ModelJob
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []corev1.Container
+		wantErr bool
+	}{
+		{
+			name: "generateInitContainers successfully",
+			args: args{
+				modeljob: &modeljobsv1alpha1.ModelJob{
+					Spec: modeljobsv1alpha1.ModelJobSpec{
+						Model: "demo.goharbor.com/release/testmodel:v1",
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := generateInitContainers(tt.args.modeljob)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("generateInitContainers() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got[0].Args[0] != tt.args.modeljob.Spec.Model {
+				t.Errorf("generateInitContainers() = %v, want %v", got, tt.want)
 			}
 		})
 	}
