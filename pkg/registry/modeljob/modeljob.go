@@ -17,19 +17,32 @@ package modeljob
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
-	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	clientset "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
+	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
 )
 
-func Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
+type ModelJobController struct {
+	kleverossClient  clientset.Interface
+	modeljobInformer v1alpha1.ModelJobInformer
+}
+
+func New(kleverossClient clientset.Interface, modeljobInformer v1alpha1.ModelJobInformer) *ModelJobController {
+	return &ModelJobController{
+		kleverossClient:  kleverossClient,
+		modeljobInformer: modeljobInformer,
+	}
+}
+
+func (m ModelJobController) Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
 	err := ExchangeModelJobNameAndID(&modeljob.ObjectMeta)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(namespace).Create(modeljob)
+	result, err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Create(modeljob)
 	if err != nil {
 		return nil, err
 	}
@@ -37,9 +50,8 @@ func Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv
 	return result, nil
 }
 
-func Get(namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
-	modeljob, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(namespace).Get(modeljobID, metav1.GetOptions{})
+func (m ModelJobController) Get(namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
+	modeljob, err := m.modeljobInformer.Lister().ModelJobs(namespace).Get(modeljobID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +59,8 @@ func Get(namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 	return modeljob, err
 }
 
-func Delete(namespace, modeljobID string) error {
-	err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(namespace).Delete(modeljobID, &metav1.DeleteOptions{})
+func (m ModelJobController) Delete(namespace, modeljobID string) error {
+	err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -57,9 +68,8 @@ func Delete(namespace, modeljobID string) error {
 	return nil
 }
 
-func List(namespace string) (*modeljobsv1alpha1.ModelJobList, error) {
-	modeljobs, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(namespace).List(metav1.ListOptions{})
+func (m ModelJobController) List(namespace string) ([]*modeljobsv1alpha1.ModelJob, error) {
+	modeljobs, err := m.modeljobInformer.Lister().ModelJobs(namespace).List(labels.Everything())
 	if err != nil {
 		return nil, err
 	}

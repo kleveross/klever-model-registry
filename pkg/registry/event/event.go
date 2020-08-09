@@ -18,28 +18,44 @@ package event
 import (
 	"github.com/caicloud/nirvana/log"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/reference"
 
+	kleverossv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
 	modeljobscheme "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/scheme"
-	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
 )
 
-func GetModelJobEvents(namespace, modeljobID string) (*corev1.EventList, error) {
-	modeljob, err := client.KubeModelJobClient.KleverossV1alpha1().
-		ModelJobs(namespace).Get(modeljobID, metav1.GetOptions{})
+type EventController struct {
+	kubeMainClient kubernetes.Interface
+
+	kleverossClient  kleverossv1alpha1.Interface
+	modeljobInformer v1alpha1.ModelJobInformer
+}
+
+func New(kubeMainClient kubernetes.Interface, kleverossClient kleverossv1alpha1.Interface,
+	modeljobInformer v1alpha1.ModelJobInformer) *EventController {
+	return &EventController{
+		kubeMainClient:   kubeMainClient,
+		kleverossClient:  kleverossClient,
+		modeljobInformer: modeljobInformer,
+	}
+}
+
+func (e EventController) GetModelJobEvents(namespace, modeljobID string) (*corev1.EventList, error) {
+	modeljob, err := e.modeljobInformer.Lister().ModelJobs(namespace).Get(modeljobID)
 	if err != nil {
 		return nil, err
 	}
 
 	var events *corev1.EventList
 	if ref, err := reference.GetReference(scheme.Scheme, modeljob); err != nil {
-		log.Errorf("get modeljob reference err: %v", err)
+		log.Errorf("failed to get modeljob reference, err: %v", err)
 	} else {
-		events, err = client.KubeMainClient.CoreV1().Events(namespace).Search(modeljobscheme.Scheme, ref)
+		events, err = e.kubeMainClient.CoreV1().Events(namespace).Search(modeljobscheme.Scheme, ref)
 		if err != nil {
-			log.Errorf("search modeljob event err: %v", err)
+			log.Errorf("failed to search modeljob event, err: %v", err)
 		}
 	}
 

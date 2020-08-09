@@ -20,12 +20,21 @@ import (
 
 	"github.com/caicloud/nirvana/definition"
 
+	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/log"
 	"github.com/kleveross/klever-model-registry/pkg/registry/resource/logs"
 )
 
+var (
+	logController *log.LogController
+)
+
 func init() {
 	register(logAPI)
+}
+
+func InitLogController() {
+	logController = log.New(client.GetKubeMainClient())
 }
 
 var logAPI = definition.Descriptor{
@@ -95,7 +104,7 @@ var getPodLogs = definition.Definition{
 	Function: func(ctx context.Context, namespace, podID, containerID, refTimestamp string,
 		refLineNum int, usePreviousLogs bool, offsetFrom,
 		offsetTo, logFilePosition string) (*logs.LogDetails, error) {
-		return log.GetPodLogs(namespace, podID, containerID, refTimestamp,
+		return logController.GetPodLogs(namespace, podID, containerID, refTimestamp,
 			refLineNum, usePreviousLogs, offsetFrom, offsetTo, logFilePosition)
 	},
 }

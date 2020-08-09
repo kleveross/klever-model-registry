@@ -88,7 +88,7 @@ func UploadFile(ctx context.Context, tenant, user, modelName, versionName string
 	}
 
 	if chunkInfo.TotalSize-1 == chunkInfo.PartTo {
-		err = uploadModelToHarbor(client.ORMBClient, zipFileName, &model)
+		err = uploadModelToHarbor(client.GetORMBClient(), zipFileName, &model)
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func DownloadFile(ctx context.Context, tenant, user, modelName, versionName stri
 	model.ModelName = modelName
 	model.VersionName = versionName
 
-	zipFileName, err := downloadModelFromHarbor(client.ORMBClient, tenant, user, model)
+	zipFileName, err := downloadModelFromHarbor(client.GetORMBClient(), tenant, user, model)
 	if err != nil {
 		return err
 	}

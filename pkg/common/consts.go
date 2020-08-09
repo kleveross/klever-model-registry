@@ -26,6 +26,7 @@ var (
 )
 
 func init() {
+	viper.AutomaticEnv()
 	ORMBDomain = viper.GetString(ORMBDomainEnvKey)
 	ORMBUserName = viper.GetString(ORMBUsernameEnvkey)
 	ORMBPassword = viper.GetString(ORMBPasswordEnvKey)

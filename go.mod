@@ -4,6 +4,8 @@ go 1.13
 
 require (
 	github.com/caicloud/nirvana v0.2.5-0.20200720023353-e989922f3fb5
+	github.com/docker/cli v0.0.0-20200130152716-5d0cf8839492
+	github.com/docker/compose-on-kubernetes v0.4.24 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/go-logr/logr v0.1.0
 	github.com/golang/mock v1.4.3
