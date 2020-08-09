@@ -22,6 +22,7 @@ import (
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	clientset "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
 	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
 )
 
 type ModelJobController struct {
@@ -39,12 +40,12 @@ func New(kleverossClient clientset.Interface, modeljobInformer v1alpha1.ModelJob
 func (m ModelJobController) Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
 	err := ExchangeModelJobNameAndID(&modeljob.ObjectMeta)
 	if err != nil {
-		return nil, err
+		return nil, errors.RenderError(err)
 	}
 
 	result, err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Create(modeljob)
 	if err != nil {
-		return nil, err
+		return nil, errors.RenderError(err)
 	}
 
 	return result, nil
@@ -53,16 +54,16 @@ func (m ModelJobController) Create(namespace string, modeljob *modeljobsv1alpha1
 func (m ModelJobController) Get(namespace, modeljobID string) (*modeljobsv1alpha1.ModelJob, error) {
 	modeljob, err := m.modeljobInformer.Lister().ModelJobs(namespace).Get(modeljobID)
 	if err != nil {
-		return nil, err
+		return nil, errors.RenderError(err)
 	}
 
-	return modeljob, err
+	return modeljob, nil
 }
 
 func (m ModelJobController) Delete(namespace, modeljobID string) error {
 	err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Delete(modeljobID, &metav1.DeleteOptions{})
 	if err != nil {
-		return err
+		return errors.RenderError(err)
 	}
 
 	return nil
@@ -71,7 +72,7 @@ func (m ModelJobController) Delete(namespace, modeljobID string) error {
 func (m ModelJobController) List(namespace string) ([]*modeljobsv1alpha1.ModelJob, error) {
 	modeljobs, err := m.modeljobInformer.Lister().ModelJobs(namespace).List(labels.Everything())
 	if err != nil {
-		return nil, err
+		return nil, errors.RenderError(err)
 	}
 
 	return modeljobs, nil
