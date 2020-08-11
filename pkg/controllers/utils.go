@@ -146,9 +146,11 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 
 	initContainers := []corev1.Container{
 		{
-			Name:       "model-initializer",
-			Image:      image,
-			Args:       []string{modeljob.Spec.Model, modeljobsv1alpha1.SourceModelPath},
+			Name:  "model-initializer",
+			Image: image,
+			// Set --relayout=false, only pull and export model, not move any file
+			// please refenrence https://github.com/kleveross/ormb/blob/master/cmd/ormb-storage-initializer/cmd/pull-and-export.go
+			Args:       []string{modeljob.Spec.Model, modeljobsv1alpha1.SourceModelPath, "--relayout=false"},
 			WorkingDir: "/models",
 			Env: []corev1.EnvVar{
 				corev1.EnvVar{
