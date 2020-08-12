@@ -21,8 +21,7 @@ RUN apt update -y \
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 COPY scripts/shell/run.sh /scripts/run.sh
-COPY scripts/extract  /scripts
+COPY scripts/extract /scripts
 WORKDIR /scripts
 
 ENV EXTRACTOR=tensorrt
-
