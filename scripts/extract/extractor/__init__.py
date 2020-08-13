@@ -19,5 +19,7 @@ elif module=='torchscript':
     from .extract_torchscript import TorchscriptExtractor as Extractor
 elif module=='pmml':
     from .extract_pmml import PMMLExtractor as Extractor
+elif module=='tensorrt':
+    from .extract_tensorrt import TensorrtExtractor as Extractor
 else:
-    raise ImportError('module must be in one of [onnx, caffe, netdef, graphdef, h5, mxnetparams, savedmodel, torchscript]')
+    raise ImportError('module must be in one of [onnx, caffe, netdef, graphdef, h5, mxnetparams, savedmodel, torchscript, tensorrt]')
