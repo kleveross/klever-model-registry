@@ -16,15 +16,13 @@ limitations under the License.
 package descriptors
 
 import (
-	"net/http"
-
 	"github.com/caicloud/nirvana/definition"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/harbor"
 )
 
 // HarborAPIDescriptor contain horbor /api/* descriptors
-func HarborAPIDescriptor() definition.Descriptor {
+func HarborAPIDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/api/{path:*}",
 		Description: "It contains all harbor /api/*",
@@ -33,14 +31,14 @@ func HarborAPIDescriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.Proxy),
+				Handler: harbor.NewProxy(domain, username, password),
 			},
 		},
 	}
 }
 
 // HarborServiceDescriptor contain horbor /service/* descriptors
-func HarborServiceDescriptor() definition.Descriptor {
+func HarborServiceDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/service/{path:*}",
 		Description: "It contains all api in /service/*",
@@ -49,14 +47,14 @@ func HarborServiceDescriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.Proxy),
+				Handler: harbor.NewProxy(domain, username, password),
 			},
 		},
 	}
 }
 
 // HarborCDescriptor contain horbor /c/* descriptors
-func HarborCDescriptor() definition.Descriptor {
+func HarborCDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/c/{path:*}",
 		Description: "It contains all api in /c/*",
@@ -65,14 +63,14 @@ func HarborCDescriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.Proxy),
+				Handler: harbor.NewProxy(domain, username, password),
 			},
 		},
 	}
 }
 
 // HarborV2Descriptor contain horbor /v2/* descriptors
-func HarborV2Descriptor() definition.Descriptor {
+func HarborV2Descriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/v2/{path:*}",
 		Description: "It contains all api in /v2/*",
@@ -81,7 +79,7 @@ func HarborV2Descriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.Proxy),
+				Handler: harbor.NewProxy(domain, username, password),
 			},
 		},
 	}

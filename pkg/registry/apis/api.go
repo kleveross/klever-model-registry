@@ -22,19 +22,15 @@ import (
 	v1alpha1 "github.com/kleveross/klever-model-registry/pkg/registry/apis/v1alpha1/descriptors"
 )
 
-var (
-	AllDescriptor []definition.Descriptor
-)
-
-func init() {
-	AllDescriptor = append(
-		AllDescriptor,
+// AllDescriptors returns all the descriptors.
+func AllDescriptors(domain, username, password string) []definition.Descriptor {
+	return []definition.Descriptor{
 		Descriptor(),
-		v1alpha1.HarborAPIDescriptor(),
-		v1alpha1.HarborCDescriptor(),
-		v1alpha1.HarborServiceDescriptor(),
-		v1alpha1.HarborV2Descriptor(),
-	)
+		v1alpha1.HarborAPIDescriptor(domain, username, password),
+		v1alpha1.HarborCDescriptor(domain, username, password),
+		v1alpha1.HarborServiceDescriptor(domain, username, password),
+		v1alpha1.HarborV2Descriptor(domain, username, password),
+	}
 }
 
 // Descriptor contain klever model registry descriptors

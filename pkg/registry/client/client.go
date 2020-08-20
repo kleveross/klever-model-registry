@@ -24,7 +24,6 @@ import (
 	"github.com/kleveross/ormb/pkg/oras"
 	"github.com/kleveross/ormb/pkg/ormb"
 	seldonv1 "github.com/seldonio/seldon-core/operator/client/machinelearning.seldon.io/v1/clientset/versioned"
-	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
@@ -32,7 +31,6 @@ import (
 	kleverossv1alpha1 "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
 	kleverossinformers "github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions"
 	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
-	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var (
@@ -71,9 +69,9 @@ func GetORMBClient() ormb.Interface {
 	return ormbClient
 }
 
-func InitClient(stopCh <-chan struct{}) error {
-	kubeconfigPath := viper.GetString("kubeconfig")
-
+// InitClient initializes the client.
+func InitClient(kubeconfigPath, domain, username, password string,
+	stopCh <-chan struct{}) error {
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
 		return err
@@ -111,7 +109,7 @@ func InitClient(stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
-	err = ormbClient.Login(common.ORMBDomain, common.ORMBUserName, common.ORMBPassword, true)
+	err = ormbClient.Login(domain, username, password, true)
 	if err != nil {
 		return err
 	}
