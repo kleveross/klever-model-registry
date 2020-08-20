@@ -33,7 +33,7 @@ func HarborAPIDescriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.HarborProxy),
+				Handler: http.HandlerFunc(harbor.Proxy),
 			},
 		},
 	}
@@ -49,7 +49,7 @@ func HarborServiceDescriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.HarborProxy),
+				Handler: http.HandlerFunc(harbor.Proxy),
 			},
 		},
 	}
@@ -65,7 +65,7 @@ func HarborCDescriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.HarborProxy),
+				Handler: http.HandlerFunc(harbor.Proxy),
 			},
 		},
 	}
@@ -81,7 +81,7 @@ func HarborV2Descriptor() definition.Descriptor {
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
-				Handler: http.HandlerFunc(harbor.HarborProxy),
+				Handler: http.HandlerFunc(harbor.Proxy),
 			},
 		},
 	}

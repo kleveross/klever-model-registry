@@ -11,7 +11,8 @@ import (
 	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
-func HarborProxy(w http.ResponseWriter, r *http.Request) {
+// Proxy is the reverse proxy to Harbor.
+func Proxy(w http.ResponseWriter, r *http.Request) {
 	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
 	ormbUserName := viper.GetString(common.ORMBUsernameEnvkey)
 	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
