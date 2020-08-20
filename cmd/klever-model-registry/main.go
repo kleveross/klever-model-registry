@@ -26,13 +26,6 @@ func init() {
 }
 
 func main() {
-	if err := client.InitClient(signals.SetupSignalHandler()); err != nil {
-		log.Fatal(err)
-	}
-	descriptors.InitModelJobController()
-	descriptors.InitLogController()
-	descriptors.InitEventController()
-
 	// Start nirvana
 	option := &config.Option{
 		Port: uint16(viper.GetInt(kleverModelRegistryPort)),
@@ -53,6 +46,20 @@ func main() {
 		nirvana.Modifier(modifiers.Modifiers()...),
 		nirvana.Descriptor(apis.AllDescriptor...),
 	)
+
+	// Set nirvana command hooks.
+	cmd.SetHook(&config.NirvanaCommandHookFunc{
+		PreServeFunc: func(c *nirvana.Config, server nirvana.Server) error {
+			if err := client.InitClient(signals.SetupSignalHandler()); err != nil {
+				log.Fatal(err)
+			}
+			descriptors.InitModelJobController()
+			descriptors.InitLogController()
+			descriptors.InitEventController()
+
+			return nil
+		},
+	})
 
 	if err := cmd.ExecuteWithConfig(serverConfig); err != nil {
 		log.Fatal(err)

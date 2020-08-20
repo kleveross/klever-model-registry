@@ -66,12 +66,12 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+build: build-local
+
 # Run tests
 test: generate fmt vet manifests
 	@go test -race -coverprofile=coverage.out ./...
 	@go tool cover -func coverage.out | tail -n 1 | awk '{ print "Total coverage: " $$3 }'
-
-build: build-local
 
 build-local:
 	@for target in $(TARGETS); do                                                      \
