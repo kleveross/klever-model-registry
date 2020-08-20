@@ -51,7 +51,7 @@ func main() {
 	cmd.SetHook(&config.NirvanaCommandHookFunc{
 		PreServeFunc: func(c *nirvana.Config, server nirvana.Server) error {
 			if err := client.InitClient(signals.SetupSignalHandler()); err != nil {
-				log.Fatal(err)
+				return err
 			}
 			descriptors.InitModelJobController()
 			descriptors.InitLogController()
