@@ -1,9 +1,5 @@
 package common
 
-import (
-	"github.com/spf13/viper"
-)
-
 const (
 	// DefaultModelJobNamespace is the default namespace for modeljob
 	DefaultModelJobNamespace = "default"
@@ -24,10 +20,3 @@ var (
 	ORMBUserName string
 	ORMBPassword string
 )
-
-func init() {
-	viper.AutomaticEnv()
-	ORMBDomain = viper.GetString(ORMBDomainEnvKey)
-	ORMBUserName = viper.GetString(ORMBUsernameEnvkey)
-	ORMBPassword = viper.GetString(ORMBPasswordEnvKey)
-}

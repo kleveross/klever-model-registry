@@ -7,6 +7,7 @@ import (
 	"github.com/caicloud/nirvana/plugins/reqlog"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
+	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis"
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis/v1alpha1/descriptors"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
@@ -43,6 +44,9 @@ func main() {
 		PreConfigureFunc: func(c *nirvana.Config) error {
 			log.Info("Harbor domain: ", customOption.Domain,
 				", Harbor Username: ", customOption.Username)
+			common.ORMBDomain = customOption.Domain
+			common.ORMBPassword = customOption.Password
+			common.ORMBUserName = customOption.Username
 			c.Configure(
 				nirvana.Descriptor(apis.AllDescriptors(
 					customOption.Domain,
