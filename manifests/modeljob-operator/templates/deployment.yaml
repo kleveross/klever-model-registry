@@ -28,14 +28,14 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: ORMB_DOMAIN
+            - name: SERVER_ORMB_DOMAIN
               value: {{ .Values.ormb.domain }}
-            - name: ORMB_USERNAME
+            - name: SERVER_ORMB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: ormb
                   key: ormbUsername
-            - name: ORMB_PASSWORD
+            - name: SERVER_ORMB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: ormb

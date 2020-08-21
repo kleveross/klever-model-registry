@@ -23,7 +23,7 @@ func main() {
 	}
 	customOption := registryconfig.New()
 	cmd := config.NewNirvanaCommand(option)
-	cmd.AddOption("REGISTRY", customOption)
+	cmd.AddOption("ORMB", customOption)
 	cmd.EnablePlugin(
 		&reqlog.Option{
 			DoubleLog:  true,
@@ -64,6 +64,7 @@ func main() {
 			descriptors.InitModelJobController()
 			descriptors.InitLogController()
 			descriptors.InitEventController()
+			descriptors.InitServingController()
 
 			return nil
 		},

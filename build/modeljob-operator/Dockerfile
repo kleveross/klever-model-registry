@@ -3,7 +3,7 @@
 FROM gcr.io/distroless/static:nonroot
 
 WORKDIR /
-COPY bin/klever-modeljob-operator  /klever-modeljob-operator
+COPY bin/modeljob-operator  /modeljob-operator
 USER nonroot:nonroot
 
-ENTRYPOINT ["/klever-modeljob-operator"]
+ENTRYPOINT ["/modeljob-operator"]

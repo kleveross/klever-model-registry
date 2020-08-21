@@ -24,8 +24,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/kleveross/klever-model-registry/cmd/klever-modeljob-operator/app"
-	"github.com/kleveross/klever-model-registry/cmd/klever-modeljob-operator/app/options"
+	"github.com/kleveross/klever-model-registry/cmd/modeljob-operator/app"
+	"github.com/kleveross/klever-model-registry/cmd/modeljob-operator/app/options"
 	// +kubebuilder:scaffold:imports
 )
 

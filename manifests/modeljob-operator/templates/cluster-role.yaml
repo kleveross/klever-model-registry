@@ -1,0 +1,83 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: kleveross
+rules:
+- apiGroups:
+  - extensions
+  resourceNames:
+  - 00-privileged
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+- apiGroups:
+  - policy
+  resourceNames:
+  - 00-privileged
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+- apiGroups:
+  - ""
+  - "extensions"
+  resources:
+  - configmaps
+  - events
+  - ingresses/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - create
+  - patch
+- apiGroups:
+  - machinelearning.seldon.io
+  resources:
+  - seldondeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kleveross.io
+  resources:
+  - modeljobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kleveross.io
+  resources:
+  - modeljobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - pods
+  verbs:
+  - '*'

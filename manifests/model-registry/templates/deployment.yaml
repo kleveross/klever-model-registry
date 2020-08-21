@@ -27,16 +27,22 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+          - name: TRT_SERVING_IMAGE
+            value: "{{ .Values.model.serving.trt.image }}:{{ .Values.model.serving.trt.tag }}"
+          - name: PMML_SERVING_IMAGE
+            value: "{{ .Values.model.serving.pmml.image }}:{{ .Values.model.serving.pmml.tag }}"
+          - name: MODEL_INITIAIZER_IMAGE
+            value: "{{ .Values.model.serving.initializer.image }}:{{ .Values.model.serving.initializer.tag }}"
           - name: KLEVER_MODEL_REGISTRY_PORT
             value: {{ .Values.service.Port }}
-          - name: ORMB_DOMAIN
+          - name: SERVER_ORMB_DOMAIN
             value: {{ .Values.ormb.domain }}
-          - name: ORMB_USERNAME
+          - name: SERVER_ORMB_USERNAME
             valueFrom:
               secretKeyRef:
                 name: ormb
                 key: ormbUsername
-          - name: ORMB_PASSWORD
+          - name: SERVER_ORMB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: ormb

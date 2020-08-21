@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   # Add fields here
-  model: "harbor.caicloud.com/release/savedmodel:v1"
+  model: "harbor-harbor-core.kleveross-system/release/savedmodel:v1"
   extraction:
     format: "SavedModel"
 

@@ -20,9 +20,9 @@ echo "model destination tag: $dst_tag"
 echo "model input dir: $input_dir"
 echo "model output dir: $output_dir"
 echo "model format: $format"
-echo "ORMB domain: $ORMB_DOMAIN"
-echo "ORMB username: $ORMB_USERNAME"
-echo "ORMB password: $ORMB_PASSWORD"
+echo "ORMB domain: $SERVER_ORMB_DOMAIN"
+echo "ORMB username: $SERVER_ORMB_USERNAME"
+echo "ORMB password: $SERVER_ORMB_PASSWORD"
 echo "#####################################################"
 
 
@@ -37,7 +37,7 @@ mkdir -p $input_dir/model
 mkdir -p $output_dir/model
 
 # login to harbor.
-ormb login  --insecure $ORMB_DOMAIN -u $ORMB_USERNAME -p $ORMB_PASSWORD
+ormb login  --insecure $SERVER_ORMB_DOMAIN -u $SERVER_ORMB_USERNAME -p $SERVER_ORMB_PASSWORD
 checkOrExit $? $ormb_login_err
 
 if [ $dst_tag == "empty" ]
