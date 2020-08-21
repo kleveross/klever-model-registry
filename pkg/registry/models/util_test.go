@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	gomock "github.com/golang/mock/gomock"
-	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/ormb/pkg/ormb"
 	ormbmock "github.com/kleveross/ormb/pkg/ormb/mock"
 	. "github.com/onsi/ginkgo"
+
+	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var (
