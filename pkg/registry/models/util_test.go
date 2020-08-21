@@ -10,6 +10,8 @@ import (
 	"github.com/kleveross/ormb/pkg/ormb"
 	ormbmock "github.com/kleveross/ormb/pkg/ormb/mock"
 	. "github.com/onsi/ginkgo"
+
+	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var (
@@ -287,6 +289,7 @@ func Test_downloadModelFromHarbor(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		common.ORMBDomain = "test"
 		t.Run(tt.name, func(t *testing.T) {
 			defer os.RemoveAll(path.Join(modelTmpDir, tt.args.tenant, tt.args.user, tt.args.modelName, tt.args.versionName))
 

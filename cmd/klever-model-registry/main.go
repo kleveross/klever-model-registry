@@ -5,39 +5,25 @@ import (
 	"github.com/caicloud/nirvana/config"
 	"github.com/caicloud/nirvana/log"
 	"github.com/caicloud/nirvana/plugins/reqlog"
-	"github.com/spf13/viper"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
+	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis"
 	"github.com/kleveross/klever-model-registry/pkg/registry/apis/v1alpha1/descriptors"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	registryconfig "github.com/kleveross/klever-model-registry/pkg/registry/config"
 	"github.com/kleveross/klever-model-registry/pkg/registry/filters"
 	"github.com/kleveross/klever-model-registry/pkg/registry/modifiers"
 )
 
-const (
-	// kleverModelRegistryPort is model registry default port, default 8080
-	kleverModelRegistryPort = "klever_model_registry_port"
-)
-
-func init() {
-	viper.AutomaticEnv()
-	viper.SetDefault(kleverModelRegistryPort, "8080")
-}
-
 func main() {
-	if err := client.InitClient(signals.SetupSignalHandler()); err != nil {
-		log.Fatal(err)
-	}
-	descriptors.InitModelJobController()
-	descriptors.InitLogController()
-	descriptors.InitEventController()
-
 	// Start nirvana
 	option := &config.Option{
-		Port: uint16(viper.GetInt(kleverModelRegistryPort)),
+		Port: 8080,
 	}
+	customOption := registryconfig.New()
 	cmd := config.NewNirvanaCommand(option)
+	cmd.AddOption("REGISTRY", customOption)
 	cmd.EnablePlugin(
 		&reqlog.Option{
 			DoubleLog:  true,
@@ -51,8 +37,37 @@ func main() {
 		nirvana.Logger(log.DefaultLogger()),
 		nirvana.Filter(filters.Filters()...),
 		nirvana.Modifier(modifiers.Modifiers()...),
-		nirvana.Descriptor(apis.AllDescriptor...),
 	)
+
+	// Set nirvana command hooks.
+	cmd.SetHook(&config.NirvanaCommandHookFunc{
+		PreConfigureFunc: func(c *nirvana.Config) error {
+			log.Info("Harbor domain: ", customOption.Domain,
+				", Harbor Username: ", customOption.Username)
+			common.ORMBDomain = customOption.Domain
+			common.ORMBPassword = customOption.Password
+			common.ORMBUserName = customOption.Username
+			c.Configure(
+				nirvana.Descriptor(apis.AllDescriptors(
+					customOption.Domain,
+					customOption.Username,
+					customOption.Password)...),
+			)
+			return nil
+		},
+		PreServeFunc: func(c *nirvana.Config, server nirvana.Server) error {
+			if err := client.InitClient(customOption.KubeConfig,
+				customOption.Domain, customOption.Username,
+				customOption.Password, signals.SetupSignalHandler()); err != nil {
+				return err
+			}
+			descriptors.InitModelJobController()
+			descriptors.InitLogController()
+			descriptors.InitEventController()
+
+			return nil
+		},
+	})
 
 	if err := cmd.ExecuteWithConfig(serverConfig); err != nil {
 		log.Fatal(err)

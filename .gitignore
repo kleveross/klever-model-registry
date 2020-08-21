@@ -7,3 +7,5 @@ coverage.out
 cover.out
 
 .vscode/
+
+config.json
