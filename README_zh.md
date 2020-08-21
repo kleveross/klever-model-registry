@@ -43,11 +43,11 @@ Klever Model Registry 的特性包括：
 ## UI MockUp
 
 <p align="center">
-<img src="docs/images/model.png" height="300">
+<img src="docs/images/model.png" height="400">
 </p>
 
 <p align="center">
-<img src="docs/images/conversion.png" height="300">
+<img src="docs/images/conversion.png" height="400">
 </p>
 
 ## 安装
