@@ -191,12 +191,20 @@ func getUserContainerImage(pu *seldonv1.PredictiveUnit) string {
 func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequirements, error) {
 	cpu := ""
 	mem := ""
+	gpuType := ""
+	gpuNum := ""
 	for _, p := range pu.Parameters {
 		if p.Name == "cpu" {
 			cpu = p.Value
 		}
 		if p.Name == "mem" {
 			mem = p.Value
+		}
+		if p.Name == "gpuType" {
+			gpuType = p.Value
+		}
+		if p.Name == "gpuNum" {
+			gpuNum = p.Value
 		}
 	}
 
@@ -212,7 +220,15 @@ func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequiremen
 		return nil, err
 	}
 	resourcesList[corev1.ResourceMemory] = memQuantity
-	// TODO(@simon-cj): Support GPU resource
+
+	// Support gpu scheduling, the detail please refer https://kubernetes.io/zh/docs/tasks/manage-gpus/scheduling-gpus/
+	if gpuType != "" && gpuNum != "" {
+		gpuNumQuantity, err := resource.ParseQuantity(gpuNum)
+		if err != nil {
+			return nil, err
+		}
+		resourcesList[corev1.ResourceName(gpuType)] = gpuNumQuantity
+	}
 
 	return &corev1.ResourceRequirements{
 		Limits:   resourcesList,
