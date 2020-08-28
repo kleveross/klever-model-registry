@@ -9,11 +9,11 @@ const (
 	DefaultModelJobNamespace = "default"
 
 	// ORMBDomainEnvKey is the domain of ORMB
-	ORMBDomainEnvKey = "ORMB_DOMAIN"
+	ORMBDomainEnvKey = "SERVER_ORMB_DOMAIN"
 	// ORMBUsernameEnvkey is the username of ORMB
-	ORMBUsernameEnvkey = "ORMB_USERNAME"
+	ORMBUsernameEnvkey = "SERVER_ORMB_USERNAME"
 	// ORMBPasswordEnvKey is the password of ORMB
-	ORMBPasswordEnvKey = "ORMB_PASSWORD"
+	ORMBPasswordEnvKey = "SERVER_ORMB_PASSWORD"
 
 	// ResourceNameLabelKey is resource name in labels
 	ResourceNameLabelKey = "resource_name"

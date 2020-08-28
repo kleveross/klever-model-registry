@@ -12,7 +12,7 @@ data:
   savedmodel-extract: '{{ .Values.ormb.domain }}/release/savedmodel:v0.2'
   torchscript-extract: '{{ .Values.ormb.domain }}/release/torchscript:v0.2'
   pmml-extract: '{{ .Values.ormb.domain }}/release/openscoring:v2.0.1-1.0'
-  ormb-storage-initializer: "{{ .Values.ormb.domain }}/release/clever-ormb-storage-initializer:v0.0.1"
+  ormb-storage-initializer: "{{ .Values.ormb.domain }}/release/klever-ormb-storage-initializer:v0.0.4"
 kind: ConfigMap
 metadata:
   name: modeljob-image-config

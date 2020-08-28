@@ -9,7 +9,7 @@ REGISTRY ?= kleveross
 BASE_REGISTRY ?= docker.io
 
 # Image URL to use all building/pushing image targets
-IMG ?= kleveross/klever-modeljob-operator:latest
+IMG ?= kleveross/modeljob-operator:latest
 
 #
 # These variables should not need tweaking.
@@ -25,7 +25,7 @@ export SHELLOPTS := errexit
 ROOT := github.com/kleveross/klever-model-registry
 
 # Target binaries. You can build multiple binaries for a single project.
-TARGETS := klever-model-registry klever-modeljob-operator
+TARGETS := model-registry modeljob-operator
 
 # Container image prefix and suffix added to targets.
 # The final built images are:
@@ -104,20 +104,20 @@ build-linux:
 
 # Install CRDs into a cluster
 install: manifests kustomize
-	$(KUSTOMIZE) build manifests/klever-modeljob-operator/crds | kubectl apply -f -
+	$(KUSTOMIZE) build manifests/modeljob-operator/crds | kubectl apply -f -
 
 # Uninstall CRDs from a cluster
 uninstall: manifests kustomize
-	$(KUSTOMIZE) build manifests/klever-modeljob-operator/crds | kubectl delete -f -
+	$(KUSTOMIZE) build manifests/modeljob-operator/crds | kubectl delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize
-	cd config/manager && $(KUSTOMIZE) edit set image klever-modeljob-operator=${IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image modeljob-operator=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=kleveross-role webhook paths="./..." output:crd:artifacts:config=manifests/klever-modeljob-operator/crds
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=kleveross-role webhook paths="./..." output:crd:artifacts:config=manifests/modeljob-operator/crds
 
 # Run go fmt against code
 fmt:

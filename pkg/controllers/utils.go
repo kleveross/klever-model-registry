@@ -63,6 +63,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 								"-c",
 								fmt.Sprintf("/scripts/run.sh"),
 							},
+							ImagePullPolicy: corev1.PullAlways,
 							Env: []corev1.EnvVar{
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.FrameworkEnvKey,
@@ -168,6 +169,7 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 					MountPath: modeljobsv1alpha1.SourceModelPath,
 				},
 			},
+			ImagePullPolicy: corev1.PullAlways,
 		},
 	}
 

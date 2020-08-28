@@ -24,7 +24,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/kleveross/klever-model-registry/cmd/klever-modeljob-operator/app/options"
+	"github.com/kleveross/klever-model-registry/cmd/modeljob-operator/app/options"
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/controllers"
 	"github.com/kleveross/klever-model-registry/pkg/version"

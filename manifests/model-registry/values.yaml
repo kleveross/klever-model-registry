@@ -78,3 +78,16 @@ affinity: {}
 # If "port" is not 80, you must set port, eg: 192.168.1.2:30002
 ormb:
   domain: 192.168.22.160:30002
+
+# 
+model:
+  serving:
+    trt: 
+      image: cargo.dev.caicloud.xyz/release/trtserver
+      tag: 0.1.0
+    pmml: 
+      image: cargo.dev.caicloud.xyz/release/openscoring
+      tag: 0.1.0
+    initializer: 
+      image: cargo.dev.caicloud.xyz/release/klever-ormb-storage-initializer
+      tag: v0.0.4
