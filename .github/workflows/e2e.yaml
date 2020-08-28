@@ -9,8 +9,7 @@ on:
 jobs:
   model-registry-e2e:
     runs-on:
-      #- self-hosted
-      - ubuntu-latest
+      - self-hosted
     timeout-minutes: 10
     steps:
       - name: Set up Go 1.14
