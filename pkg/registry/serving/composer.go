@@ -28,6 +28,12 @@ const (
 
 	// envModelInitializerImage is the preset image for model initializer.
 	envModelInitializerImage = "MODEL_INITIAIZER_IMAGE"
+
+	// defaultInferenceHTTPPort is default port for http.
+	defaultInferenceHTTPPort = 8000
+
+	// defaultInferenceGRPCPort is default port for grpc.
+	defaultInferenceGRPCPort = 8001
 )
 
 func Compose(sdep *seldonv1.SeldonDeployment) error {
@@ -43,12 +49,13 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 
 		// use no-engine mode
 		sdep.Spec.Predictors[i].Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
-		graphName, err := getModelTag(p.Graph.ModelURI)
+		modelTag, err := getModelTag(p.Graph.ModelURI)
 		if err != nil {
 			return err
 		}
-		sdep.Spec.Predictors[i].Name = graphName
-		sdep.Spec.Predictors[i].Graph.Name = graphName
+		podName := modelTag
+		containerName := sdep.Spec.Predictors[i].Graph.Name
+		sdep.Spec.Predictors[i].Name = sdep.Spec.Predictors[i].Graph.Name
 
 		resources, err := getRuntimeResource(&sdep.Spec.Predictors[i].Graph)
 		if err != nil {
@@ -61,8 +68,9 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 		image := getUserContainerImage(&sdep.Spec.Predictors[i].Graph)
 		// compose user containers
 		container := corev1.Container{
-			Name:  graphName,
-			Image: image,
+			Name:            containerName,
+			Image:           image,
+			ImagePullPolicy: corev1.PullAlways,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "MODEL_STORE",
@@ -71,6 +79,15 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 				{
 					Name:  "SERVING_NAME",
 					Value: sdep.Name,
+				},
+			},
+			// Must set ports, otherwise it will can not traffic diversion in unique port(default: 8000) for multi deployment.
+			// please refer https://github.com/SeldonIO/seldon-core/blob/master/operator/apis/machinelearning.seldon.io/v1/seldondeployment_webhook.go#L142-L145
+			Ports: []corev1.ContainerPort{
+				{
+					Name:          "http",
+					Protocol:      corev1.ProtocolTCP,
+					ContainerPort: defaultInferenceHTTPPort,
 				},
 			},
 			VolumeMounts: []corev1.VolumeMount{
@@ -88,7 +105,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 		sdep.Spec.Predictors[i].ComponentSpecs = []*seldonv1.SeldonPodSpec{
 			&seldonv1.SeldonPodSpec{
 				Metadata: metav1.ObjectMeta{
-					Name: graphName,
+					Name: podName,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{container},
@@ -110,7 +127,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 	return nil
 }
 
-// getProbe generate readiness and liveiness
+// getProbe generate readiness and liveiness.
 func getProbe(format, servingName string) *corev1.Probe {
 	path := fmt.Sprintf("/api/status/%v", servingName)
 	if format == string(modeljobsv1alpha1.FormatPMML) {
@@ -123,7 +140,7 @@ func getProbe(format, servingName string) *corev1.Probe {
 				Path: path,
 				Port: intstr.IntOrString{
 					Type:   intstr.Int,
-					IntVal: 8000,
+					IntVal: defaultInferenceHTTPPort,
 				},
 				Scheme: corev1.URISchemeHTTP,
 			},
@@ -131,6 +148,14 @@ func getProbe(format, servingName string) *corev1.Probe {
 	}
 }
 
+// getModelFormat get model format from Graph.Parameters, eg:
+// "parameters": [
+// 	{
+// 		"name": "format",
+// 		"value": "SavedModel"
+// 	},
+// 	...
+// ]
 func getModelFormat(pu *seldonv1.PredictiveUnit) string {
 	for _, p := range pu.Parameters {
 		if p.Name == "format" {
@@ -141,6 +166,7 @@ func getModelFormat(pu *seldonv1.PredictiveUnit) string {
 	return ""
 }
 
+// getUserContainerImage get image by different model format.
 func getUserContainerImage(pu *seldonv1.PredictiveUnit) string {
 	format := getModelFormat(pu)
 	if format == string(modeljobsv1alpha1.FormatPMML) {
@@ -150,6 +176,18 @@ func getUserContainerImage(pu *seldonv1.PredictiveUnit) string {
 	return viper.GetString(envTRTServingImage)
 }
 
+// getRuntimeResource get resource from Graph.Parameters, eg:
+// "parameters": [
+// 	{
+// 		"name": "cpu",
+// 		"value": "1"
+// 	},
+// 	{
+// 		"name": "mem",
+// 		"value": "2Gi"
+// 	},
+// 	...
+// ]
 func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequirements, error) {
 	cpu := ""
 	mem := ""
@@ -182,6 +220,7 @@ func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequiremen
 	}, nil
 }
 
+// getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
 func getModelTag(modelUri string) (string, error) {
 	modelURISlice := strings.Split(modelUri, ":")
 	if len(modelURISlice) < 2 {
@@ -191,6 +230,8 @@ func getModelTag(modelUri string) (string, error) {
 	return modelURISlice[len(modelURISlice)-1], nil
 }
 
+// getModelMountPath will generate model mount path in container,
+// ormb-storage-initializer will pull and export model to this path.
 func getModelMountPath(servingName string) string {
 	return fmt.Sprintf("/mnt/%v", servingName)
 }
