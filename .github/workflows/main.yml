@@ -77,7 +77,3 @@ jobs:
         run: |
           cd src/github.com/kleveross/klever-model-registry
           make build
-  model-registry-e2e:
-    runs-on:
-      #- self-hosted
-      - ubuntu-latest
