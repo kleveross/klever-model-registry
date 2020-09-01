@@ -58,7 +58,7 @@ jobs:
       - name: install harbor
         run: |
           helm repo add harbor https://helm.goharbor.io
-          helm install my-release harbor/harbor --set expose.type=nodePort --set externalURL=0.0.0.0 --set expose.tls.enabled=false
+          helm install my-release harbor/harbor --set expose.type=nodePort --set externalURL=localhost --set expose.tls.enabled=false
 
       - name: e2e test
         env:
