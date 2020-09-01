@@ -44,6 +44,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		return nil, err
 	}
 
+	backoffLimit := int32(0)
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: modeljob.Namespace,
@@ -125,6 +126,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 					RestartPolicy: corev1.RestartPolicyNever,
 				},
 			},
+			BackoffLimit: &backoffLimit,
 		},
 	}
 
