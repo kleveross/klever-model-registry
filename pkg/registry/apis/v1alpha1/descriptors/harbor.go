@@ -1,6 +1,4 @@
 /*
-
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,13 +19,19 @@ import (
 	"github.com/kleveross/klever-model-registry/pkg/registry/harbor"
 )
 
-// HarborAPIDescriptor contain horbor /api/* descriptors
-func HarborAPIDescriptor(domain, username, password string) definition.Descriptor {
+var harborController *harbor.Proxy
+
+func InitHarborController(domain, username, password string) {
+	harborController = harbor.NewProxy(domain, username, password)
+}
+
+// HarborAPIPrefixDescriptor contain horbor /api/* descriptors
+func HarborAPIPrefixDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/api/{path:*}",
 		Description: "It contains all harbor /api/*",
 		Consumes:    []string{definition.MIMEAll},
-		Produces:    []string{definition.MIMEJSON},
+		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
@@ -37,13 +41,13 @@ func HarborAPIDescriptor(domain, username, password string) definition.Descripto
 	}
 }
 
-// HarborServiceDescriptor contain horbor /service/* descriptors
-func HarborServiceDescriptor(domain, username, password string) definition.Descriptor {
+// HarborServicePrefixDescriptor contain horbor /service/* descriptors
+func HarborServicePrefixDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/service/{path:*}",
 		Description: "It contains all api in /service/*",
 		Consumes:    []string{definition.MIMEAll},
-		Produces:    []string{definition.MIMEJSON},
+		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
@@ -53,13 +57,13 @@ func HarborServiceDescriptor(domain, username, password string) definition.Descr
 	}
 }
 
-// HarborCDescriptor contain horbor /c/* descriptors
-func HarborCDescriptor(domain, username, password string) definition.Descriptor {
+// HarborCPrefixDescriptor contain horbor /c/* descriptors
+func HarborCPrefixDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
 		Path:        "/c/{path:*}",
 		Description: "It contains all api in /c/*",
 		Consumes:    []string{definition.MIMEAll},
-		Produces:    []string{definition.MIMEJSON},
+		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
@@ -69,13 +73,28 @@ func HarborCDescriptor(domain, username, password string) definition.Descriptor 
 	}
 }
 
-// HarborV2Descriptor contain horbor /v2/* descriptors
-func HarborV2Descriptor(domain, username, password string) definition.Descriptor {
+// HarborV2PrefixDescriptor contain horbor /v2/* descriptors
+func HarborV2PrefixDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
-		Path:        "/v2/{path:*}",
+		Path:        "/v2/{path:*}/",
 		Description: "It contains all api in /v2/*",
 		Consumes:    []string{definition.MIMEAll},
-		Produces:    []string{definition.MIMEJSON},
+		Produces:    []string{definition.MIMEAll},
+		Definitions: []definition.Definition{
+			{
+				Method:  definition.Any,
+				Handler: harbor.NewProxy(domain, username, password),
+			},
+		},
+	}
+}
+
+func HarborV2Descriptor(domain, username, password string) definition.Descriptor {
+	return definition.Descriptor{
+		Path:        "/v2/",
+		Description: "It contains all api in /v2/*",
+		Consumes:    []string{definition.MIMEAll},
+		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
 				Method:  definition.Any,
