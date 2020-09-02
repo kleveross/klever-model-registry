@@ -1,10 +1,13 @@
 package harbor
 
 import (
-	"encoding/base64"
-	"fmt"
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"strings"
+
+	"github.com/caicloud/nirvana/log"
 )
 
 // Proxy is the proxy to Harbor core service.
@@ -24,18 +27,38 @@ func NewProxy(domain, username, password string) *Proxy {
 }
 
 func (p Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	authBytes := []byte(fmt.Sprintf("%v:%v", p.Username, p.Password))
-	auth := "basic " + base64.StdEncoding.EncodeToString(authBytes)
-
 	proxy := httputil.NewSingleHostReverseProxy(r.URL)
 	proxy.Director = func(req *http.Request) {
-		req.Header = r.Header
-		req.Header["Authorization"] = []string{auth}
+		req.SetBasicAuth(p.Username, p.Password)
+
 		req.Host = p.Domain
 		req.URL.Host = p.Domain
 		req.URL.Scheme = "http"
 		req.URL.Path = r.URL.Path
+		if r.URL.Path == "/v2" {
+			req.URL.Path = r.URL.Path + "/"
+		}
+	}
+
+	var bodyBytes []byte
+	var err error
+	if strings.Contains(r.URL.Path, "manifests") {
+		if r.Body != nil {
+			bodyBytes, err = ioutil.ReadAll(r.Body)
+			if err != nil {
+				log.Errorf("read request body err: %v", err)
+			} else {
+				r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+			}
+		}
 	}
 
 	proxy.ServeHTTP(w, r)
+
+	if strings.Contains(r.URL.Path, "manifests") && len(bodyBytes) > 0 {
+		err := p.createModelJob(r.URL.Path, bodyBytes)
+		if err != nil {
+			log.Errorf("create modeljob error when push model, err: %v", err)
+		}
+	}
 }

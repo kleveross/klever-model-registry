@@ -5,6 +5,7 @@ import (
 	"github.com/caicloud/nirvana/config"
 	"github.com/caicloud/nirvana/log"
 	"github.com/caicloud/nirvana/plugins/reqlog"
+	"github.com/caicloud/nirvana/service"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/kleveross/klever-model-registry/pkg/common"
@@ -53,6 +54,11 @@ func main() {
 					customOption.Username,
 					customOption.Password)...),
 			)
+
+			err := service.RegisterConsumer(service.NewSimpleSerializer("application/vnd.oci.image.manifest.v1+json"))
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 		PreServeFunc: func(c *nirvana.Config, server nirvana.Server) error {
@@ -61,6 +67,7 @@ func main() {
 				customOption.Password, signals.SetupSignalHandler()); err != nil {
 				return err
 			}
+
 			descriptors.InitModelJobController()
 			descriptors.InitLogController()
 			descriptors.InitEventController()

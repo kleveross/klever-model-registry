@@ -26,10 +26,11 @@ import (
 func AllDescriptors(domain, username, password string) []definition.Descriptor {
 	return []definition.Descriptor{
 		Descriptor(),
-		v1alpha1.HarborAPIDescriptor(domain, username, password),
-		v1alpha1.HarborCDescriptor(domain, username, password),
-		v1alpha1.HarborServiceDescriptor(domain, username, password),
 		v1alpha1.HarborV2Descriptor(domain, username, password),
+		v1alpha1.HarborV2PrefixDescriptor(domain, username, password),
+		v1alpha1.HarborAPIPrefixDescriptor(domain, username, password),
+		v1alpha1.HarborCPrefixDescriptor(domain, username, password),
+		v1alpha1.HarborServicePrefixDescriptor(domain, username, password),
 	}
 }
 
