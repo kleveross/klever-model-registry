@@ -1,0 +1,71 @@
+name: E2ETest
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  model-registry-e2e:
+    runs-on:
+      - ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        # v1.18.2 does not work when installing seldon core because of
+        # https://github.com/kubernetes-sigs/controller-tools/issues/444
+        k8s_version: [v1.17.5, v1.16.9]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+         path: src/github.com/kleveross/klever-model-registry
+
+      - name: set up Helm 3.2.3
+        uses: azure/setup-helm@v1
+        with:
+          version: '3.2.3'
+
+      - name: create kind cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+        with:
+          version: v0.8.1
+          node_image: kindest/node:${{ matrix.k8s_version }}
+          cluster_name: kind-cluster-${{ matrix.k8s_version }}
+          config: src/github.com/kleveross/klever-model-registry/testutil/integration/kind-cluster.yaml
+          kubeconfig: /kubeconfig
+
+      - name: setup env
+        run: |
+          cd src/github.com/kleveross/klever-model-registry
+          pwd
+          go env
+          echo "::set-env name=GOPATH::$(go env GOPATH):$GITHUB_WORKSPACE"
+          echo "::add-path::$(go env GOPATH)/bin"
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: install seldon core
+        run: |
+          kubectl create namespace seldon-system
+          helm install seldon-core seldon-core-operator --repo https://storage.googleapis.com/seldon-charts --set usageMetrics.enabled=true --namespace seldon-system
+
+      - name: install harbor
+        run: |
+          helm repo add harbor https://helm.goharbor.io
+          helm install my-release harbor/harbor --set expose.type=nodePort --set externalURL=http://localhost:30002 --set expose.tls.enabled=false
+
+      - name: e2e test
+        env:
+          MODEL_REGISTRY_HOST: http://localhost:8080
+        run: |
+          cd src/github.com/kleveross/klever-model-registry
+          make build
+          kubectl apply -f ./manifests/modeljob-operator/crds/kleveross.io_modeljobs.yaml
+          ./bin/model-registry --ormb-kube-config $HOME/.kube/config --ormb-domain localhost:30002 --ormb-username admin --ormb-password Harbor12345 &
+          go test ./testutil/...
