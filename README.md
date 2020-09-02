@@ -2,7 +2,9 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/kleveross/klever-model-registry)](https://goreportcard.com/report/github.com/kleveross/klever-model-registry)
 [![Build Status](https://github.com/kleveross/klever-model-registry/workflows/UnitTest/badge.svg
-)](https://travis-ci.com/kleveross/klever-model-registry)
+)](https://github.com/kleveross/klever-model-registry/actions?query=workflow%3AUnitTest)
+[![Build Status](https://github.com/kleveross/klever-model-registry/workflows/E2ETest/badge.svg
+)](https://github.com/kleveross/klever-model-registry/actions?query=workflow%3AE2ETest)
 [![Coverage Status](https://coveralls.io/repos/github/kleveross/klever-model-registry/badge.svg?branch=master)](https://coveralls.io/github/kleveross/klever-model-registry?branch=master)
 
 <a href="https://join.slack.com/t/kleveross/shared_invite/zt-g0eoiyq9-9OwiI7c__oV79bh_94MyTw">
