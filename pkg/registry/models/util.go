@@ -276,7 +276,7 @@ func writeORMBFile(filePath string, model *Model) error {
 		Description: model.Description,
 		Format:      model.Format,
 		Framework:   model.Format,
-		Signature: ormbmodel.Signature{
+		Signature:  &ormbmodel.Signature{
 			Inputs:  model.Inputs,
 			Outputs: model.Outputs,
 		},

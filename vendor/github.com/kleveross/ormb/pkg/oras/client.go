@@ -38,6 +38,7 @@ type Client struct {
 	orasClient orasclient.Interface
 	rootPath   string
 	plainHTTP  bool
+	insecure   bool
 }
 
 // NewClient returns a new registry client with config
@@ -64,9 +65,8 @@ func NewClient(opts ...ClientOption) (Interface, error) {
 		resolver, err := client.authorizer.Resolver(
 			context.Background(),
 			&http.Client{
-				// TODO(gaocegege): Make it optional.
 				Transport: &http.Transport{
-					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: client.insecure},
 				},
 			}, client.plainHTTP)
 		if err != nil {
@@ -132,6 +132,9 @@ func (c *Client) SaveModel(ch *model.Model, ref *oci.Reference) error {
 
 // TagModel tags the ref to target.
 func (c *Client) TagModel(ref *oci.Reference, target *oci.Reference) error {
+	if ref.FullName() == target.FullName() {
+		return nil
+	}
 	if err := c.cache.TagReference(ref, target); err != nil {
 		return err
 	}

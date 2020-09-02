@@ -29,7 +29,7 @@ github.com/Microsoft/hcsshim/osversion
 github.com/ajg/form
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
-# github.com/caicloud/nirvana v0.2.5-0.20200720023353-e989922f3fb5
+# github.com/caicloud/nirvana v0.2.5-0.20200825065332-cabc5559748c
 github.com/caicloud/nirvana
 github.com/caicloud/nirvana/config
 github.com/caicloud/nirvana/definition
@@ -147,7 +147,7 @@ github.com/gogo/protobuf/protoc-gen-gogo/descriptor
 github.com/gogo/protobuf/sortkeys
 # github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6
 github.com/golang/groupcache/lru
-# github.com/golang/mock v1.4.3
+# github.com/golang/mock v1.4.4
 github.com/golang/mock/gomock
 # github.com/golang/protobuf v1.4.2
 github.com/golang/protobuf/proto
@@ -205,7 +205,7 @@ github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
 # github.com/klauspost/cpuid v1.2.1
 github.com/klauspost/cpuid
-# github.com/kleveross/ormb v0.0.5-0.20200731011932-8f3baae3a261
+# github.com/kleveross/ormb v0.0.5
 github.com/kleveross/ormb/pkg/consts
 github.com/kleveross/ormb/pkg/exporter
 github.com/kleveross/ormb/pkg/model
@@ -381,7 +381,7 @@ go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7
+# golang.org/x/net v0.0.0-20200625001655-4c5254603344
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/html
@@ -398,10 +398,10 @@ golang.org/x/oauth2/google
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+# golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20200828194041-157a740278f4
+# golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
