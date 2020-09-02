@@ -41,11 +41,20 @@ func (d Saver) Save(path string) (*model.Model, error) {
 		return nil, err
 	}
 
-	// Save the model from <path>/model.
-	buf := &bytes.Buffer{}
-	if err := Tar(filepath.Join(path, consts.ORMBModelDirectory), buf); err != nil {
+	format := model.Format(metadata.Format)
+	if err := format.ValidateDirectory(path); err != nil {
 		return nil, err
 	}
+
+	// Save the model from <path>/model.
+	buf := &bytes.Buffer{}
+	directoryStructure, err := TarAndGetDirectoryStructure(
+		filepath.Join(path, consts.ORMBModelDirectory), buf)
+	if err != nil {
+		return nil, err
+	}
+	// Set directoryStructure for the model metadata.
+	metadata.DirectoryStructure = directoryStructure
 
 	m := &model.Model{
 		Metadata: metadata,
@@ -56,12 +65,14 @@ func (d Saver) Save(path string) (*model.Model, error) {
 	return m, nil
 }
 
-// Tar is copied from https://medium.com/@skdomino/taring-untaring-files-in-go-6b07cf56bc07.
-func Tar(src string, writers ...io.Writer) error {
+// TarAndGetDirectoryStructure is copied from https://medium.com/@skdomino/taring-untaring-files-in-go-6b07cf56bc07.
+func TarAndGetDirectoryStructure(
+	src string, writers ...io.Writer) ([]string, error) {
+	structure := make([]string, 0)
 
 	// ensure the src actually exists before trying to tar it
 	if _, err := os.Stat(src); err != nil {
-		return fmt.Errorf("Unable to tar files - %v", err.Error())
+		return nil, fmt.Errorf("Unable to tar files - %v", err.Error())
 	}
 
 	mw := io.MultiWriter(writers...)
@@ -73,7 +84,7 @@ func Tar(src string, writers ...io.Writer) error {
 	defer tw.Close()
 
 	// walk path
-	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
+	err := filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
 
 		// return on any error
 		if err != nil {
@@ -94,7 +105,11 @@ func Tar(src string, writers ...io.Writer) error {
 		parentDir := filepath.Dir(src)
 
 		// update the name to correctly reflect the desired destination when untaring
-		header.Name = strings.TrimPrefix(strings.Replace(file, parentDir, "", -1), string(filepath.Separator))
+		header.Name = strings.TrimPrefix(
+			strings.Replace(file, parentDir, "", -1), string(filepath.Separator))
+
+		// Add filename to the directory structure.
+		structure = append(structure, header.Name)
 
 		// write the header
 		if err := tw.WriteHeader(header); err != nil {
@@ -118,4 +133,6 @@ func Tar(src string, writers ...io.Writer) error {
 
 		return nil
 	})
+
+	return structure, err
 }

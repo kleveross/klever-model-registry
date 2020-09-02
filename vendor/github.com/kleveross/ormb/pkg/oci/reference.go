@@ -37,9 +37,6 @@ func ParseReference(s string) (*Reference, error) {
 	// immediately return an error. Other validation will be performed later in
 	// the function
 	splitComponents := fixSplitComponents(referenceDelimiter.Split(s, -1))
-	if len(splitComponents) > 3 {
-		return nil, errTooManyColons
-	}
 
 	var ref *Reference
 	switch len(splitComponents) {
@@ -49,8 +46,11 @@ func ParseReference(s string) (*Reference, error) {
 		ref = &Reference{Repo: splitComponents[0], Tag: splitComponents[1]}
 	case 3:
 		ref = &Reference{Repo: strings.Join(splitComponents[:2], ":"), Tag: splitComponents[2]}
+	default:
+		return nil, errTooManyColons
 	}
 
+	ref.mutate()
 	// ensure the reference is valid
 	err := ref.validate()
 	if err != nil {
@@ -66,6 +66,13 @@ func (ref *Reference) FullName() string {
 		return ref.Repo
 	}
 	return fmt.Sprintf("%s:%s", ref.Repo, ref.Tag)
+}
+
+// mutate assigns default tag when it is empty
+func (ref *Reference) mutate() {
+	if ref.Tag == "" {
+		ref.Tag = "latest"
+	}
 }
 
 // validate makes sure the ref meets our criteria
