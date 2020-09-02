@@ -67,5 +67,5 @@ jobs:
           cd src/github.com/kleveross/klever-model-registry
           make build
           kubectl apply -f ./manifests/modeljob-operator/crds/kleveross.io_modeljobs.yaml
-          ./bin/model-registry --ormb-kube-config $HOME/.kube/config --ormb-domain localhost:30002 --ormb-username admin --ormb-password Harbor12345
+          ./bin/model-registry --ormb-kube-config $HOME/.kube/config --ormb-domain localhost:30002 --ormb-username admin --ormb-password Harbor12345 &
           go test ./testutil/...
