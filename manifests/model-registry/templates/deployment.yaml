@@ -35,6 +35,8 @@ spec:
             value: "{{ .Values.model.serving.initializer.image }}:{{ .Values.model.serving.initializer.tag }}"
           - name: KLEVER_MODEL_REGISTRY_PORT
             value: {{ .Values.service.Port }}
+          - name: EXTERNAL_ADDRESS
+            value: {{ .Values.model.externalAddress }}
           - name: SERVER_ORMB_DOMAIN
             value: {{ .Values.ormb.domain }}
           - name: SERVER_ORMB_USERNAME

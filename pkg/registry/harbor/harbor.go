@@ -8,6 +8,11 @@ import (
 	"strings"
 
 	"github.com/caicloud/nirvana/log"
+	"github.com/spf13/viper"
+)
+
+const (
+	envModelRestirtyExternalAddress = "EXTERNAL_ADDRESS"
 )
 
 // Proxy is the proxy to Harbor core service.
@@ -35,9 +40,19 @@ func (p Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		req.URL.Host = p.Domain
 		req.URL.Scheme = "http"
 		req.URL.Path = r.URL.Path
-		if r.URL.Path == "/v2" {
+		// If not add "/" suffix, harbor will match error router.
+		if r.URL.Path == "/v2" || strings.HasSuffix(req.URL.Path, "/uploads") {
 			req.URL.Path = r.URL.Path + "/"
 		}
+	}
+
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		// Redirect's address is internal address in k8s, so MUST set model-registry's external address.
+		if location, ok := resp.Header["Location"]; ok {
+			resp.Header["Location"] = []string{strings.ReplaceAll(location[0], p.Domain,
+				viper.GetString(envModelRestirtyExternalAddress))}
+		}
+		return nil
 	}
 
 	var bodyBytes []byte

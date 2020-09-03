@@ -81,6 +81,7 @@ ormb:
 
 # 
 model:
+  externalAddress: 192.168.33.34:30010
   serving:
     trt: 
       image: cargo.dev.caicloud.xyz/release/trtserver

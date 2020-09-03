@@ -76,7 +76,7 @@ func HarborCPrefixDescriptor(domain, username, password string) definition.Descr
 // HarborV2PrefixDescriptor contain horbor /v2/* descriptors
 func HarborV2PrefixDescriptor(domain, username, password string) definition.Descriptor {
 	return definition.Descriptor{
-		Path:        "/v2/{path:*}/",
+		Path:        "/v2/{path:*}",
 		Description: "It contains all api in /v2/*",
 		Consumes:    []string{definition.MIMEAll},
 		Produces:    []string{definition.MIMEAll},

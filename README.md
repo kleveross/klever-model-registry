@@ -86,8 +86,8 @@ $ make docker-build
 $ kubectl create namespace kleveross-system
 $ git clone https://github.com/kleveross/klever-model-registry
 $ cd klever-model-registry/manifests
-$ helm install klever-model-registry ./klever-model-registry --namespace=kleveross-system --set ormb.domain={harbor address}
-$ helm install klever-modeljob-operator ./klever-modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address}
+$ helm install klever-model-registry ./klever-model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
+$ helm install klever-modeljob-operator ./klever-modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
 ```
 
 ## Community
