@@ -6,6 +6,7 @@ import (
 
 type Model struct {
 	ModelName   string         `json:"modelName"`
+	ProjectName string         `json:"projectName"`
 	VersionName string         `json:"versionName"`
 	Description string         `json:"description"`
 	Format      string         `json:"format"`

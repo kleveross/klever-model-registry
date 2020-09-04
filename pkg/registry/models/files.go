@@ -27,13 +27,15 @@ func init() {
 	modelTmpDir = path.Join(workDir, "modelx")
 }
 
-func UploadFile(ctx context.Context, tenant, user, modelName, versionName string) error {
+// UploadFile uploads the model file to harbor
+func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versionName string) error {
 	var model Model
 	modelContent := util.GetFormValueFromRequest(ctx, "model")
 	err := json.Unmarshal([]byte(modelContent), &model)
 	if err != nil {
 		return errors.RenderBadRequestError(err)
 	}
+	model.ProjectName = projectName
 	model.ModelName = modelName
 	model.VersionName = versionName
 
@@ -43,7 +45,7 @@ func UploadFile(ctx context.Context, tenant, user, modelName, versionName string
 		return errors.RenderInternalServerError(err)
 	}
 
-	request := util.GetRequstFromContext(ctx)
+	request := util.GetRequestFromContext(ctx)
 	responseWriter := util.GetResponseFromContext(ctx)
 	err = validateFileSize(responseWriter, request)
 	if err != nil {
@@ -98,7 +100,9 @@ func UploadFile(ctx context.Context, tenant, user, modelName, versionName string
 	return nil
 }
 
-func DownloadFile(ctx context.Context, tenant, user, modelName, versionName string, model *Model) error {
+// DownloadFile downloads the model file from harbor
+func DownloadFile(ctx context.Context, tenant, user, projectName, modelName, versionName string, model *Model) error {
+	model.ProjectName = projectName
 	model.ModelName = modelName
 	model.VersionName = versionName
 
