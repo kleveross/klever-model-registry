@@ -155,7 +155,7 @@ func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *
 	}
 	defer os.RemoveAll(filePath)
 
-	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ModelName,
+	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ProjectName,
 		model.ModelName, model.VersionName)
 	err = client.Pull(modelRef)
 	if err != nil {
@@ -204,7 +204,7 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		return err
 	}
 
-	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ModelName,
+	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ProjectName,
 		model.ModelName, model.VersionName)
 	err = client.Save(deCompressDir, modelRef)
 	if err != nil {

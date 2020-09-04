@@ -31,7 +31,7 @@ func GetFormValueFromRequest(ctx context.Context, field string) string {
 	return service.HTTPContextFrom(ctx).Request().FormValue(field)
 }
 
-func GetRequstFromContext(ctx context.Context) *http.Request {
+func GetRequestFromContext(ctx context.Context) *http.Request {
 	return service.HTTPContextFrom(ctx).Request()
 }
 
