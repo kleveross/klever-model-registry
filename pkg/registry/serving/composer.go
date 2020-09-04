@@ -64,6 +64,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 
 		modelFormat := getModelFormat(&sdep.Spec.Predictors[i].Graph)
 		probe := getProbe(modelFormat, sdep.Name)
+		ports := getUserContainerPorts(modelFormat)
 
 		image := getUserContainerImage(&sdep.Spec.Predictors[i].Graph)
 		// compose user containers
@@ -83,13 +84,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 			},
 			// Must set ports, otherwise it will can not traffic diversion in unique port(default: 8000) for multi deployment.
 			// please refer https://github.com/SeldonIO/seldon-core/blob/master/operator/apis/machinelearning.seldon.io/v1/seldondeployment_webhook.go#L142-L145
-			Ports: []corev1.ContainerPort{
-				{
-					Name:          "http",
-					Protocol:      corev1.ProtocolTCP,
-					ContainerPort: defaultInferenceHTTPPort,
-				},
-			},
+			Ports: ports,
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      modelSharedMountName,
@@ -125,6 +120,26 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 	composeInitContainer(sdep)
 
 	return nil
+}
+
+func getUserContainerPorts(format string) []corev1.ContainerPort {
+	ports := []corev1.ContainerPort{
+		{
+			Name:          "http",
+			Protocol:      corev1.ProtocolTCP,
+			ContainerPort: defaultInferenceHTTPPort,
+		},
+	}
+
+	if format != string(modeljobsv1alpha1.FormatPMML) {
+		ports = append(ports, corev1.ContainerPort{
+			Name:          "grpc",
+			Protocol:      corev1.ProtocolTCP,
+			ContainerPort: defaultInferenceGRPCPort,
+		})
+	}
+
+	return ports
 }
 
 // getProbe generate readiness and liveiness.
