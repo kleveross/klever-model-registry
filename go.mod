@@ -1,6 +1,6 @@
 module github.com/kleveross/klever-model-registry
 
-go 1.13
+go 1.14
 
 require (
 	github.com/caicloud/nirvana v0.2.5-0.20200825065332-cabc5559748c
