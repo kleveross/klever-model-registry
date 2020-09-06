@@ -41,7 +41,7 @@ var logAPI = definition.Descriptor{
 	Description: "APIs for log",
 	Children: []definition.Descriptor{
 		{
-			Path:        "/namespaces/{namespace}/pods/{podID}/log",
+			Path:        "/namespaces/{namespace}/pods/{podID}/logs",
 			Definitions: []definition.Definition{getPodLogs},
 		},
 	},
