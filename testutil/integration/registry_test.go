@@ -20,4 +20,10 @@ var _ = Describe("Model Registry", func() {
 				"default").Expect().Status(200)
 		})
 	})
+	Context("Models", func() {
+		It("Should push the model successfully", func() {
+			e.POST("/api/v1alpha1/projects/{projectName}/models/{modelName}/versions/{versionName}/upload",
+				"library", "tensorflow", "test").WithMultipart().WithFile("model", "./models/model.zip").Expect().Status(200)
+		})
+	})
 })
