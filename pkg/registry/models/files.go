@@ -58,7 +58,6 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 		log.Errorf("Failed to parse the chunk for the form key `file`: %v", err)
 		return errors.RenderBadRequestError(err)
 	}
-	println(chunkInfo.TotalSize)
 	defer func() {
 		if cerr := chunkInfo.Content.Close(); cerr != nil {
 			log.Errorf("chunInfo.Content close err: %v", cerr.Error())
