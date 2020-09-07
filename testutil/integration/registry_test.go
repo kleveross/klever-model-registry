@@ -53,7 +53,8 @@ var _ = Describe("Model Registry", func() {
 			artifact := e.GET("/api/v2.0/projects/{project_name}/repositories/{repository_name}/artifacts/{version}",
 				project, model, version).Expect().Status(http.StatusOK).JSON().Object()
 			// Validate that the artifact is a SavedModel.
-			artifact.Value("extra_attrs").Object().Value("format").Equal("SavedModel")
+			// It is blocked since goharbor/harbor-helm does not support 2.1 now.
+			// artifact.Value("extra_attrs").Object().Value("format").Equal("SavedModel")
 			artifact.Value("type").Equal("MODEL")
 		})
 	})
