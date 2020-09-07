@@ -55,11 +55,7 @@ var createModelJob = definition.Definition{
 	Description: "Create modeljob",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
-		{
-			Source:      definition.Body,
-			Name:        "job",
-			Description: "modeljob body",
-		},
+		definition.BodyParameterFor("modeljob body"),
 	},
 	Results: []definition.Result{
 		definition.ErrorResult(),

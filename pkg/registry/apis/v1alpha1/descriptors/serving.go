@@ -41,11 +41,7 @@ var createServing = definition.Definition{
 	Description: "Create serving",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
-		{
-			Source:      definition.Body,
-			Name:        "serving",
-			Description: "serving body",
-		},
+		definition.BodyParameterFor("serving body"),
 	},
 	Results: []definition.Result{
 		definition.ErrorResult(),

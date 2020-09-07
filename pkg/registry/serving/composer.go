@@ -27,7 +27,7 @@ const (
 	envPMMLServingImage = "PMML_SERVING_IMAGE"
 
 	// envModelInitializerImage is the preset image for model initializer.
-	envModelInitializerImage = "MODEL_INITIAIZER_IMAGE"
+	envModelInitializerImage = "MODEL_INITIALIZER_IMAGE"
 
 	// defaultInferenceHTTPPort is default port for http.
 	defaultInferenceHTTPPort = 8000
