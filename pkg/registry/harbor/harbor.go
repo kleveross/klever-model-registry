@@ -52,6 +52,8 @@ func (p Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			resp.Header["Location"] = []string{strings.ReplaceAll(location[0], p.Domain,
 				viper.GetString(envModelRestirtyExternalAddress))}
 		}
+		// It is to solve https://github.com/kleveross/klever-model-registry/issues/104
+		resp.Header.Set("content-type", "application/json")
 		return nil
 	}
 
