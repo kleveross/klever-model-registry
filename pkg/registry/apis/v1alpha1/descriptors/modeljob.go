@@ -30,6 +30,7 @@ func init() {
 	register(modeljobAPI)
 }
 
+// InitModelJobController inits the modeljob controller
 func InitModelJobController() {
 	modeljobController = modeljob.New(client.GetKubeKleverOssClient(), client.GetKubeKleverOssModelJobInformer())
 }

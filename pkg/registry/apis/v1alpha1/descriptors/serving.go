@@ -16,6 +16,7 @@ func init() {
 	register(servingAPI)
 }
 
+// InitServingController inits the seldon serving controller
 func InitServingController() {
 	servingController = serving.New(client.GetKubeSeldonClient())
 }
@@ -56,8 +57,8 @@ var createServing = definition.Definition{
 
 var listServing = definition.Definition{
 	Method:      definition.List,
-	Summary:     "List definition",
-	Description: "List definition",
+	Summary:     "List Serving",
+	Description: "List Serving",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
 	},
@@ -69,13 +70,13 @@ var listServing = definition.Definition{
 
 var getServing = definition.Definition{
 	Method:      definition.Get,
-	Summary:     "Get definition",
-	Description: "Get definition",
+	Summary:     "Get Serving",
+	Description: "Get Serving",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
-		definition.PathParameterFor("servingID", "definition id"),
+		definition.PathParameterFor("servingID", "serving id"),
 	},
-	Results: definition.DataErrorResults("definition"),
+	Results: definition.DataErrorResults("serving"),
 	Function: func(ctx context.Context, namespace, servingID string) (*seldonv1.SeldonDeployment, error) {
 		return servingController.Get(namespace, servingID)
 	},
@@ -83,12 +84,11 @@ var getServing = definition.Definition{
 
 var deleteServing = definition.Definition{
 	Method:      definition.Delete,
-	Summary:     "Delete definition",
-	Description: "Delete definition",
-
+	Summary:     "Delete Serving",
+	Description: "Delete Serving",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
-		definition.PathParameterFor("servingID", "definition id"),
+		definition.PathParameterFor("servingID", "serving id"),
 	},
 	Results: []definition.Result{
 		definition.ErrorResult(),
