@@ -65,6 +65,7 @@ type ChunkInfo struct {
 	PartTo    int64
 }
 
+// parseChunk parses `file` key as the file in the HTTP form.
 func parseChunk(r *http.Request) (*ChunkInfo, error) {
 	file, fileHeader, err := r.FormFile("file")
 	if err != nil {
@@ -183,7 +184,9 @@ func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *
 	return zipFileName, nil
 }
 
+// uploadModelToHarbor validates the model directory and uploads it to Harbor.
 func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) error {
+	var err error = nil
 	deCompressDir := strings.Trim(zipFile, ".zip")
 
 	defer func() {
@@ -194,7 +197,7 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		}
 	}()
 
-	err := util.Unarchive(zipFile, deCompressDir)
+	err = util.Unarchive(zipFile, deCompressDir)
 	if err != nil {
 		return err
 	}
@@ -211,7 +214,7 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		return err
 	}
 	defer func() {
-		err := client.Remove(modelRef)
+		err = client.Remove(modelRef)
 		if err != nil {
 			log.Warningf("Remove model err: %v", err)
 		}
@@ -222,9 +225,10 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		return err
 	}
 
-	return nil
+	return err
 }
 
+// validateModelDir validates the model dir.
 func validateModelDir(dirPath string, model *Model) error {
 	rootDir, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -276,7 +280,7 @@ func writeORMBFile(filePath string, model *Model) error {
 		Description: model.Description,
 		Format:      model.Format,
 		Framework:   model.Format,
-		Signature:  &ormbmodel.Signature{
+		Signature: &ormbmodel.Signature{
 			Inputs:  model.Inputs,
 			Outputs: model.Outputs,
 		},
