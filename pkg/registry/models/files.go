@@ -49,13 +49,16 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 	responseWriter := util.GetResponseFromContext(ctx)
 	err = validateFileSize(responseWriter, request)
 	if err != nil {
+		log.Errorf("Failed to validate the file size: %v", err)
 		return errors.RenderBadRequestError(err)
 	}
 
 	chunkInfo, err := parseChunk(request)
 	if err != nil {
+		log.Errorf("Failed to parse the chunk for the form key `file`: %v", err)
 		return errors.RenderBadRequestError(err)
 	}
+	println(chunkInfo.TotalSize)
 	defer func() {
 		if cerr := chunkInfo.Content.Close(); cerr != nil {
 			log.Errorf("chunInfo.Content close err: %v", cerr.Error())
@@ -66,6 +69,7 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 	if chunkInfo.PartFrom == 0 {
 		err = createSizedFile(zipFileName, chunkInfo.TotalSize)
 		if err != nil {
+			log.Errorf("Failed to create the file: %v", err)
 			return errors.RenderInternalServerError(err)
 		}
 	}
@@ -77,15 +81,17 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 		}
 		defer func() {
 			if cerr := newFile.Close(); cerr != nil {
-				log.Errorf("failed to close: %v", cerr)
+				log.Errorf("Failed to close: %v", cerr)
 			}
 		}()
 		_, err = newFile.Seek(chunkInfo.PartFrom, io.SeekStart)
 		if err != nil {
+			log.Errorf("Failed to seek: %v", err)
 			return errors.RenderInternalServerError(err)
 		}
 		_, err = io.Copy(newFile, chunkInfo.Content)
 		if err != nil {
+			log.Errorf("Failed to copy the content to the new created file: %v", err)
 			return errors.RenderInternalServerError(err)
 		}
 	}
@@ -93,6 +99,7 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 	if chunkInfo.TotalSize-1 == chunkInfo.PartTo {
 		err = uploadModelToHarbor(client.GetORMBClient(), zipFileName, &model)
 		if err != nil {
+			log.Errorf("Failed to update the model to harbor: %v", err)
 			return errors.RenderInternalServerError(err)
 		}
 	}

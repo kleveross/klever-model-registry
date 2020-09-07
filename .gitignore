@@ -9,3 +9,5 @@ cover.out
 .vscode/
 
 config.json
+
+.DS_Store
