@@ -2,6 +2,7 @@ package integration
 
 import (
 	"encoding/json"
+	"net/http"
 
 	httpexpect "github.com/gavv/httpexpect/v2"
 	"github.com/kleveross/klever-model-registry/pkg/registry/models"
@@ -14,20 +15,21 @@ var _ = Describe("Model Registry", func() {
 	Context("ModelJobs", func() {
 		It("Should get the ModelJobs successfully", func() {
 			e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
-				"default").Expect().Status(200)
+				"default").Expect().Status(http.StatusOK)
 		})
 	})
 	Context("Servings", func() {
 		It("Should get the Servings successfully", func() {
 			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
-				"default").Expect().Status(200)
+				"default").Expect().Status(http.StatusOK)
 		})
 	})
 	Context("Models", func() {
+		project := "library"
+		model := "tensorflow"
+		version := "test"
+
 		It("Should push the model successfully", func() {
-			project := "library"
-			model := "tensorflow"
-			version := "test"
 			modelContent := models.Model{
 				ProjectName: project,
 				ModelName:   model,
@@ -45,7 +47,14 @@ var _ = Describe("Model Registry", func() {
 				}).
 				WithMultipart().
 				WithFile("file", "./models/model.zip").WithFormField("model", string(bytes)).
-				Expect().Status(201)
+				Expect().Status(http.StatusCreated)
+		})
+		It("Should list the model successfully", func() {
+			artifact := e.GET("/api/v2.0/projects/{project_name}/repositories/{repository_name}/artifacts/{version}",
+				project, model, version).Expect().Status(http.StatusOK).JSON().Object()
+			// Validate that the artifact is a SavedModel.
+			artifact.Value("extra_attrs").Object().Value("format").Equal("SavedModel")
+			artifact.Value("type").Equal("MODEL")
 		})
 	})
 })

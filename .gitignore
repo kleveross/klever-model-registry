@@ -11,3 +11,4 @@ cover.out
 config.json
 
 .DS_Store
+cache/
