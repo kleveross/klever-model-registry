@@ -33,6 +33,7 @@ func init() {
 	register(eventAPI)
 }
 
+// InitEventController inits the event controller
 func InitEventController() {
 	eventController = event.New(client.GetKubeMainClient(),
 		client.GetKubeKleverOssClient(),

@@ -21,6 +21,7 @@ import (
 
 var harborController *harbor.Proxy
 
+// InitHarborController handles the harbor proxy
 func InitHarborController(domain, username, password string) {
 	harborController = harbor.NewProxy(domain, username, password)
 }

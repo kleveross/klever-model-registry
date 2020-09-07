@@ -33,6 +33,7 @@ func init() {
 	register(logAPI)
 }
 
+// InitLogController inits the log controller
 func InitLogController() {
 	logController = log.New(client.GetKubeMainClient())
 }
