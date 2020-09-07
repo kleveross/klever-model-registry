@@ -7,9 +7,9 @@ RUN rpm  --import  /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7    \
     && pip3 install --no-cache-dir requests loguru pyyaml   \  
     && yum clean all 
 
-COPY wrapper /opt/openscoring/wrapper
+COPY scripts/serving/wrapper /opt/openscoring/wrapper
 
-COPY openscoring/docker/application.conf /opt/openscoring/
+COPY scripts/serving/openscoring/application.conf /opt/openscoring/
 
 ADD ${url} /opt/openscoring
 
