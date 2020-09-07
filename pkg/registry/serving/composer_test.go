@@ -19,7 +19,7 @@ var _ = Describe("Composer", func() {
 		Expect(err).To(BeNil())
 
 		Expect(len(sdepSingleGraph.Spec.Predictors)).Should(Equal(1))
-		Expect(len(sdepSingleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(1))
+		Expect(len(sdepSingleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(2))
 		Expect(sdepSingleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports[0].ContainerPort).Should(Equal(int32(8000)))
 
 		Expect(len(sdepSingleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].VolumeMounts)).Should(Equal(1))
@@ -34,7 +34,7 @@ var _ = Describe("Composer", func() {
 		Expect(err).To(BeNil())
 
 		Expect(len(sdepDoubleGraph.Spec.Predictors)).Should(Equal(2))
-		Expect(len(sdepDoubleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(1))
+		Expect(len(sdepDoubleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(2))
 		Expect(len(sdepDoubleGraph.Spec.Predictors[1].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(1))
 		Expect(sdepDoubleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports[0].ContainerPort).Should(Equal(int32(8000)))
 		Expect(sdepDoubleGraph.Spec.Predictors[1].ComponentSpecs[0].Spec.Containers[0].Ports[0].ContainerPort).Should(Equal(int32(8000)))
