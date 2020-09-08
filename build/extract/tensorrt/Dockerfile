@@ -2,8 +2,8 @@ FROM nvcr.io/nvidia/tensorrt:19.10-py3
 ENV LC_ALL="C.UTF-8" \
   LANG="C.UTF-8"
 
-ARG ormb_version=v0.0.3
-ARG ormb_tar_filename=ormb_0.0.3_Linux_x86_64.tar.gz
+ARG ormb_version=v0.0.5
+ARG ormb_tar_filename=ormb_0.0.5_Linux_x86_64.tar.gz
 
 RUN apt update -y \
     && apt install wget -y \

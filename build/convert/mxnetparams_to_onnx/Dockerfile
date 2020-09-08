@@ -3,8 +3,8 @@ FROM python:3.6-slim
 ENV LC_ALL="C.UTF-8" \
   LANG="C.UTF-8"
 
-ARG ormb_version=v0.0.3
-ARG ormb_tar_filename=ormb_0.0.3_Linux_x86_64.tar.gz
+ARG ormb_version=v0.0.5
+ARG ormb_tar_filename=ormb_0.0.5_Linux_x86_64.tar.gz
 
 RUN apt update -y \
     && apt install libgomp1 wget -y \
