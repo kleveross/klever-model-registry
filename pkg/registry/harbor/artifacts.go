@@ -9,11 +9,9 @@ import (
 	"time"
 
 	"github.com/caicloud/nirvana/log"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
-	"github.com/kleveross/klever-model-registry/pkg/util"
+	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
 )
 
 // Artifact is copy from https://github.com/goharbor/harbor/blob/master/src/pkg/artifact/model.go#L31-L47
@@ -50,11 +48,11 @@ type Tag struct {
 func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
 	path = strings.Trim(path, "/")
 	pathSlice := strings.Split(path, "/")
-	project := pathSlice[1]
-	repo := pathSlice[2]
-	version := pathSlice[4]
+	projectName := pathSlice[1]
+	modelName := pathSlice[2]
+	versionName := pathSlice[4]
 
-	artis, err := p.listArtifacts(project, repo)
+	artis, err := p.listArtifacts(projectName, modelName)
 	if err != nil {
 		return err
 	}
@@ -62,7 +60,7 @@ func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
 	var found *Artifact
 	for artiIndex, arti := range artis {
 		for _, tag := range arti.Tags {
-			if tag.Name == version {
+			if tag.Name == versionName {
 				found = &artis[artiIndex]
 				break
 			}
@@ -77,25 +75,8 @@ func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
 		return nil
 	}
 	if format, ok := found.ExtraAttrs["format"]; ok {
-		modeljob := modeljobsv1alpha1.ModelJob{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "kleveross.io/v1alpha1",
-				Kind:       "ModelJob",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      util.RandomNameWithPrefix(fmt.Sprintf("modeljob-%v-%v-%v", project, repo, version)),
-				Namespace: "default",
-			},
-			Spec: modeljobsv1alpha1.ModelJobSpec{
-				Model: fmt.Sprintf("%v/%v/%v:%v", p.Domain, project, repo, version),
-				ModelJobSource: modeljobsv1alpha1.ModelJobSource{
-					Extraction: &modeljobsv1alpha1.ExtractionSource{
-						Format: modeljobsv1alpha1.Format(format.(string)),
-					},
-				},
-			},
-		}
-		_, err := client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(&modeljob)
+		modeljobObj := modeljob.GenerateExtractionModelJob(p.Domain, projectName, modelName, versionName, format.(string))
+		_, err := client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
 		if err != nil {
 			return err
 		}

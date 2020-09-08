@@ -2,15 +2,21 @@ package integration
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	httpexpect "github.com/gavv/httpexpect/v2"
-	"github.com/kleveross/klever-model-registry/pkg/registry/models"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/kleveross/klever-model-registry/pkg/registry/models"
 )
 
 var _ = Describe("Model Registry", func() {
+	const timeout = time.Second * 5
+	const interval = time.Second * 1
+
 	e := httpexpect.New(GinkgoT(), ModelRegistryHost)
 	Context("ModelJobs", func() {
 		It("Should get the ModelJobs successfully", func() {
@@ -48,6 +54,16 @@ var _ = Describe("Model Registry", func() {
 				WithMultipart().
 				WithFile("file", "./models/model.zip").WithFormField("model", string(bytes)).
 				Expect().Status(http.StatusCreated)
+			// Upload model will create ModelJob automatically, now get ModelJobList.
+			Eventually(func() error {
+				length := e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
+					"default").Expect().JSON().Object().Value("items").Array().Length()
+				if int(length.Raw()) != 1 {
+					return fmt.Errorf("Not found any modeljob")
+				}
+				return nil
+			}, timeout, interval).Should(Succeed())
+
 		})
 		It("Should list the model successfully", func() {
 			artifact := e.GET("/api/v2.0/projects/{project_name}/repositories/{repository_name}/artifacts/{version}",

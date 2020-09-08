@@ -10,8 +10,10 @@ import (
 
 	"github.com/caicloud/nirvana/log"
 
+	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
+	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
 	"github.com/kleveross/klever-model-registry/pkg/util"
 )
 
@@ -99,6 +101,12 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 		err = uploadModelToHarbor(client.GetORMBClient(), zipFileName, &model)
 		if err != nil {
 			log.Errorf("Failed to update the model to harbor: %v", err)
+			return errors.RenderInternalServerError(err)
+		}
+
+		modeljobObj := modeljob.GenerateExtractionModelJob(common.ORMBDomain, projectName, modelName, versionName, model.Format)
+		_, err = client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
+		if err != nil {
 			return errors.RenderInternalServerError(err)
 		}
 	}
