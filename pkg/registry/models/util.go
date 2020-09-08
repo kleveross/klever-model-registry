@@ -251,19 +251,24 @@ func validateModelDir(dirPath string, model *Model) error {
 	if err != nil {
 		return err
 	}
-	for _, file := range fileList {
-		err = util.ExecOSCommand("mv",
-			[]string{
-				path.Join(fileListPath, file.Name()),
-				ormbModelDir})
 
+	// if `fileListPath != ormbModelDir` logic is special for issue
+	// https://github.com/kleveross/klever-model-registry/issues/100
+	if fileListPath != ormbModelDir {
+		for _, file := range fileList {
+			err = util.ExecOSCommand("mv",
+				[]string{
+					path.Join(fileListPath, file.Name()),
+					ormbModelDir})
+
+			if err != nil {
+				return err
+			}
+		}
+		err = util.ExecOSCommand("rm", []string{"-rf", fileListPath})
 		if err != nil {
 			return err
 		}
-	}
-	err = util.ExecOSCommand("rm", []string{"-rf", path.Join(dirPath, rootDir[0].Name())})
-	if err != nil {
-		return err
 	}
 
 	err = writeORMBFile(path.Join(dirPath, "ormbfile.yaml"), model)
