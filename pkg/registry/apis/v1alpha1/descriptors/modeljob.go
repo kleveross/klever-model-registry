@@ -22,6 +22,7 @@ import (
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 )
 
 var modeljobController *modeljob.ModelJobController
@@ -72,10 +73,11 @@ var listModelJob = definition.Definition{
 	Description: "List modeljob",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
+		paging.PageDefinitionParameter(),
 	},
 	Results: definition.DataErrorResults("modeljob list"),
-	Function: func(ctx context.Context, namespace string) ([]*modeljobsv1alpha1.ModelJob, error) {
-		return modeljobController.List(namespace)
+	Function: func(ctx context.Context, namespace string, opt *paging.ListOption) (*modeljob.ModelJobList, error) {
+		return modeljobController.List(namespace, opt)
 	},
 }
 

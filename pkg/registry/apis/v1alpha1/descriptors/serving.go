@@ -6,6 +6,7 @@ import (
 	"github.com/caicloud/nirvana/definition"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 	"github.com/kleveross/klever-model-registry/pkg/registry/serving"
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
 )
@@ -57,10 +58,11 @@ var listServing = definition.Definition{
 	Description: "List Serving",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
+		paging.PageDefinitionParameter(),
 	},
 	Results: definition.DataErrorResults("definition list"),
-	Function: func(ctx context.Context, namespace string) (*seldonv1.SeldonDeploymentList, error) {
-		return servingController.List(namespace)
+	Function: func(ctx context.Context, namespace string, opt *paging.ListOption) (*serving.ServingList, error) {
+		return servingController.List(namespace, opt)
 	},
 }
 
