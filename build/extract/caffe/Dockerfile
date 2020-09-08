@@ -3,8 +3,8 @@ FROM cargo.caicloud.xyz/devops_release/miniconda:v4.7.12.1-py36
 ENV LC_ALL="C.UTF-8" \
   LANG="C.UTF-8"
 
-ARG ormb_version=v0.0.3
-ARG ormb_tar_filename=ormb_0.0.3_Linux_x86_64.tar.gz
+ARG ormb_version=v0.0.5
+ARG ormb_tar_filename=ormb_0.0.5_Linux_x86_64.tar.gz
 
 RUN conda install caffe==1.0 \
     && conda clean -ya \
