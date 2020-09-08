@@ -9,7 +9,7 @@ import (
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/common"
-	"github.com/kleveross/klever-model-registry/pkg/paging"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 )
 
 var _ = Describe("Modeljob API", func() {
