@@ -16,6 +16,8 @@ limitations under the License.
 package modeljob
 
 import (
+	"sort"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -23,6 +25,7 @@ import (
 	clientset "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned"
 	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 )
 
 type ModelJobController struct {
@@ -69,11 +72,36 @@ func (m ModelJobController) Delete(namespace, modeljobID string) error {
 	return nil
 }
 
-func (m ModelJobController) List(namespace string) ([]*modeljobsv1alpha1.ModelJob, error) {
+// ModelJobList is the response of List Interface.
+type ModelJobList struct {
+	ListMeta paging.ListMeta               `json:"metadata"`
+	Items    []*modeljobsv1alpha1.ModelJob `json:"items"`
+}
+
+// toModelJobList is convert to ModelJobList struct.
+func toModelJobList(items []*modeljobsv1alpha1.ModelJob, opt *paging.ListOption) *ModelJobList {
+	datas := paging.Page(items, opt)
+	servingList := &ModelJobList{
+		ListMeta: paging.ListMeta{
+			TotalItems: datas.TotalItems,
+		},
+		Items: []*modeljobsv1alpha1.ModelJob{},
+	}
+
+	for _, d := range datas.Items {
+		servingList.Items = append(servingList.Items, d.(*modeljobsv1alpha1.ModelJob))
+	}
+	return servingList
+}
+
+func (m ModelJobController) List(namespace string, opt *paging.ListOption) (*ModelJobList, error) {
 	modeljobs, err := m.modeljobInformer.Lister().ModelJobs(namespace).List(labels.Everything())
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}
 
-	return modeljobs, nil
+	sort.SliceStable(modeljobs, func(i, j int) bool {
+		return modeljobs[i].Name < modeljobs[j].Name
+	})
+	return toModelJobList(modeljobs, opt), nil
 }

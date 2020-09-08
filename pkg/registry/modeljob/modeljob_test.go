@@ -9,6 +9,7 @@ import (
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/common"
+	"github.com/kleveross/klever-model-registry/pkg/paging"
 )
 
 var _ = Describe("Modeljob API", func() {
@@ -34,9 +35,11 @@ var _ = Describe("Modeljob API", func() {
 		}, timeout, interval).Should(Succeed())
 
 		// List modeljob
-		modeljobeListed, err := modeljobController.List(modeljobCreated.Namespace)
+		modeljobeListed, err := modeljobController.List(modeljobCreated.Namespace, &paging.ListOption{
+			Start: 0,
+		})
 		Expect(err).To(BeNil())
-		Expect(len(modeljobeListed)).To(Equal(1))
+		Expect(modeljobeListed.ListMeta.TotalItems).To(Equal(1))
 
 		// Delete modeljob
 		err = modeljobController.Delete(modeljobCreated.Namespace, modeljobCreated.Name)
