@@ -42,6 +42,8 @@ Klever Model Registry's features:
     - Keras H5 to SavedModel
     - CaffeModel to NetDef
 
+See our [official documentations](/docs/README.md) for more information。
+
 ## UI MockUp
 
 <p align="center">
