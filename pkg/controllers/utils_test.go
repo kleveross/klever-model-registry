@@ -107,7 +107,7 @@ func Test_getFrameworkByFormat(t *testing.T) {
 func Test_generateJobResource(t *testing.T) {
 	initGlobalVar()
 	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
-	conversionDesiredTag := "desired tag"
+	conversionDesiredTag := "release/savedmodel:v2"
 
 	type args struct {
 		modeljob *modeljobsv1alpha1.ModelJob
@@ -123,6 +123,7 @@ func Test_generateJobResource(t *testing.T) {
 			args: args{
 				modeljob: &modeljobsv1alpha1.ModelJob{
 					Spec: modeljobsv1alpha1.ModelJobSpec{
+						Model: "release/savedmodel:v1",
 						ModelJobSource: modeljobsv1alpha1.ModelJobSource{
 							Extraction: &modeljobsv1alpha1.ExtractionSource{
 								Format: modeljobsv1alpha1.FormatSavedModel,
@@ -156,7 +157,7 @@ func Test_generateJobResource(t *testing.T) {
 			args: args{
 				modeljob: &modeljobsv1alpha1.ModelJob{
 					Spec: modeljobsv1alpha1.ModelJobSpec{
-						Model:      "model tag",
+						Model:      "release/savedmodel:v1",
 						DesiredTag: &conversionDesiredTag,
 						ModelJobSource: modeljobsv1alpha1.ModelJobSource{
 							Conversion: &modeljobsv1alpha1.ConversionSource{

@@ -11,4 +11,7 @@ var (
 	ModelFormatToFrameworkMapping map[modeljobsv1alpha1.Format]modeljobsv1alpha1.Framework
 	// PresetAnalyzeImageConfig is the preset image of analyze for some model's format.
 	PresetAnalyzeImageConfig *corev1.ConfigMap
+
+	// KleverModelRegistryAddressEnvKey is the address of klever-model-registry
+	KleverModelRegistryAddressEnvKey = "KLEVER_MODEL_REGISTRY_ADDRESS"
 )
