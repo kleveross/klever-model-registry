@@ -10,7 +10,7 @@ RUN apt update -y && apt install libgomp1 wget -y &&\
     pip install --no-cache-dir \
                 grpcio==1.26.0\
                 grpcio-tools\
-                mxnet\
+                mxnet==1.5.1\
                 future\
                 pyyaml\
     && wget https://github.com/kleveross/ormb/releases/download/$ormb_version/$ormb_tar_filename \
