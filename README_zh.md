@@ -40,6 +40,8 @@ Klever Model Registry 的特性包括：
     - Keras H5 转为 SavedModel
     - CaffeModel 转为 NetDef 
 
+查看我们的 [官方文档](/docs/docs_zh/README.md) 获取更多信息。
+
 ## UI MockUp
 
 <p align="center">
