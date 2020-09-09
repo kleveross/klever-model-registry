@@ -17,26 +17,72 @@ func getFrameworkByFormat(format modeljobsv1alpha1.Format) modeljobsv1alpha1.Fra
 	return ModelFormatToFrameworkMapping[format]
 }
 
+// getORMBDomain is get domain for ModelJob task.
+// For model extraction, when it is completed, it should push model to harbor directly
+// so that not create ModelJob repeatedly, but for model conversion, when convert complete,
+// it should push to klever-model-registry, so that it can extract model automatically.
+func getORMBDomain(isConvert bool) string {
+	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
+	if isConvert {
+		ormbDomain = viper.GetString(KleverModelRegistryAddressEnvKey)
+	}
+
+	return ormbDomain
+}
+
+// replaceModelRefDomain will replace modelRef domain.
+// The real domain is depend on getORMBDomain.
+func replaceModelRefDomain(inputModelRef, ormbDomain string) (string, error) {
+	refSlice := strings.Split(inputModelRef, "/")
+
+	modelRef := ""
+	if len(refSlice) == 2 {
+		// The form like release/savedmodel:v1.0, do not have default domain.
+		modelRef = strings.Join([]string{ormbDomain, refSlice[0], refSlice[1]}, "/")
+	} else if len(refSlice) == 3 {
+		// The form like harbor.io/release/savedmodel:v1.0, it have default domain.
+		modelRef = strings.Join([]string{ormbDomain, refSlice[1], refSlice[2]}, "/")
+	} else {
+		return "", fmt.Errorf("The model ref's format is error")
+	}
+
+	return modelRef, nil
+}
+
 func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, error) {
 	var dstFormat modeljobsv1alpha1.Format
 	var dstFramework modeljobsv1alpha1.Framework
-	dstTag := ""
+	srcModelRef := ""
+	dstModelRef := ""
 	image := ""
+	ormbDomain := ""
+	var err error
+
 	if modeljob.Spec.Conversion != nil {
 		if modeljob.Spec.DesiredTag == nil {
 			return nil, fmt.Errorf("modeljob desired tag is nil")
 		}
-		dstTag = *modeljob.Spec.DesiredTag
+		ormbDomain = getORMBDomain(true)
+		dstModelRef, err = replaceModelRefDomain(*modeljob.Spec.DesiredTag, ormbDomain)
+		if err != nil {
+			return nil, err
+		}
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
 		dstFramework = getFrameworkByFormat(dstFormat)
 		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(modeljob.Spec.Conversion.MMdnn.From))+"-convert"]
 	} else if modeljob.Spec.Extraction != nil {
-		dstTag = "empty"
+		ormbDomain = getORMBDomain(false)
+		dstModelRef = "empty"
 		dstFormat = modeljob.Spec.Extraction.Format
 		dstFramework = getFrameworkByFormat(dstFormat)
 		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-extract"]
 	} else {
 		return nil, fmt.Errorf("%v", "not support source")
+	}
+
+	srcModelRef, err = replaceModelRefDomain(modeljob.Spec.Model, ormbDomain)
+	if err != nil {
+		return nil, err
 	}
 
 	initContainers, err := generateInitContainers(modeljob)
@@ -76,11 +122,11 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 								},
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.SourceModelTagEnvKey,
-									Value: modeljob.Spec.Model,
+									Value: srcModelRef,
 								},
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.DestinationModelTagEnvKey,
-									Value: dstTag,
+									Value: dstModelRef,
 								},
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.SourceModelPathEnvKey,
@@ -96,7 +142,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 								},
 								corev1.EnvVar{
 									Name:  common.ORMBDomainEnvKey,
-									Value: viper.GetString(common.ORMBDomainEnvKey),
+									Value: ormbDomain,
 								},
 								corev1.EnvVar{
 									Name:  common.ORMBUsernameEnvkey,

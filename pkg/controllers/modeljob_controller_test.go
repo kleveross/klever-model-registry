@@ -63,7 +63,7 @@ var _ = Describe("Modeljob Controller", func() {
 					Namespace: key.Namespace,
 				},
 				Spec: modeljobsv1alpha1.ModelJobSpec{
-					Model: "extraction model tag",
+					Model: "release/savedmodel:v1",
 					ModelJobSource: modeljobsv1alpha1.ModelJobSource{
 						Extraction: &modeljobsv1alpha1.ExtractionSource{
 							Format: modeljobsv1alpha1.FormatSavedModel,
