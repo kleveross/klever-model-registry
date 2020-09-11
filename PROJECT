@@ -1,6 +1,6 @@
-domain: caicloud.io
+domain: kleveross.io
 layout: go.kubebuilder.io/v2
-repo: github.com/caicloud/temp-model-registry
+repo: github.com/kleveross/klever-model-registry
 resources:
 - group: modeljobs
   kind: ModelJob
