@@ -9,6 +9,7 @@ import (
 	httpexpect "github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/models"
@@ -70,13 +71,12 @@ var _ = Describe("Model Registry", func() {
 		})
 
 		Context("ModelJobs", func() {
-			It("Should get the ModelJobs successfully", func() {
-				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
-					"default").Expect().Status(http.StatusOK)
-			})
-
+			name := "jobtest"
 			It("Should create the ModelJobs successfully", func() {
 				job := modeljobsv1alpha1.ModelJob{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: name,
+					},
 					Spec: modeljobsv1alpha1.ModelJobSpec{
 						// Use ModelRegistryHost/<project>/<model>:<version>.
 						Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, model, version),
@@ -88,6 +88,16 @@ var _ = Describe("Model Registry", func() {
 					},
 				}
 				e.POST("/api/v1alpha1/namespaces/{namespace}/modeljobs", "default").WithJSON(job).Expect().Status(http.StatusCreated)
+			})
+
+			It("Should list the ModelJobs successfully", func() {
+				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
+					"default").Expect().Status(http.StatusOK)
+			})
+
+			It("Should get the ModelJob successfully", func() {
+				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/{modeljobID}",
+					"default", name).Expect().Status(http.StatusOK)
 			})
 		})
 	})
