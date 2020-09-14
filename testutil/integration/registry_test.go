@@ -91,8 +91,20 @@ var _ = Describe("Model Registry", func() {
 			})
 
 			It("Should list the ModelJobs successfully", func() {
-				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
-					"default").Expect().Status(http.StatusOK)
+				modelJobs := e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
+					"default").Expect().Status(http.StatusOK).JSON().Object().Value("items").Array()
+
+				found := false
+				for _, modelJob := range modelJobs.Iter() {
+					rawLabels := modelJob.Path("$.metadata.labels").Raw()
+					if rawLabels.(map[string]interface{})["resource_name"].(string) == name {
+						found = true
+						// Set the name to the CRD name in the kubernetes cluster.
+						name = modelJob.Path("$.metadata.name").String().Raw()
+						return
+					}
+				}
+				Expect(found).To(BeTrue())
 			})
 
 			It("Should get the ModelJob successfully", func() {
