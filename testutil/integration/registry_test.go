@@ -30,7 +30,7 @@ var _ = Describe("Model Registry", func() {
 				},
 				Spec: seldonv1.SeldonDeploymentSpec{},
 			}
-			e.POST("/api/v1alpha1/namespaces/{namespace}/servings", "default").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusCreated)
+			e.POST("/api/v1alpha1/namespaces/{namespace}/servings/", "default").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusCreated)
 		})
 		It("Should get the Servings successfully", func() {
 			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
@@ -127,8 +127,7 @@ var _ = Describe("Model Registry", func() {
 
 			It("Should get the ModelJob events successfully", func() {
 				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/{modeljobID}/events",
-					"default", name).Expect().Status(http.StatusOK).
-					JSON().Object().Value("items").Array()
+					"default", name).Expect().Status(http.StatusOK)
 			})
 		})
 	})
