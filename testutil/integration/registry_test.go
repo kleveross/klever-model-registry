@@ -111,6 +111,12 @@ var _ = Describe("Model Registry", func() {
 				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/{modeljobID}",
 					"default", name).Expect().Status(http.StatusOK)
 			})
+
+			It("Should get the ModelJob events successfully", func() {
+				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/{modeljobID}/events",
+					"default", name).Expect().Status(http.StatusOK).
+					JSON().Object().Value("items").Array()
+			})
 		})
 	})
 })
