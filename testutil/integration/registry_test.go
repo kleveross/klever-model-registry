@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/models"
 )
 
@@ -18,12 +19,6 @@ var _ = Describe("Model Registry", func() {
 	const interval = time.Second * 1
 
 	e := httpexpect.New(GinkgoT(), ModelRegistryHost)
-	Context("ModelJobs", func() {
-		It("Should get the ModelJobs successfully", func() {
-			e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
-				"default").Expect().Status(http.StatusOK)
-		})
-	})
 	Context("Servings", func() {
 		It("Should get the Servings successfully", func() {
 			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
@@ -72,6 +67,28 @@ var _ = Describe("Model Registry", func() {
 			// It is blocked since goharbor/harbor-helm does not support 2.1 now.
 			// artifact.Value("extra_attrs").Object().Value("format").Equal("SavedModel")
 			artifact.Value("type").Equal("MODEL")
+		})
+
+		Context("ModelJobs", func() {
+			It("Should get the ModelJobs successfully", func() {
+				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
+					"default").Expect().Status(http.StatusOK)
+			})
+
+			It("Should create the ModelJobs successfully", func() {
+				job := modeljobsv1alpha1.ModelJob{
+					Spec: modeljobsv1alpha1.ModelJobSpec{
+						// Use ModelRegistryHost/<project>/<model>:<version>.
+						Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, model, version),
+						ModelJobSource: modeljobsv1alpha1.ModelJobSource{
+							Extraction: &modeljobsv1alpha1.ExtractionSource{
+								Format: modeljobsv1alpha1.FormatSavedModel,
+							},
+						},
+					},
+				}
+				e.POST("/api/v1alpha1/namespaces/{namespace}/modeljobs", "default").WithJSON(job).Expect().Status(http.StatusCreated)
+			})
 		})
 	})
 })
