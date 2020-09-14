@@ -9,6 +9,7 @@ import (
 	httpexpect "github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
@@ -21,11 +22,23 @@ var _ = Describe("Model Registry", func() {
 
 	e := httpexpect.New(GinkgoT(), ModelRegistryHost)
 	Context("Servings", func() {
+		name := "test"
+		It("Should create the Serving successfully", func() {
+			seldonCoreDeploy := &seldonv1.SeldonDeployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: name,
+				},
+				Spec: seldonv1.SeldonDeploymentSpec{},
+			}
+			e.POST("/api/v1alpha1/namespaces/{namespace}/servings", "default").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusCreated)
+		})
 		It("Should get the Servings successfully", func() {
 			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
-				"default").Expect().Status(http.StatusOK)
+				"default").Expect().Status(http.StatusOK).
+				JSON().Object().Value("items").Array().Length().Equal(1)
 		})
 	})
+
 	Context("Models", func() {
 		project := "library"
 		model := "tensorflow"
