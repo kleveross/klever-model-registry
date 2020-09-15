@@ -78,19 +78,7 @@ $ make docker-build
 ```
 
 ### Install
-
-#### Install Harbor
-[Harbor](https://github.com/goharbor/harbor) is registry for the training model in klever-model-registry, please refer to the installation of Harbor [harbor-helm installation](https://github.com/goharbor/harbor-helm)
-
-#### Install klever-model-registry
-
-```bash
-$ kubectl create namespace kleveross-system
-$ git clone https://github.com/kleveross/klever-model-registry
-$ cd klever-model-registry/manifests
-$ helm install klever-model-registry ./klever-model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
-$ helm install klever-modeljob-operator ./klever-modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
-```
+Please have a look at [docs/installer/install.md](docs/installer/installation.md)
 
 ## Community
 

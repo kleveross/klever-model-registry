@@ -76,19 +76,7 @@ $ make docker-build
 ```
 
 ### 部署
-
-#### 安装 Harbor
-klever-model-registry 使用 [Harbor](https://github.com/goharbor/harbor) 存储训练模型，Harbor 的安装方式请参考 [harbor-helm 安装](https://github.com/goharbor/harbor-helm)
-
-#### 安装 klever-model-registry
-
-```bash
-$ kubectl create namespace kleveross-system
-$ git clone https://github.com/kleveross/klever-model-registry
-$ cd klever-model-registry/manifests
-$ helm install klever-model-registry ./klever-model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
-$ helm install klever-modeljob-operator ./klever-modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
-```
+请参考 [docs/installer/install_zh.md](docs/installer/installation_zh.md)
 
 ## 社区
 
