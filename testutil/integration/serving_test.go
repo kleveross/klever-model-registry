@@ -12,7 +12,6 @@ import (
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/models"
 )
 
@@ -30,7 +29,7 @@ var _ = Describe("Model Registry", func() {
 				},
 				Spec: seldonv1.SeldonDeploymentSpec{},
 			}
-			e.POST("/api/v1alpha1/namespaces/{namespace}/servings/", "default").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusCreated)
+			e.POST("/api/v1alpha1/namespaces/{namespace}/servings", "default").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusCreated)
 		})
 		It("Should get the Servings successfully", func() {
 			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
@@ -81,54 +80,6 @@ var _ = Describe("Model Registry", func() {
 			// It is blocked since goharbor/harbor-helm does not support 2.1 now.
 			// artifact.Value("extra_attrs").Object().Value("format").Equal("SavedModel")
 			artifact.Value("type").Equal("MODEL")
-		})
-
-		Context("ModelJobs", func() {
-			name := "jobtest"
-			It("Should create the ModelJobs successfully", func() {
-				job := modeljobsv1alpha1.ModelJob{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: name,
-					},
-					Spec: modeljobsv1alpha1.ModelJobSpec{
-						// Use ModelRegistryHost/<project>/<model>:<version>.
-						Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, model, version),
-						ModelJobSource: modeljobsv1alpha1.ModelJobSource{
-							Extraction: &modeljobsv1alpha1.ExtractionSource{
-								Format: modeljobsv1alpha1.FormatSavedModel,
-							},
-						},
-					},
-				}
-				e.POST("/api/v1alpha1/namespaces/{namespace}/modeljobs", "default").WithJSON(job).Expect().Status(http.StatusCreated)
-			})
-
-			It("Should list the ModelJobs successfully", func() {
-				modelJobs := e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/",
-					"default").Expect().Status(http.StatusOK).JSON().Object().Value("items").Array()
-
-				found := false
-				for _, modelJob := range modelJobs.Iter() {
-					rawLabels := modelJob.Path("$.metadata.labels").Raw()
-					if rawLabels.(map[string]interface{})["resource_name"].(string) == name {
-						found = true
-						// Set the name to the CRD name in the kubernetes cluster.
-						name = modelJob.Path("$.metadata.name").String().Raw()
-						return
-					}
-				}
-				Expect(found).To(BeTrue())
-			})
-
-			It("Should get the ModelJob successfully", func() {
-				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/{modeljobID}",
-					"default", name).Expect().Status(http.StatusOK)
-			})
-
-			It("Should get the ModelJob events successfully", func() {
-				e.GET("/api/v1alpha1/namespaces/{namespace}/modeljobs/{modeljobID}/events",
-					"default", name).Expect().Status(http.StatusOK)
-			})
 		})
 	})
 })
