@@ -52,7 +52,7 @@ func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
 	modelName := pathSlice[2]
 	versionName := pathSlice[4]
 
-	artis, err := p.listArtifacts(projectName, modelName)
+	artis, err := p.ListArtifacts(projectName, modelName)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
 	return nil
 }
 
-func (p *Proxy) listArtifacts(project, repo string) ([]Artifact, error) {
+func (p *Proxy) ListArtifacts(project, repo string) ([]Artifact, error) {
 	url := fmt.Sprintf("http://%v/api/v2.0/projects/%v/repositories/%v/artifacts",
 		p.Domain, project, repo)
 
