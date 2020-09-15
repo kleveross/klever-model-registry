@@ -79,3 +79,6 @@ ormb:
 model:
   registry:
     address: klever-model-registry.kleveross-system:8080
+
+scheduler:
+  name: ""

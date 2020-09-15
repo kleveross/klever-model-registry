@@ -14,4 +14,10 @@ var (
 
 	// KleverModelRegistryAddressEnvKey is the address of klever-model-registry
 	KleverModelRegistryAddressEnvKey = "KLEVER_MODEL_REGISTRY_ADDRESS"
+
+	// DefaultSchedulerName is default scheduler name
+	DefaultSchedulerName = "default-scheduler"
+
+	// SchedulerNameEnvKey is the env key for scheduler name, it is set in Deployment
+	SchedulerNameEnvKey = "SCHEDULER_NAME"
 )
