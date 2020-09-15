@@ -28,6 +28,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: SCHEDULER_NAME
+              value: {{ .Values.scheduler.name }}
             - name: KLEVER_MODEL_REGISTRY_ADDRESS
               value: {{ .Values.model.registry.address }}
             - name: SERVER_ORMB_DOMAIN

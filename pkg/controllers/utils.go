@@ -90,6 +90,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		return nil, err
 	}
 
+	schedulerName := getSchedulerName()
 	backoffLimit := int32(0)
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -110,7 +111,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 								"-c",
 								fmt.Sprintf("/scripts/run.sh"),
 							},
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.FrameworkEnvKey,
@@ -170,6 +171,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 						},
 					},
 					RestartPolicy: corev1.RestartPolicyNever,
+					SchedulerName: schedulerName,
 				},
 			},
 			BackoffLimit: &backoffLimit,
@@ -222,4 +224,13 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 	}
 
 	return initContainers, nil
+}
+
+func getSchedulerName() string {
+	schedulerName := viper.GetString(SchedulerNameEnvKey)
+	if schedulerName == "" {
+		schedulerName = DefaultSchedulerName
+	}
+
+	return schedulerName
 }
