@@ -3,6 +3,7 @@ package serving
 import (
 	"sort"
 
+	"github.com/caicloud/nirvana/log"
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
 	seldonv1client "github.com/seldonio/seldon-core/operator/client/machinelearning.seldon.io/v1/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,10 +23,14 @@ func New(seldClient seldonv1client.Interface) *ServingController {
 }
 
 func (s ServingController) Create(namespace string, sdep *seldonv1.SeldonDeployment) error {
-	Compose(sdep)
+	if err := Compose(sdep); err != nil {
+		log.Errorf("Failed to compose the Seldon Deployment: %v", err)
+		return errors.RenderError(err)
+	}
 
 	_, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Create(sdep)
 	if err != nil {
+		log.Errorf("Failed to create the Seldon Deployment: %v", err)
 		return errors.RenderError(err)
 	}
 
