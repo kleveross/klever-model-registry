@@ -15,23 +15,29 @@ const (
 	envModelRestirtyExternalAddress = "EXTERNAL_ADDRESS"
 )
 
-// Proxy is the proxy to Harbor core service.
-type Proxy struct {
+// ProxyClient is the proxy client to Harbor core service.
+type ProxyClient interface {
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+	createModelJob(path string, byteManifests []byte) error
+	ListArtifacts(project, repo string) ([]Artifact, error)
+}
+
+// proxy is the proxy to Harbor core service.
+type proxy struct {
 	Domain   string
 	Username string
 	Password string
 }
 
-// NewProxy creates a new proxy.
-func NewProxy(domain, username, password string) *Proxy {
-	return &Proxy{
+func NewProxy(domain, username, password string) ProxyClient {
+	return &proxy{
 		Domain:   domain,
 		Username: username,
 		Password: password,
 	}
 }
 
-func (p Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	proxy := httputil.NewSingleHostReverseProxy(r.URL)
 	proxy.Director = func(req *http.Request) {
 		req.SetBasicAuth(p.Username, p.Password)

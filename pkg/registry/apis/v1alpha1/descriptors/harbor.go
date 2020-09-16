@@ -19,7 +19,7 @@ import (
 	"github.com/kleveross/klever-model-registry/pkg/registry/harbor"
 )
 
-var harborController *harbor.Proxy
+var harborController harbor.ProxyClient
 
 // InitHarborController handles the harbor proxy
 func InitHarborController(domain, username, password string) {
