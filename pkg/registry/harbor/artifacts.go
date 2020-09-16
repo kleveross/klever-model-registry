@@ -45,7 +45,7 @@ type Tag struct {
 	PullTime     time.Time `json:"pull_time"`
 }
 
-func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
+func (p *proxy) createModelJob(path string, byteManifests []byte) error {
 	path = strings.Trim(path, "/")
 	pathSlice := strings.Split(path, "/")
 	projectName := pathSlice[1]
@@ -85,7 +85,7 @@ func (p *Proxy) createModelJob(path string, byteManifests []byte) error {
 	return nil
 }
 
-func (p *Proxy) ListArtifacts(project, repo string) ([]Artifact, error) {
+func (p *proxy) ListArtifacts(project, repo string) ([]Artifact, error) {
 	url := fmt.Sprintf("http://%v/api/v2.0/projects/%v/repositories/%v/artifacts",
 		p.Domain, project, repo)
 

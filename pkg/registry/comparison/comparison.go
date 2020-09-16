@@ -21,7 +21,8 @@ import (
 
 // Generator list models' metadata and compare
 func Generator(ctx context.Context, models Comparison, opt *paging.ListOption) (*ORMBModelList, error) {
-	metaList, err := composeComparison(models.Models)
+	proxy := harbor.NewProxy(common.ORMBDomain, common.ORMBUserName, common.ORMBPassword)
+	metaList, err := composeComparison(models.Models, proxy)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +45,7 @@ func toORMBModelList(items []*ormbmodel.Model, opt *paging.ListOption) *ORMBMode
 	return modelList
 }
 
-func composeComparison(models []ComparisonModel) ([]*ormbmodel.Model, error) {
-	proxy := harbor.NewProxy(common.ORMBDomain, common.ORMBUserName, common.ORMBPassword)
+func composeComparison(models []ComparisonModel, proxy harbor.ProxyClient) ([]*ormbmodel.Model, error) {
 	metaList := make([]*ormbmodel.Model, 0)
 	for _, model := range models {
 		artifacts, err := proxy.ListArtifacts(model.Project, model.Name)
@@ -78,7 +78,8 @@ func composeComparison(models []ComparisonModel) ([]*ormbmodel.Model, error) {
 
 // DownloadCSVFile downloads the comparison csv file
 func DownloadCSVFile(ctx context.Context, models Comparison) error {
-	metaList, err := composeComparison(models.Models)
+	proxy := harbor.NewProxy(common.ORMBDomain, common.ORMBUserName, common.ORMBPassword)
+	metaList, err := composeComparison(models.Models, proxy)
 	if err != nil {
 		return err
 	}
