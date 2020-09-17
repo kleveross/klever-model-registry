@@ -22,6 +22,7 @@ import (
 	"strconv"
 
 	"github.com/seldonio/seldon-core/operator/constants"
+	istio_networking "istio.io/api/networking/v1alpha3"
 	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,15 +35,15 @@ const (
 	Label_svc_orch           = "seldon-deployment-contains-svcorch"
 	Label_app                = "app"
 	Label_fluentd            = "fluentd"
-	Label_router             = "router"
-	Label_combiner           = "combiner"
-	Label_model              = "model"
-	Label_transformer        = "transformer"
-	Label_output_transformer = "output-transformer"
-	Label_default            = "default"
-	Label_shadow             = "shadow"
-	Label_canary             = "canary"
-	Label_explainer          = "explainer"
+	Label_router             = "seldon.io/router"
+	Label_combiner           = "seldon.io/combiner"
+	Label_model              = "seldon.io/model"
+	Label_transformer        = "seldon.io/transformer"
+	Label_output_transformer = "seldon.io/output-transformer"
+	Label_default            = "seldon.io/default"
+	Label_shadow             = "seldon.io/shadow"
+	Label_canary             = "seldon.io/canary"
+	Label_explainer          = "seldon.io/explainer"
 	Label_managed_by         = "app.kubernetes.io/managed-by"
 	Label_value_seldon       = "seldon-core"
 
@@ -60,6 +61,7 @@ const (
 	ENV_PREDICTOR_ID                         = "PREDICTOR_ID"
 	ENV_PREDICTOR_LABELS                     = "PREDICTOR_LABELS"
 	ENV_SELDON_DEPLOYMENT_ID                 = "SELDON_DEPLOYMENT_ID"
+	ENV_SELDON_EXECUTOR_ENABLED              = "SELDON_EXECUTOR_ENABLED"
 
 	ANNOTATION_JAVA_OPTS       = "seldon.io/engine-java-opts"
 	ANNOTATION_SEPARATE_ENGINE = "seldon.io/engine-separate-pod"
@@ -163,17 +165,17 @@ func GetPredictiveUnit(pu *PredictiveUnit, name string) *PredictiveUnit {
 
 // if engine is not separated then this tells us which pu it should go on, as the mutating webhook handler has set host as localhost on the pu
 func GetEnginePredictiveUnit(pu *PredictiveUnit) *PredictiveUnit {
-	if pu.Endpoint != nil && pu.Endpoint.ServiceHost == "localhost" {
+	if pu.Endpoints != nil && pu.Endpoints[0].ServiceHost == "localhost" {
 		return pu
-	} else {
-		for i := 0; i < len(pu.Children); i++ {
-			found := GetEnginePredictiveUnit(&pu.Children[i])
-			if found != nil {
-				return found
-			}
-		}
-		return nil
 	}
+	for i := 0; i < len(pu.Children); i++ {
+		found := GetEnginePredictiveUnit(&pu.Children[i])
+		if found != nil {
+			return found
+		}
+	}
+	return nil
+
 }
 
 func GetPredictiveUnitList(p *PredictiveUnit) (list []*PredictiveUnit) {
@@ -209,6 +211,7 @@ type SeldonDeploymentSpec struct {
 	Protocol    Protocol          `json:"protocol,omitempty" protobuf:"bytes,6,opt,name=protocol"`
 	Transport   Transport         `json:"transport,omitempty" protobuf:"bytes,7,opt,name=transport"`
 	Replicas    *int32            `json:"replicas,omitempty" protobuf:"bytes,8,opt,name=replicas"`
+	ServerType  ServerType        `json:"serverType,omitempty" protobuf:"bytes,8,opt,name=serverType"`
 }
 
 type PredictorSpec struct {
@@ -221,6 +224,7 @@ type PredictorSpec struct {
 	Labels          map[string]string       `json:"labels,omitempty" protobuf:"bytes,7,opt,name=labels"`
 	SvcOrchSpec     SvcOrchSpec             `json:"svcOrchSpec,omitempty" protobuf:"bytes,8,opt,name=svcOrchSpec"`
 	Traffic         int32                   `json:"traffic,omitempty" protobuf:"bytes,9,opt,name=traffic"`
+	TrafficMatchs   []HTTPMatchRequest      `json:"trafficMatchs,omitempty" protobuf:"bytes,9,opt,name=trafficMatchs"`
 	Explainer       *Explainer              `json:"explainer,omitempty" protobuf:"bytes,10,opt,name=explainer"`
 	Shadow          bool                    `json:"shadow,omitempty" protobuf:"bytes,11,opt,name=shadow"`
 }
@@ -239,6 +243,13 @@ const (
 	TransportGrpc Transport = "grpc"
 )
 
+type ServerType string
+
+const (
+	ServerRPC   ServerType = "rpc"
+	ServerKafka ServerType = "kafka"
+)
+
 type SvcOrchSpec struct {
 	Resources *v1.ResourceRequirements `json:"resources,omitempty" protobuf:"bytes,1,opt,name=resources"`
 	Env       []*v1.EnvVar             `json:"env,omitempty" protobuf:"bytes,2,opt,name=env"`
@@ -248,12 +259,68 @@ type SvcOrchSpec struct {
 type AlibiExplainerType string
 
 const (
-	AlibiAnchorsTabularExplainer  AlibiExplainerType = "AnchorTabular"
-	AlibiAnchorsImageExplainer    AlibiExplainerType = "AnchorImages"
-	AlibiAnchorsTextExplainer     AlibiExplainerType = "AnchorText"
-	AlibiCounterfactualsExplainer AlibiExplainerType = "Counterfactuals"
-	AlibiContrastiveExplainer     AlibiExplainerType = "Contrastive"
+	AlibiAnchorsTabularExplainer      AlibiExplainerType = "AnchorTabular"
+	AlibiAnchorsImageExplainer        AlibiExplainerType = "AnchorImages"
+	AlibiAnchorsTextExplainer         AlibiExplainerType = "AnchorText"
+	AlibiCounterfactualsExplainer     AlibiExplainerType = "Counterfactuals"
+	AlibiContrastiveExplainer         AlibiExplainerType = "Contrastive"
+	AlibiKernelShapExplainer          AlibiExplainerType = "KernelShap"
+	AlibiIntegratedGradientsExplainer AlibiExplainerType = "IntegratedGradients"
+	AlibiALEExplainer                 AlibiExplainerType = "ALE"
 )
+
+// HTTPMatchRequest specify rules to match requests. All rules are ANDed.
+type HTTPMatchRequest struct {
+	// Match headers of a request.
+	Headers map[string]StringMatch `json:"headers"`
+}
+
+// StringMatch defines 3 different types of matching strategy, i.e. only match prefix,
+// exact string match, and regular expression match.
+type StringMatch struct {
+	Prefix  string `json:"prefix,omitempty"`
+	Exact   string `json:"exact,omitempty"`
+	Regex   string `json:"regex,omitempty"`
+	Include string `json:"include,omitempty"`
+	Exclude string `json:"exclude,omitempty"`
+}
+
+// ConvertIstioStringMatch convert the StringMatch type in this file to *istio_networking.StringMatch.
+func ConvertIstioStringMatch(match StringMatch) *istio_networking.StringMatch {
+	if match.Exact != "" {
+		return &istio_networking.StringMatch{
+			MatchType: &istio_networking.StringMatch_Exact{
+				Exact: match.Exact,
+			},
+		}
+	} else if match.Prefix != "" {
+		return &istio_networking.StringMatch{
+			MatchType: &istio_networking.StringMatch_Prefix{
+				Prefix: match.Prefix,
+			},
+		}
+	} else if match.Regex != "" {
+		return &istio_networking.StringMatch{
+			MatchType: &istio_networking.StringMatch_Regex{
+				Regex: match.Regex,
+			},
+		}
+	} else if match.Include != "" {
+		return &istio_networking.StringMatch{
+			MatchType: &istio_networking.StringMatch_Regex{
+				Regex: match.Include,
+			},
+		}
+	} else if match.Exclude != "" {
+		return &istio_networking.StringMatch{
+			MatchType: &istio_networking.StringMatch_Regex{
+				Regex: match.Exclude,
+			},
+		}
+	}
+
+	return nil
+}
 
 type Explainer struct {
 	Type               AlibiExplainerType `json:"type,omitempty" protobuf:"string,1,opt,name=type"`
@@ -344,7 +411,7 @@ type PredictiveUnit struct {
 	Type               *PredictiveUnitType           `json:"type,omitempty" protobuf:"int,3,opt,name=type"`
 	Implementation     *PredictiveUnitImplementation `json:"implementation,omitempty" protobuf:"int,4,opt,name=implementation"`
 	Methods            *[]PredictiveUnitMethod       `json:"methods,omitempty" protobuf:"int,5,opt,name=methods"`
-	Endpoint           *Endpoint                     `json:"endpoint,omitempty" protobuf:"bytes,6,opt,name=endpoint"`
+	Endpoints          []Endpoint                    `json:"endpoints,omitempty" protobuf:"bytes,6,opt,name=endpoints"`
 	Parameters         []Parameter                   `json:"parameters,omitempty" protobuf:"bytes,7,opt,name=parameters"`
 	ModelURI           string                        `json:"modelUri,omitempty" protobuf:"bytes,8,opt,name=modelUri"`
 	ServiceAccountName string                        `json:"serviceAccountName,omitempty" protobuf:"bytes,9,opt,name=serviceAccountName"`

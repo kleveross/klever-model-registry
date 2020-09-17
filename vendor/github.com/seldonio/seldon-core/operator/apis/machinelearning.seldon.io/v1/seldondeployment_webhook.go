@@ -17,6 +17,10 @@ limitations under the License.
 package v1
 
 import (
+	"log"
+	"os"
+	"strconv"
+
 	"github.com/seldonio/seldon-core/operator/constants"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -24,13 +28,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"log"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	"strconv"
 )
 
 var (
@@ -125,23 +126,46 @@ func (r *SeldonDeploymentSpec) setContainerPredictiveUnitDefaults(compSpecIdx in
 	portNum int32, nextMetricsPortNum *int32, mldepName string, namespace string,
 	p *PredictorSpec, pu *PredictiveUnit, con *corev1.Container) {
 
-	if pu.Endpoint == nil {
-		if r.Transport == TransportGrpc {
-			pu.Endpoint = &Endpoint{Type: GRPC}
-		} else {
-			pu.Endpoint = &Endpoint{Type: REST}
-		}
-	}
-	var portType string
-	if pu.Endpoint.Type == GRPC {
-		portType = constants.GrpcPortName
+	// Set ports and hostname in predictive unit so engine can read it from SDep
+	// if this is the first componentSpec then it's the one to put the engine in - note using outer loop counter here
+	serviceHost := ""
+	if _, hasSeparateEnginePod := r.Annotations[ANNOTATION_SEPARATE_ENGINE]; compSpecIdx == 0 && !hasSeparateEnginePod {
+		serviceHost = constants.DNSLocalHost
 	} else {
-		portType = constants.HttpPortName
+		containerServiceValue := GetContainerServiceName(mldepName, *p, con)
+		serviceHost = containerServiceValue + "." + namespace + constants.DNSClusterLocalSuffix
 	}
 
-	existingPort := GetPort(portType, con.Ports)
-	if existingPort != nil {
-		portNum = existingPort.ContainerPort
+	if pu.Endpoints == nil {
+		for _, c := range con.Ports {
+			if c.Name == constants.GrpcPortName {
+				endpoint := Endpoint{ServiceHost: serviceHost,
+					ServicePort: c.ContainerPort,
+					Type:        GRPC,
+				}
+				pu.Endpoints = append(pu.Endpoints, endpoint)
+			}
+
+			if c.Name == constants.HttpPortName {
+				endpoint := Endpoint{ServiceHost: serviceHost,
+					ServicePort: c.ContainerPort,
+					Type:        REST,
+				}
+				pu.Endpoints = append(pu.Endpoints, endpoint)
+			}
+		}
+
+		if pu.Endpoints == nil {
+			if r.Transport == TransportGrpc {
+				pu.Endpoints = []Endpoint{{Type: GRPC, ServicePort: portNum, ServiceHost: serviceHost}}
+			} else {
+				pu.Endpoints = []Endpoint{{Type: REST, ServicePort: portNum, ServiceHost: serviceHost}}
+			}
+		}
+	}
+	if pu.Endpoints[0].ServicePort == 0 {
+		pu.Endpoints[0].ServicePort = portNum
+		pu.Endpoints[0].ServiceHost = serviceHost
 	}
 
 	volFound := false
@@ -174,17 +198,6 @@ func (r *SeldonDeploymentSpec) setContainerPredictiveUnitDefaults(compSpecIdx in
 
 	//Add metrics port if missing
 	addMetricsPortAndIncrement(nextMetricsPortNum, con)
-
-	// Set ports and hostname in predictive unit so engine can read it from SDep
-	// if this is the first componentSpec then it's the one to put the engine in - note using outer loop counter here
-	if _, hasSeparateEnginePod := r.Annotations[ANNOTATION_SEPARATE_ENGINE]; compSpecIdx == 0 && !hasSeparateEnginePod {
-		pu.Endpoint.ServiceHost = constants.DNSLocalHost
-	} else {
-		containerServiceValue := GetContainerServiceName(mldepName, *p, con)
-		pu.Endpoint.ServiceHost = containerServiceValue + "." + namespace + constants.DNSClusterLocalSuffix
-	}
-	pu.Endpoint.ServicePort = portNum
-
 }
 
 func (r *SeldonDeploymentSpec) DefaultSeldonDeployment(mldepName string, namespace string) {
@@ -358,14 +371,27 @@ func (r *SeldonDeploymentSpec) checkPredictiveUnits(pu *PredictiveUnit, p *Predi
 func checkTraffic(spec *SeldonDeploymentSpec, fldPath *field.Path, allErrs field.ErrorList) field.ErrorList {
 	var trafficSum int32 = 0
 	var shadows int = 0
+	var trafficMatchsNum int = 0
 	for i := 0; i < len(spec.Predictors); i++ {
 		p := spec.Predictors[i]
+
+		if len(p.TrafficMatchs) != 0 {
+			trafficMatchsNum++
+			continue
+		}
+
 		trafficSum = trafficSum + p.Traffic
 
 		if p.Shadow == true {
 			shadows += 1
 		}
 	}
+
+	// Traffic diversion by header, not check traffic diversion by weight.
+	if trafficMatchsNum != 0 {
+		return allErrs
+	}
+
 	if trafficSum != 100 && (len(spec.Predictors)-shadows) > 1 {
 		allErrs = append(allErrs, field.Invalid(fldPath, spec.Predictors[0].Name, "Traffic must sum to 100 for multiple predictors"))
 	}
@@ -385,12 +411,53 @@ func sizeOfGraph(p *PredictiveUnit) int {
 }
 
 func collectTransports(pu *PredictiveUnit, transportsFound map[EndpointType]bool) {
-	if pu.Endpoint != nil && pu.Endpoint.Type != "" {
-		transportsFound[pu.Endpoint.Type] = true
+	for _, t := range pu.Endpoints {
+		if t.Type != "" {
+			transportsFound[t.Type] = true
+		}
 	}
+
 	for _, c := range pu.Children {
 		collectTransports(&c, transportsFound)
 	}
+}
+
+const (
+	ENV_KAFKA_BROKER       = "KAFKA_BROKER"
+	ENV_KAFKA_INPUT_TOPIC  = "KAFKA_INPUT_TOPIC"
+	ENV_KAFKA_OUTPUT_TOPIC = "KAFKA_OUTPUT_TOPIC"
+)
+
+func (r *SeldonDeploymentSpec) validateKafka(allErrs field.ErrorList) field.ErrorList {
+	if r.ServerType == ServerKafka {
+		for i, p := range r.Predictors {
+			if len(p.SvcOrchSpec.Env) == 0 {
+				fldPath := field.NewPath("spec").Child("predictors").Index(i)
+				allErrs = append(allErrs, field.Invalid(fldPath, p.Name, "For kafka please supply svcOrchSpec envs KAFKA_BROKER, KAFKA_INPUT_TOPIC, KAFKA_OUTPUT_TOPIC"))
+			} else {
+				found := 0
+				for _, env := range p.SvcOrchSpec.Env {
+					switch env.Name {
+					case ENV_KAFKA_BROKER, ENV_KAFKA_INPUT_TOPIC, ENV_KAFKA_OUTPUT_TOPIC:
+						found = found + 1
+					}
+				}
+				if found < 3 {
+					fldPath := field.NewPath("spec").Child("predictors").Index(i)
+					allErrs = append(allErrs, field.Invalid(fldPath, p.Name, "For kafka please supply svcOrchSpec envs KAFKA_BROKER, KAFKA_INPUT_TOPIC, KAFKA_OUTPUT_TOPIC"))
+				}
+			}
+		}
+	}
+	return allErrs
+}
+
+func (r *SeldonDeploymentSpec) validateShadow(allErrs field.ErrorList) field.ErrorList {
+	if len(r.Predictors) == 1 && r.Predictors[0].Shadow {
+		fldPath := field.NewPath("spec").Child("predictors").Index(0)
+		allErrs = append(allErrs, field.Invalid(fldPath, r.Predictors[0].Name, "Shadow can not exist as only predictor"))
+	}
+	return allErrs
 }
 
 func (r *SeldonDeploymentSpec) ValidateSeldonDeployment() error {
@@ -406,7 +473,20 @@ func (r *SeldonDeploymentSpec) ValidateSeldonDeployment() error {
 		allErrs = append(allErrs, field.Invalid(fldPath, r.Transport, "Invalid transport"))
 	}
 
+	if r.ServerType != "" && !(r.ServerType == ServerRPC || r.ServerType == ServerKafka) {
+		fldPath := field.NewPath("spec")
+		allErrs = append(allErrs, field.Invalid(fldPath, r.ServerType, "Invalid serverType"))
+	}
+
+	allErrs = r.validateKafka(allErrs)
+	allErrs = r.validateShadow(allErrs)
+
 	transports := make(map[EndpointType]bool)
+
+	if len(r.Predictors) == 0 {
+		fldPath := field.NewPath("spec")
+		allErrs = append(allErrs, field.Invalid(fldPath, r.Transport, "Graph contains no predictors"))
+	}
 
 	predictorNames := make(map[string]bool)
 	for i, p := range r.Predictors {
@@ -428,12 +508,14 @@ func (r *SeldonDeploymentSpec) ValidateSeldonDeployment() error {
 		allErrs = r.checkPredictiveUnits(&p.Graph, &p, field.NewPath("spec").Child("predictors").Index(i).Child("graph"), allErrs)
 	}
 
-	if len(transports) > 1 {
-		fldPath := field.NewPath("spec")
-		allErrs = append(allErrs, field.Invalid(fldPath, "", "Multiple endpoint.types found - can only have 1 type in graph. Please use spec.transport"))
-	} else if len(transports) == 1 && r.Transport != "" {
+	if r.Transport != "" {
+		found := false
 		for k := range transports {
-			if (k == REST && r.Transport != TransportRest) || (k == GRPC && r.Transport != TransportGrpc) {
+			if (k == REST && r.Transport == TransportRest) || (k == GRPC && r.Transport == TransportGrpc) {
+				found = true
+				break
+			}
+			if !found {
 				fldPath := field.NewPath("spec")
 				allErrs = append(allErrs, field.Invalid(fldPath, "", "Mixed transport types found. Remove graph endpoint.types if transport set at deployment level"))
 			}
