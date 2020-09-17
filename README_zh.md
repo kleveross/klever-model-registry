@@ -76,7 +76,7 @@ $ make docker-build
 ```
 
 ### 部署
-请参考 [docs/installer/install_zh.md](docs/installer/installation_zh.md)
+请参考 [docs/docs_zh/installation.md](docs/docs_zh/installation.md)
 
 ## 社区
 

@@ -78,7 +78,7 @@ $ make docker-build
 ```
 
 ### Install
-Please have a look at [docs/installer/install.md](docs/installer/installation.md)
+Please have a look at [docs/installation.md](docs/installation.md)
 
 ## Community
 
