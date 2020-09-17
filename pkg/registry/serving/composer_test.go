@@ -60,8 +60,10 @@ var _ = BeforeEach(func() {
 						Name:               "graph1",
 						ModelURI:           "harbor-harbor-core.kleveross-system/release/savedmodel:v1",
 						ServiceAccountName: "default",
-						Endpoint: &seldonv1.Endpoint{
-							Type: seldonv1.REST,
+						Endpoints: []seldonv1.Endpoint{
+							{
+								Type: seldonv1.REST,
+							},
 						},
 						Parameters: []seldonv1.Parameter{
 							{
@@ -96,8 +98,10 @@ var _ = BeforeEach(func() {
 						Name:               "graph1",
 						ModelURI:           "harbor-harbor-core.kleveross-system/release/savedmodel:v1",
 						ServiceAccountName: "default",
-						Endpoint: &seldonv1.Endpoint{
-							Type: seldonv1.REST,
+						Endpoints: []seldonv1.Endpoint{
+							{
+								Type: seldonv1.REST,
+							},
 						},
 						Parameters: []seldonv1.Parameter{
 							{
@@ -120,8 +124,10 @@ var _ = BeforeEach(func() {
 						Name:               "graph2",
 						ModelURI:           "harbor-harbor-core.kleveross-system/release/pmml:v1",
 						ServiceAccountName: "default",
-						Endpoint: &seldonv1.Endpoint{
-							Type: seldonv1.REST,
+						Endpoints: []seldonv1.Endpoint{
+							{
+								Type: seldonv1.REST,
+							},
 						},
 						Parameters: []seldonv1.Parameter{
 							{

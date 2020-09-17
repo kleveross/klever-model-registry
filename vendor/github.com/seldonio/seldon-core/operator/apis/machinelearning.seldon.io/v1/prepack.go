@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+
 	corev1 "k8s.io/api/core/v1"
 	k8types "k8s.io/apimachinery/pkg/types"
-	"os"
 )
 
 const (
@@ -153,8 +154,8 @@ func GetPrepackServerConfig(serverName string) *PredictorServerConfig {
 
 func SetImageNameForPrepackContainer(pu *PredictiveUnit, c *corev1.Container, serverConfig *PredictorServerConfig) {
 	// Add image: ignore version if empty
-	if c.Image == "" {
-		if pu.Endpoint.Type == REST {
+	if c.Image == "" && pu.Endpoints != nil {
+		if pu.Endpoints[0].Type == REST {
 			c.Image = serverConfig.RestConfig.ContainerImage
 			if serverConfig.RestConfig.DefaultImageVersion != "" {
 				c.Image = c.Image + ":" + serverConfig.RestConfig.DefaultImageVersion
