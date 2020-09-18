@@ -104,10 +104,12 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 			return errors.RenderInternalServerError(err)
 		}
 
-		modeljobObj := modeljob.GenerateExtractionModelJob(common.ORMBDomain, projectName, modelName, versionName, model.Format)
-		_, err = client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
-		if err != nil {
-			return errors.RenderInternalServerError(err)
+		if modeljob.IsExtractModel(model.Format) {
+			modeljobObj := modeljob.GenerateExtractionModelJob(common.ORMBDomain, projectName, modelName, versionName, model.Format)
+			_, err = client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
+			if err != nil {
+				return errors.RenderInternalServerError(err)
+			}
 		}
 	}
 
