@@ -75,6 +75,11 @@ func (p *proxy) createModelJob(path string, byteManifests []byte) error {
 		return nil
 	}
 	if format, ok := found.ExtraAttrs["format"]; ok {
+		if !modeljob.IsExtractModel(format.(string)) {
+			log.Infof("the model format %v is not need extract", format)
+			return nil
+		}
+
 		modeljobObj := modeljob.GenerateExtractionModelJob(p.Domain, projectName, modelName, versionName, format.(string))
 		_, err := client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
 		if err != nil {
