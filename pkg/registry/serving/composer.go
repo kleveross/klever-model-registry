@@ -34,6 +34,9 @@ const (
 
 	// defaultInferenceGRPCPort is default port for grpc.
 	defaultInferenceGRPCPort = 8001
+
+	// modelStorePath is trtserver param --model-repository path.
+	modelStorePath = "/mnt"
 )
 
 func Compose(sdep *seldonv1.SeldonDeployment) error {
@@ -75,7 +78,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 			Env: []corev1.EnvVar{
 				{
 					Name:  "MODEL_STORE",
-					Value: modelMountPath,
+					Value: modelStorePath,
 				},
 				{
 					Name:  "SERVING_NAME",
@@ -264,7 +267,7 @@ func getModelTag(modelUri string) (string, error) {
 // getModelMountPath will generate model mount path in container,
 // ormb-storage-initializer will pull and export model to this path.
 func getModelMountPath(servingName string) string {
-	return fmt.Sprintf("/mnt/%v", servingName)
+	return fmt.Sprintf("%v/%v", modelStorePath, servingName)
 }
 
 func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
