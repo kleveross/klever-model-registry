@@ -27,6 +27,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+          - name: MODEL_INITIALIZER_CPU
+          - name: MODEL_INITIALIZER_MEM
           - name: TRT_SERVING_IMAGE
             value: "{{ .Values.model.serving.trt.image }}:{{ .Values.model.serving.trt.tag }}"
           - name: PMML_SERVING_IMAGE
