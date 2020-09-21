@@ -32,6 +32,12 @@ const (
 	// envModelInitializerImage is the preset image for model initializer.
 	envModelInitializerImage = "MODEL_INITIALIZER_IMAGE"
 
+	// envModelInitializerCPU ist the cpu config for model-initializer container.
+	envModelInitializerCPU = "MODEL_INITIALIZER_CPU"
+
+	// envModelInitializerMem ist the cpu config for model-initializer container.
+	envModelInitializerMem = "MODEL_INITIALIZER_MEM"
+
 	// defaultInferenceHTTPPort is default port for http.
 	defaultInferenceHTTPPort = 8000
 
@@ -301,8 +307,41 @@ func getModelMountPath(servingName string) string {
 	return fmt.Sprintf("%v/%v", modelStorePath, servingName)
 }
 
+// getModelInitailzerContainerResource get the default resource config.
+func getModelInitailzerContainerResource() (*corev1.ResourceRequirements, error) {
+	cpu := viper.GetString(envModelInitializerCPU)
+	mem := viper.GetString(envModelInitializerMem)
+	if cpu != "" && mem != "" {
+		resourcesList := make(corev1.ResourceList)
+		cpuQuantity, err := resource.ParseQuantity(cpu)
+		if err != nil {
+			return nil, err
+		}
+		resourcesList[corev1.ResourceCPU] = cpuQuantity
+
+		memQuantity, err := resource.ParseQuantity(mem)
+		if err != nil {
+			return nil, err
+		}
+		resourcesList[corev1.ResourceMemory] = memQuantity
+
+		resources := &corev1.ResourceRequirements{
+			Limits:   resourcesList,
+			Requests: resourcesList,
+		}
+
+		return resources, nil
+	}
+
+	return nil, nil
+}
+
 func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
 	modelMountPath := getModelMountPath(sdep.Name)
+	resources, err := getModelInitailzerContainerResource()
+	if err != nil {
+		return err
+	}
 
 	for _, p := range sdep.Spec.Predictors {
 		// simple model serving, the number of ComponentSpecs is 1
@@ -340,7 +379,11 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
 				},
 			},
 		}
+		if resources != nil {
+			container.Resources = *resources
+		}
 		p.ComponentSpecs[0].Spec.InitContainers = []corev1.Container{container}
 	}
+
 	return nil
 }

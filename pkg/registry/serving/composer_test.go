@@ -4,6 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
+	"github.com/spf13/viper"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/serving"
@@ -47,6 +48,9 @@ var _ = Describe("Composer", func() {
 })
 
 var _ = BeforeEach(func() {
+	viper.Set("MODEL_INITIALIZER_CPU", "1")
+	viper.Set("MODEL_INITIALIZER_MEM", "1Gi")
+
 	sdepSingleGraph = &seldonv1.SeldonDeployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "sdep-name",
