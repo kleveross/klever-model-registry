@@ -29,7 +29,9 @@ def get_platform_by_format(format):
         'graphdef': 'tensorflow_graphdef',
         'netdef': 'caffe2_netdef',
         'pmml': 'pmmlruntime_pmml',
-        'tensorrt': 'tensorrt_plan'
+        'tensorrt': 'tensorrt_plan',
+        'sklearn': 'scikitlearn_sklearn',
+        'xgboost': 'xgboost_xgboost'
     }
     
     return format_platform_dict[format]

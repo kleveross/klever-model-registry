@@ -26,6 +26,9 @@ const (
 	// envPMMLServingImage is the preset image for pmml.
 	envPMMLServingImage = "PMML_SERVING_IMAGE"
 
+	// envMLServerLImage is the preset image for mlserver.
+	envMLServerImage = "MLSERVER_IMAGE"
+
 	// envModelInitializerImage is the preset image for model initializer.
 	envModelInitializerImage = "MODEL_INITIALIZER_IMAGE"
 
@@ -34,6 +37,12 @@ const (
 
 	// defaultInferenceGRPCPort is default port for grpc.
 	defaultInferenceGRPCPort = 8001
+
+	// defaultMLServerHTTPPort is default port for http.
+	defaultMLServerHTTPPort = 8080
+
+	// defaultMLServerGRPCPort is default port for grpc.
+	defaultMLServerGRPCPort = 8081
 
 	// modelStorePath is trtserver param --model-repository path.
 	modelStorePath = "/mnt"
@@ -69,7 +78,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 		probe := getProbe(modelFormat, sdep.Name)
 		ports := getUserContainerPorts(modelFormat)
 
-		image := getUserContainerImage(&sdep.Spec.Predictors[i].Graph)
+		image := getUserContainerImage(modelFormat)
 		// compose user containers
 		container := corev1.Container{
 			Name:            containerName,
@@ -126,6 +135,22 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 }
 
 func getUserContainerPorts(format string) []corev1.ContainerPort {
+	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
+		ports := []corev1.ContainerPort{
+			{
+				Name:          "http",
+				Protocol:      corev1.ProtocolTCP,
+				ContainerPort: defaultMLServerHTTPPort,
+			},
+			{
+				Name:          "grpc",
+				Protocol:      corev1.ProtocolTCP,
+				ContainerPort: defaultMLServerGRPCPort,
+			},
+		}
+		return ports
+	}
+
 	ports := []corev1.ContainerPort{
 		{
 			Name:          "http",
@@ -148,8 +173,12 @@ func getUserContainerPorts(format string) []corev1.ContainerPort {
 // getProbe generate readiness and liveiness.
 func getProbe(format, servingName string) *corev1.Probe {
 	path := fmt.Sprintf("/api/status/%v", servingName)
+	port := defaultInferenceHTTPPort
 	if format == string(modeljobsv1alpha1.FormatPMML) {
 		path = fmt.Sprintf("/openscoring/model/%v", servingName)
+	} else if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
+		path = fmt.Sprintf("/v2/models/%v/ready", servingName)
+		port = defaultMLServerHTTPPort
 	}
 
 	return &corev1.Probe{
@@ -158,7 +187,7 @@ func getProbe(format, servingName string) *corev1.Probe {
 				Path: path,
 				Port: intstr.IntOrString{
 					Type:   intstr.Int,
-					IntVal: defaultInferenceHTTPPort,
+					IntVal: int32(port),
 				},
 				Scheme: corev1.URISchemeHTTP,
 			},
@@ -185,10 +214,12 @@ func getModelFormat(pu *seldonv1.PredictiveUnit) string {
 }
 
 // getUserContainerImage get image by different model format.
-func getUserContainerImage(pu *seldonv1.PredictiveUnit) string {
-	format := getModelFormat(pu)
+func getUserContainerImage(format string) string {
 	if format == string(modeljobsv1alpha1.FormatPMML) {
 		return viper.GetString(envPMMLServingImage)
+	}
+	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
+		return viper.GetString(envMLServerImage)
 	}
 
 	return viper.GetString(envTRTServingImage)

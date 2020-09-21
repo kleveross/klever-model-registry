@@ -89,6 +89,9 @@ model:
     pmml: 
       image: cargo.dev.caicloud.xyz/release/openscoring
       tag: 0.1.0
+    mlserver: 
+      image: cargo.dev.caicloud.xyz/release/mlserver
+      tag: 0.1.0
     initializer: 
       image: cargo.dev.caicloud.xyz/release/klever-ormb-storage-initializer
       tag: v0.0.4

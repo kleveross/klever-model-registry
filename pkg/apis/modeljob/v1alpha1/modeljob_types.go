@@ -129,6 +129,8 @@ const (
 	FormatTorchScript Format = "TorchScript"
 	FormatGraphDef    Format = "GraphDef"
 	FormatTensorRT    Format = "TensorRT"
+	FormatSKLearn     Format = "SKLearn"
+	FormatXGBoost     Format = "XGBoost"
 )
 
 type ModelJobPhase string
