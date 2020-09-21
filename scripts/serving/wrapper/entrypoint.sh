@@ -87,4 +87,4 @@ python3 /opt/wrapper/preprocessor.py
 # We found that warn caused the program to exit unexpectedly, such as (failed to get power usage for GPU 0,
 # NVML_ERROR 3) or (failed to get energy consumption for GPU 0, NVML_ERROR 3), so we tried to use this option to
 # avoid accidental exit.
-trtserver --model-repository=${MODEL_STORE}/.. --strict-model-config=false --log-warning=false
+trtserver --model-repository=${MODEL_STORE} --strict-model-config=false --log-warning=false

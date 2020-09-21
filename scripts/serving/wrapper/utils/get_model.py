@@ -7,8 +7,8 @@ from loguru import logger
 
 
 @logger.catch()
-def check_model(dirPath):
-    yaml_file_path = os.path.join(dirPath, 'ormbfile.yaml')
+def check_model(dir_path, serving_name):
+    yaml_file_path = os.path.join(dir_path, serving_name, 'ormbfile.yaml')
     with open(yaml_file_path, encoding="utf-8") as mf:
         buffer = mf.read()
         manifest = yaml.load(buffer)

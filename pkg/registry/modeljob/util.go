@@ -45,3 +45,14 @@ func GenerateExtractionModelJob(domain, project, modelName, versionName, format 
 
 	return &modeljob
 }
+
+// IsExtractModel return bool which is represent whether extract model or not.
+// For `TensorRT` format, since extract MUST have GPU, but GPU resource is precious, so not extract.
+// For `Others` format, not extract.
+func IsExtractModel(format string) bool {
+	if format == string(modeljobsv1alpha1.FormatTensorRT) {
+		return false
+	}
+
+	return true
+}
