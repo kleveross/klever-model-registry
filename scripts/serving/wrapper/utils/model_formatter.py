@@ -97,6 +97,23 @@ class TensorRTFormatter(ModelFormatInterface):
         hp.rename(target_dir, tensorrt_file[0],
                   TensorRTFormatter._target_plan_filename)
 
+class SKLearnFormatter(ModelFormatInterface):
+    _target_sklearn_filename = 'model.joblib'
+
+    def execute(self, target_dir):
+        sklearn_file = hp.find_file_ends_with(target_dir, '.joblib')
+        assert len(sklearn_file) == 1
+        hp.rename(target_dir, sklearn_file[0],
+                  SKLearnFormatter._target_sklearn_filename)
+
+class XGBoostFormatter(ModelFormatInterface):
+    _target_xgboost_filename = 'model.xgboost'
+
+    def execute(self, target_dir):
+        xgboost_file = hp.find_file_ends_with(target_dir, '.xgboost')
+        assert len(xgboost_file) == 1
+        hp.rename(target_dir, xgboost_file[0],
+                  XGBoostFormatter._target_xgboost_filename)
 
 class ModelFormatter:
     _implemented_dict = {
@@ -106,7 +123,9 @@ class ModelFormatter:
         'tensorflow_graphdef': TFGraphDefFormatter,
         'caffe2_netdef': Caffe2NetDefFormatter,
         'pmmlruntime_pmml': PMMLFormatter,
-        'tensorrt_plan': TensorRTFormatter
+        'tensorrt_plan': TensorRTFormatter,
+        'scikitlearn_sklearn': SKLearnFormatter,
+        'xgboost_xgboost': XGBoostFormatter
     }
     def __init__(self, format):
         platform = hp.get_platform_by_format(format)

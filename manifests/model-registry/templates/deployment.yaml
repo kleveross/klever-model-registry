@@ -31,6 +31,8 @@ spec:
             value: "{{ .Values.model.serving.trt.image }}:{{ .Values.model.serving.trt.tag }}"
           - name: PMML_SERVING_IMAGE
             value: "{{ .Values.model.serving.pmml.image }}:{{ .Values.model.serving.pmml.tag }}"
+          - name: MLSERVER_IMAGE
+            value: "{{ .Values.model.serving.mlserver.image }}:{{ .Values.model.serving.mlserver.tag }}"
           - name: MODEL_INITIALIZER_IMAGE
             value: "{{ .Values.model.serving.initializer.image }}:{{ .Values.model.serving.initializer.tag }}"
           - name: KLEVER_MODEL_REGISTRY_PORT
