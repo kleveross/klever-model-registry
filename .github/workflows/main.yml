@@ -47,7 +47,8 @@ jobs:
       - name: send coverage
         uses: shogo82148/actions-goveralls@v1
         with:
-          path-to-profile: src/github.com/kleveross/klever-model-registry/profile.cov
+          path-to-profile: profile.cov
+          working-directory: src/github.com/kleveross/klever-model-registry
           flag-name: unit-test
           parallel: true
 
