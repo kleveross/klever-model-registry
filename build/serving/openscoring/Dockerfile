@@ -17,4 +17,4 @@ WORKDIR /opt/openscoring
 
 EXPOSE 8000
 
-ENTRYPOINT ["/opt/openscoring/openscoring.sh"]
+ENTRYPOINT ["/opt/openscoring/entrypoint.sh"]
