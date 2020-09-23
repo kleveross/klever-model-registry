@@ -32,11 +32,17 @@ const (
 	// envModelInitializerImage is the preset image for model initializer.
 	envModelInitializerImage = "MODEL_INITIALIZER_IMAGE"
 
-	// envModelInitializerCPU ist the cpu config for model-initializer container.
+	// envModelInitializerCPU is the cpu config for model-initializer container.
 	envModelInitializerCPU = "MODEL_INITIALIZER_CPU"
 
-	// envModelInitializerMem ist the cpu config for model-initializer container.
+	// envModelInitializerMem is the cpu config for model-initializer container.
 	envModelInitializerMem = "MODEL_INITIALIZER_MEM"
+
+	// envNvidiaVisibleDevices set the env empty string, the container will not use GPU.
+	envNvidiaVisibleDevices = "NVIDIA_VISIBLE_DEVICES"
+
+	// envSchedulerName will set podSpec's SchedulerName.
+	envSchedulerName = "SCHEDULER_NAME"
 
 	// defaultInferenceHTTPPort is default port for http.
 	defaultInferenceHTTPPort = 8000
@@ -75,13 +81,15 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 		containerName := sdep.Spec.Predictors[i].Graph.Name
 		sdep.Spec.Predictors[i].Name = sdep.Spec.Predictors[i].Graph.Name
 
-		resources, err := getRuntimeResource(&sdep.Spec.Predictors[i].Graph)
+		resources, gpuFlag, err := getRuntimeResource(&sdep.Spec.Predictors[i].Graph)
 		if err != nil {
 			return err
 		}
 
 		modelFormat := getModelFormat(&sdep.Spec.Predictors[i].Graph)
+		// Must set probe, otherwise the default probe by seldon's webhook will cause error.
 		probe := getProbe(modelFormat, sdep.Name)
+
 		ports := getUserContainerPorts(modelFormat)
 
 		image := getUserContainerImage(modelFormat)
@@ -115,24 +123,31 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 			Resources: *resources,
 		}
 
-		sdep.Spec.Predictors[i].ComponentSpecs = []*seldonv1.SeldonPodSpec{
-			&seldonv1.SeldonPodSpec{
-				Metadata: metav1.ObjectMeta{
-					Name: podName,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{container},
-					Volumes: []corev1.Volume{
-						{
-							Name: modelSharedMountName,
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
+		// If not set GPU resource, must set env key is equal "NVIDIA_VISIBLE_DEVICES" and value is empty string.
+		if !gpuFlag {
+			container.Env = append(container.Env, corev1.EnvVar{
+				Name: envNvidiaVisibleDevices,
+			})
+		}
+
+		seldPodSpec := &seldonv1.SeldonPodSpec{
+			Metadata: metav1.ObjectMeta{
+				Name: podName,
+			},
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{container},
+				Volumes: []corev1.Volume{
+					{
+						Name: modelSharedMountName,
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					},
 				},
 			},
 		}
+		composeSchedulerName(seldPodSpec)
+		sdep.Spec.Predictors[i].ComponentSpecs = []*seldonv1.SeldonPodSpec{seldPodSpec}
 	}
 
 	composeInitContainer(sdep)
@@ -243,11 +258,12 @@ func getUserContainerImage(format string) string {
 // 	},
 // 	...
 // ]
-func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequirements, error) {
+func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequirements, bool, error) {
 	cpu := ""
 	mem := ""
 	gpuType := ""
 	gpuNum := ""
+	gpuFlag := false
 	for _, p := range pu.Parameters {
 		if p.Name == "cpu" {
 			cpu = p.Value
@@ -266,13 +282,13 @@ func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequiremen
 	resourcesList := make(corev1.ResourceList)
 	cpuQuantity, err := resource.ParseQuantity(cpu)
 	if err != nil {
-		return nil, err
+		return nil, gpuFlag, err
 	}
 	resourcesList[corev1.ResourceCPU] = cpuQuantity
 
 	memQuantity, err := resource.ParseQuantity(mem)
 	if err != nil {
-		return nil, err
+		return nil, gpuFlag, err
 	}
 	resourcesList[corev1.ResourceMemory] = memQuantity
 
@@ -280,15 +296,16 @@ func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequiremen
 	if gpuType != "" && gpuNum != "" {
 		gpuNumQuantity, err := resource.ParseQuantity(gpuNum)
 		if err != nil {
-			return nil, err
+			return nil, gpuFlag, err
 		}
 		resourcesList[corev1.ResourceName(gpuType)] = gpuNumQuantity
+		gpuFlag = true
 	}
 
 	return &corev1.ResourceRequirements{
 		Limits:   resourcesList,
 		Requests: resourcesList,
-	}, nil
+	}, gpuFlag, nil
 }
 
 // getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
@@ -307,41 +324,36 @@ func getModelMountPath(servingName string) string {
 	return fmt.Sprintf("%v/%v", modelStorePath, servingName)
 }
 
-// getModelInitailzerContainerResource get the default resource config.
-func getModelInitailzerContainerResource() (*corev1.ResourceRequirements, error) {
+// composeModelInitailzerContainerResource get the default resource config.
+func composeModelInitailzerContainerResource(container *corev1.Container) error {
 	cpu := viper.GetString(envModelInitializerCPU)
 	mem := viper.GetString(envModelInitializerMem)
 	if cpu != "" && mem != "" {
 		resourcesList := make(corev1.ResourceList)
 		cpuQuantity, err := resource.ParseQuantity(cpu)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		resourcesList[corev1.ResourceCPU] = cpuQuantity
 
 		memQuantity, err := resource.ParseQuantity(mem)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		resourcesList[corev1.ResourceMemory] = memQuantity
 
-		resources := &corev1.ResourceRequirements{
+		container.Resources = corev1.ResourceRequirements{
 			Limits:   resourcesList,
 			Requests: resourcesList,
 		}
-
-		return resources, nil
+		return nil
 	}
 
-	return nil, nil
+	return nil
 }
 
 func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
 	modelMountPath := getModelMountPath(sdep.Name)
-	resources, err := getModelInitailzerContainerResource()
-	if err != nil {
-		return err
-	}
 
 	for _, p := range sdep.Spec.Predictors {
 		// simple model serving, the number of ComponentSpecs is 1
@@ -349,7 +361,7 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
 			return fmt.Errorf("too many or too less componentspecs")
 		}
 
-		container := corev1.Container{
+		container := &corev1.Container{
 			Name:  "model-initializer",
 			Image: viper.GetString(envModelInitializerImage),
 			Args:  []string{p.Graph.ModelURI, modelMountPath},
@@ -379,11 +391,23 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
 				},
 			},
 		}
-		if resources != nil {
-			container.Resources = *resources
+
+		err := composeModelInitailzerContainerResource(container)
+		if err != nil {
+			return err
 		}
-		p.ComponentSpecs[0].Spec.InitContainers = []corev1.Container{container}
+
+		p.ComponentSpecs[0].Spec.InitContainers = []corev1.Container{*container}
 	}
 
 	return nil
+}
+
+// composeSchedulerName set container for inference task.
+func composeSchedulerName(seldonPodSpec *seldonv1.SeldonPodSpec) {
+	schedulerName := viper.GetString(envSchedulerName)
+	if schedulerName == "" {
+		return
+	}
+	seldonPodSpec.Spec.SchedulerName = schedulerName
 }
