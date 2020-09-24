@@ -15,25 +15,47 @@ But for klever, we only support [istio](https://github.com/istio/istio), not sup
 
 ### Install command
 ```bash
-helm install seldon-core seldon-core-operator \
+$ kubectl create namespace seldon-system
+$ helm install seldon-core seldon-core-operator \
     --repo https://storage.googleapis.com/seldon-charts \
     --set usageMetrics.enabled=true \
-    --namespace seldon-system \
     --set istio.enabled=true \
     --set istio.gateway=istio-system/kleveross-gateway \
     --set ambassador.enabled=false \
     --set executor.enabled=false \
-    --set defaultUserID=0
+    --set defaultUserID=0 \
+    --set image.registry=ghcr.io \
+    --set image.repository=kleveross/seldon-core-operator \
+    --set image.tag=0.1.0 \
+    --namespace seldon-system
 ```
 
 ## Install harbor
 [Harbor](https://github.com/goharbor/harbor) is registry for the training model in klever-model-registry, please refer to the installation of Harbor [harbor-helm installation](https://github.com/goharbor/harbor-helm)
+
+There are install case.
+
+```bash
+$ kubectl create namespace harbor-system
+$ helm install harbor harbor/harbor \
+    --repo https://helm.goharbor.io \
+    --set expose.nodePort.ports.http.nodePort=30022 \
+    --set expose.type=nodePort \
+    --set expose.tls.enabled=false \
+    --set trivy.enabled=false \
+    --set notary.enabled=false \
+    --set persistence.enabled=false \
+    --set trivy.ignoreUnfixed=true \
+    --set trivy.insecure=true \
+    --set externalURL=http://{masterIP}:30022 \
+    --namespace harbor-system
+```
 
 ## Install klever
 ```bash
 $ kubectl create namespace kleveross-system
 $ git clone https://github.com/kleveross/klever-model-registry
 $ cd klever-model-registry/manifests
-$ helm install klever-model-registry ./klever-model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
-$ helm install klever-modeljob-operator ./klever-modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
+$ helm install klever-model-registry ./model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set externalAddress={model-registry-external-address}  --set service.nodePort={port}
+$ helm install klever-modeljob-operator ./modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.registry.address={model-registry-internal-address}
 ```

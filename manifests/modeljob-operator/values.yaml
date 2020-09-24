@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: cargo.dev.caicloud.xyz/release/modeljob-operator
+  repository: ghcr.io/kleveross/modeljob-operator
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -73,7 +73,13 @@ affinity: {}
 #
 # If "port" is not 80, you must set port, eg: 192.168.1.2:30002
 ormb:
-  domain: 192.168.22.160:30002
+  domain: harbor-harbor-core.harbor-system
+
+#
+# docker.registry is the image address of `docker pull`
+#
+docker:
+  registry: ghcr.io/kleveross
 
 # model.registry.address is the internal address of klever-model-registry in k8s.
 model:

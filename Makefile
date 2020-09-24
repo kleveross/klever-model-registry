@@ -3,7 +3,7 @@
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 # Container registries.
-REGISTRY ?= kleveross
+REGISTRY ?= ghcr.io/kleveross
 
 # Container registry for base images.
 BASE_REGISTRY ?= docker.io
