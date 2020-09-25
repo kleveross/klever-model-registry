@@ -1,0 +1,84 @@
+---
+apiVersion: machinelearning.seldon.io/v1alpha2
+kind: SeldonDeployment
+metadata:
+  name: tensorrt-seldon
+  namespace: kleveross-system
+spec:
+  name: tensorrt
+  predictors:
+  - annotations:
+      seldon.io/no-engine: "true"
+    componentSpecs:
+    - spec:
+        metadata:
+          name: tensorrt
+        containers:
+        - name: tensorrt
+          image: ghcr.io/kleveross/trtserver:0.1.0
+          ports:
+          - name: http
+            protocol: TCP
+            containerPort: 8000
+          - name: grpc
+            protocol: TCP
+            containerPort: 8001
+          imagePullPolicy: Always
+          env:
+          - name: MODEL_STORE
+            value: /mnt
+          - name: SERVING_NAME
+            value: models
+          volumeMounts:
+          - name: models-mnt
+            mountPath: /mnt/models
+          readinessProbe:
+            failureThreshold: 30
+            timeoutSeconds: 5
+            httpGet:
+              path: /api/status/models
+              scheme: HTTP
+              port: 8000
+          livenessProbe:
+            failureThreshold: 30
+            timeoutSeconds: 5
+            httpGet:
+              path: /api/status/models
+              scheme: HTTP
+              port: 8000
+          resources:
+            limits:
+              cpu: "1"
+              memory: 2Gi
+            requests:
+              cpu: "1"
+              memory: 2Gi
+        initContainers:
+        - name: model-initializer
+          args: ["harbor-harbor-core.kleveross-system/release/ol-classify:v1", "/mnt/models"]
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.4
+          imagePullPolicy: Always
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: admin
+          - name: AWS_SECRET_ACCESS_KEY
+            value: ORMBtest12345
+          - name: ROOTPATH
+            value: /mnt
+          volumeMounts:
+          - name: models-mnt
+            mountPath: /mnt/models
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          fsGroup: 10000
+        volumes:
+        - name: models-mnt
+          emptyDir: {}
+    graph:
+      name: savedmodel
+      children: []
+      modelUri: harbor-harbor-core.kleveross-system/release/ol-classify:v1
+      serviceAccountName: default
+    name: savedmodel
+    replicas: 1

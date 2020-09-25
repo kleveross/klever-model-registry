@@ -1,0 +1,78 @@
+---
+apiVersion: machinelearning.seldon.io/v1alpha2
+kind: SeldonDeployment
+metadata:
+  name: netdef-seldon
+  namespace: kleveross-system
+spec:
+  name: netdef
+  protocol: tensorflow
+  transport: rest
+  predictors:
+  - annotations:
+      seldon.io/no-engine: "true"
+    componentSpecs:
+    - spec:
+        metadata:
+          name: netdef
+        containers:
+        - name: netdef
+          image: ghcr.io/kleveross/trtserver:0.1.0
+          env:
+          - name: MODEL_STORE
+            value: /mnt
+          - name: SERVING_NAME
+            value: models
+          volumeMounts:
+          - name: models-mnt
+            mountPath: /mnt/models
+          imagePullPolicy: Always
+          readinessProbe:
+            failureThreshold: 30
+            timeoutSeconds: 5
+            httpGet:
+              path: /api/status/models
+              scheme: HTTP
+              port: 8000
+          livenessProbe:
+            failureThreshold: 30
+            timeoutSeconds: 5
+            httpGet:
+              path: /api/status/models
+              scheme: HTTP
+              port: 8000
+          resources:
+            limits:
+              cpu: 3
+              memory: 6Gi
+            requests:
+              cpu: 3
+              memory: 6Gi
+        initContainers:
+        - name: model-initializer
+          args: ["harbor-harbor-core.kleveross-system/release/netdef:v1", "/mnt/models"]
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.4
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: admin
+          - name: AWS_SECRET_ACCESS_KEY
+            value: ORMBtest12345
+          volumeMounts:
+          - name: models-mnt
+            mountPath: /mnt/models
+          imagePullPolicy: Always
+        securityContext:
+          runAsUser: 0
+          fsGroup: 10000
+        volumes:
+        - name: models-mnt
+          emptyDir: {}
+    graph:
+      name: netdef
+      children: []
+      modelUri: harbor-harbor-core.kleveross-system/release/netdef:v1
+      serviceAccountName: default
+      endpoint:
+        type: REST
+    name: netdef
+    replicas: 1
