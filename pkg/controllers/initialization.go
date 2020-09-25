@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 func initGlobalVar() {
@@ -22,6 +23,10 @@ func initGlobalVar() {
 		modeljobsv1alpha1.FormatGraphDef:    modeljobsv1alpha1.FrameworkTensorflow,
 		modeljobsv1alpha1.FormatTensorRT:    modeljobsv1alpha1.FrameworkTensorRT,
 	}
+
+	common.ORMBDomain = viper.GetString(common.ORMBDomainEnvKey)
+	common.ORMBUserName = viper.GetString(common.ORMBUsernameEnvkey)
+	common.ORMBPassword = viper.GetString(common.ORMBPasswordEnvKey)
 }
 
 func Initialization() error {

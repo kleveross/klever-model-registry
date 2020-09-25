@@ -22,7 +22,7 @@ import (
 var _ = Describe("Modeljob Controller", func() {
 	initGlobalVar()
 	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
-	modeljobName := ""
+	modeljobName := "test-modeljob"
 
 	req := ctrl.Request{
 		NamespacedName: types.NamespacedName{
