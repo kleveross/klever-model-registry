@@ -76,7 +76,15 @@ $ make docker-build
 ```
 
 ### 部署
+
 请参考 [docs/docs_zh/installation.md](docs/docs_zh/installation.md)
+
+如果想快速部署验证，可使用脚本按照如下安装步骤安装。
+
+```bash
+$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install.sh
+$ bash install.sh <master-ip>
+```
 
 ## 社区
 

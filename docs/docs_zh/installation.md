@@ -41,3 +41,17 @@ $ cd klever-model-registry/manifests
 $ helm install klever-model-registry ./model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set externalAddress={model-registry-external-address} --set service.nodePort={port}
 $ helm install klever-modeljob-operator ./modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.registry.address={model-registry-internal-address}
 ```
+
+
+### klever-model-registry 参数
+| Key | Comments |
+| :-----| :---- |
+| ormb.domain | ormb.domain 等于 harbor 地址，如果 harbor 安装在 k8s 集群中，不需设置，使用默认值即可；如果 harbor 安装在集群外部，则应设置为 harbor 访问地址，例如：demo.goharbor.io |
+| externalAddress | externalAddress 是 klever-model-registry 暴露到集群外的访问地址|
+| service.nodePort | service.nodePort klever-model-registry 暴露到集群外部的端口，其端口应该和 externalAddress 中的端口匹配 |
+
+### klever-modeljob-operator 参数
+| Key | Comments |
+| :-----| :---- |
+| ormb.domain | ormb.domain 等于 harbor 地址，如果 harbor 安装在 k8s 集群中，不需设置，使用默认值即可；如果 harbor 安装在集群外部，则应设置为 harbor 访问地址，例如：demo.goharbor.io |
+| model.registry.address | model.registry.address 是 klever-model-registry 集群内部访问地址，使用默认值即可 |

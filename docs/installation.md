@@ -59,3 +59,16 @@ $ cd klever-model-registry/manifests
 $ helm install klever-model-registry ./model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set externalAddress={model-registry-external-address}  --set service.nodePort={port}
 $ helm install klever-modeljob-operator ./modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.registry.address={model-registry-internal-address}
 ```
+
+### klever-model-registry parameters
+| Key | Comments |
+| :-----| :---- |
+| ormb.domain | It is harbor address, if harbor install in k8s cluster,  the value is harbor-harbor-core.harbor-system(it is harbor core Service address), the default value is ok,  don't set it again. If harbor install out of k8s cluster, should set it harbor's address, e.g. demo.goharbor.io |
+| externalAddress | externalAddress is address for klever-model-registry, it is exposed out of k8s cluster. |
+| service.nodePort | It is the port for klever-model-registry's Service, and it is exposed out of k8s cluster, it should be match with externalAddress's port. |
+
+### klever-modeljob-operator parameters
+| Key | Comments |
+| :-----| :---- |
+| ormb.domain | It is harbor address, if harbor install in k8s cluster,  the value is harbor-harbor-core.harbor-system(it is harbor core Service address), the default value is ok,  don't set it again. If harbor install out of k8s cluster, should set it harbor's address, e.g. demo.goharbor.io |
+| model.registry.address | It is klever-model-registry's address, Using default is ok. |
