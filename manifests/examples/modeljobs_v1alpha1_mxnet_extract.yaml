@@ -5,6 +5,6 @@ metadata:
   namespace: default
 spec:
   # Add fields here
-  model: "harbor.caicloud.com/release/mxnet:v1"
+  model: "harbor-harbor-core.kleveross-system/release/mxnet:v1"
   extraction:
     format: "MXNETParams"
