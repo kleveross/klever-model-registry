@@ -13,7 +13,6 @@ import (
 	ormbmodel "github.com/kleveross/ormb/pkg/model"
 
 	"github.com/kleveross/klever-model-registry/pkg/common"
-	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
 	"github.com/kleveross/klever-model-registry/pkg/registry/harbor"
 	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 	"github.com/kleveross/klever-model-registry/pkg/util"
@@ -83,7 +82,19 @@ func DownloadCSVFile(ctx context.Context, models Comparison) error {
 	if err != nil {
 		return err
 	}
-	err = createCSVFile(ctx, metaList)
+
+	fileName := fmt.Sprintf("%d.csv", time.Now().Unix())
+	err = generateCSVFile(ctx, fileName, metaList)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := os.Remove(fileName); err != nil {
+			log.Error("remove file is failed, err: %s", err.Error())
+		}
+	}()
+
+	err = responseCSVFile(ctx, fileName)
 	if err != nil {
 		return err
 	}
@@ -91,9 +102,7 @@ func DownloadCSVFile(ctx context.Context, models Comparison) error {
 	return nil
 }
 
-func createCSVFile(ctx context.Context, metas []*ormbmodel.Model) error {
-	fileName := fmt.Sprintf("%d.csv", time.Now().Unix())
-
+func generateCSVFile(ctx context.Context, fileName string, metas []*ormbmodel.Model) error {
 	file, err := os.Create(fileName)
 	if err != nil {
 		return fmt.Errorf("open file is failed, err: %s", err.Error())
@@ -102,9 +111,6 @@ func createCSVFile(ctx context.Context, metas []*ormbmodel.Model) error {
 	defer func() {
 		if err := file.Close(); err != nil {
 			log.Error("close file is failed, err: %s", err.Error())
-		}
-		if err := os.Remove(fileName); err != nil {
-			log.Error("remove file is failed, err: %s", err.Error())
 		}
 	}()
 
@@ -126,18 +132,28 @@ func createCSVFile(ctx context.Context, metas []*ormbmodel.Model) error {
 	}
 	csvWrite.Flush()
 
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		log.Errorf("Seek file is failed, err: %s", err.Error())
+	return nil
+}
+
+func responseCSVFile(ctx context.Context, fileName string) error {
+	file, err := os.Open(fileName)
+	if err != nil {
 		return err
 	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Error("close file is failed, err: %s", err.Error())
+		}
+	}()
 
 	responseWriter := util.GetResponseFromContext(ctx)
 	responseWriter.Header().Set("Content-Type", "application/octet-stream")
 	responseWriter.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
 	_, err = io.Copy(responseWriter, file)
 	if err != nil {
-		return errors.RenderInternalServerError(err)
+		return err
 	}
+
 	return nil
 }
 
@@ -151,6 +167,7 @@ func composeCSVFileContent(metas []*ormbmodel.Model) ([][]string, error) {
 		{"Model Inputs"},
 		{"Model Outputs"},
 	}
+
 	for index, content := range fileContents {
 		for _, meta := range metas {
 			switch content[0] {
@@ -166,13 +183,13 @@ func composeCSVFileContent(metas []*ormbmodel.Model) ([][]string, error) {
 				content = append(content, meta.Metadata.Format)
 			case "Model Inputs":
 				jsonString := "-"
-				if meta.Metadata.Signature.Inputs != nil {
+				if meta.Metadata.Signature != nil && meta.Metadata.Signature.Inputs != nil {
 					jsonString = composeJSONString(meta.Metadata.Signature.Inputs)
 				}
 				content = append(content, jsonString)
 			case "Model Outputs":
 				jsonString := "-"
-				if meta.Metadata.Signature.Outputs != nil {
+				if meta.Metadata.Signature != nil && meta.Metadata.Signature.Outputs != nil {
 					jsonString = composeJSONString(meta.Metadata.Signature.Outputs)
 				}
 				content = append(content, jsonString)
