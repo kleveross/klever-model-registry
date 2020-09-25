@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: cargo.dev.caicloud.xyz/release/model-registry
+  repository: ghcr.io/kleveross/model-registry
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -33,8 +33,9 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8080
+  nodePort: 30100
 
 ingress:
   enabled: false
@@ -77,21 +78,31 @@ affinity: {}
 #
 # If "port" is not 80, you must set port, eg: 192.168.1.2:30002
 ormb:
-  domain: 192.168.22.160:30002
+  domain: harbor-harbor-core.harbor-system
+
+#
+# externalAddress is the external address for klever-model-registry
+#
+externalAddress: ""
 
 # 
 model:
-  externalAddress: 192.168.33.34:30010
   serving:
     trt: 
-      image: cargo.dev.caicloud.xyz/release/trtserver
+      image: ghcr.io/kleveross/trtserver
       tag: 0.1.0
     pmml: 
-      image: cargo.dev.caicloud.xyz/release/openscoring
+      image: ghcr.io/kleveross/openscoring
       tag: 0.1.0
     mlserver: 
-      image: cargo.dev.caicloud.xyz/release/mlserver
+      image: ghcr.io/kleveross/mlserver
       tag: 0.1.0
     initializer: 
-      image: cargo.dev.caicloud.xyz/release/klever-ormb-storage-initializer
-      tag: v0.0.4
+      image: ghcr.io/kleveross/klever-ormb-storage-initializer
+      tag: 0.6.0
+
+#
+# set Pod SchedulerName.
+#
+scheduler:
+  name: ""

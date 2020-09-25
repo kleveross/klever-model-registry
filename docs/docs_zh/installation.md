@@ -15,15 +15,19 @@ Seldon core 官方支持 helm 安装，具体请参考 [install seldon-core by h
 
 ### 安装命令
 ```bash
+kubectl create namespace seldon-system
 helm install seldon-core seldon-core-operator \
     --repo https://storage.googleapis.com/seldon-charts \
     --set usageMetrics.enabled=true \
-    --namespace seldon-system \
     --set istio.enabled=true \
     --set istio.gateway=istio-system/kleveross-gateway \
     --set ambassador.enabled=false \
     --set executor.enabled=false \
-    --set defaultUserID=0
+    --set defaultUserID=0 \
+    --set image.registry=ghcr.io \
+    --set image.repository=kleveross/seldon-core-operator \
+    --set image.tag=0.1.0 \
+    --namespace seldon-system
 ```
 
 ## 安装 harbor
@@ -34,6 +38,6 @@ klever-model-registry 使用 [Harbor](https://github.com/goharbor/harbor) 存储
 $ kubectl create namespace kleveross-system
 $ git clone https://github.com/kleveross/klever-model-registry
 $ cd klever-model-registry/manifests
-$ helm install klever-model-registry ./klever-model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
-$ helm install klever-modeljob-operator ./klever-modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.externalAddress={model-registry-external-address}
+$ helm install klever-model-registry ./model-registry --namespace=kleveross-system --set ormb.domain={harbor address} --set externalAddress={model-registry-external-address} --set service.nodePort={port}
+$ helm install klever-modeljob-operator ./modeljob-operator --namespace=kleveross-system --set ormb.domain={harbor address} --set model.registry.address={model-registry-internal-address}
 ```

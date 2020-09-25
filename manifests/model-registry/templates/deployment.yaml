@@ -27,6 +27,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+          - name: SCHEDULER_NAME
+            value: {{ .Values.scheduler.name }}
           - name: MODEL_INITIALIZER_CPU
           - name: MODEL_INITIALIZER_MEM
           - name: TRT_SERVING_IMAGE
@@ -40,7 +42,7 @@ spec:
           - name: KLEVER_MODEL_REGISTRY_PORT
             value: {{ .Values.service.Port }}
           - name: EXTERNAL_ADDRESS
-            value: {{ .Values.model.externalAddress }}
+            value: {{ .Values.externalAddress }}
           - name: SERVER_ORMB_DOMAIN
             value: {{ .Values.ormb.domain }}
           - name: SERVER_ORMB_USERNAME
