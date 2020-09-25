@@ -1,0 +1,77 @@
+---
+apiVersion: machinelearning.seldon.io/v1alpha2
+kind: SeldonDeployment
+metadata:
+  name: pmml-seldon
+  namespace: kleveross-system
+spec:
+  name: pmml
+  protocol: tensorflow
+  transport: rest
+  predictors:
+  - annotations:
+      seldon.io/no-engine: "true"
+    componentSpecs:
+    - spec:
+        metadata:
+          name: pmml
+        containers:
+        - name: pmml
+          image: ghcr.io/kleveross/openscoring:0.1.0
+          env:
+          - name: MODEL_STORE
+            value: /mnt
+          - name: SERVING_NAME
+            value: models
+          volumeMounts:
+          - name: models-mnt
+            mountPath: /mnt/models
+          imagePullPolicy: Always
+          readinessProbe:
+            failureThreshold: 30
+            timeoutSeconds: 5
+            httpGet:
+              path: /openscoring/model/models
+              scheme: HTTP
+              port: 8000
+          livenessProbe:
+            failureThreshold: 30
+            timeoutSeconds: 5
+            httpGet:
+              path: /openscoring/model/models
+              scheme: HTTP
+              port: 8000
+          resources:
+            limits:
+              cpu: 3
+              memory: 6Gi
+            requests:
+              cpu: 3
+              memory: 6Gi
+        initContainers:
+        - name: model-initializer
+          args: ["harbor-harbor-core.kleveross-system/release/pmml:v1", "/mnt/models"]
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.4
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: admin
+          - name: AWS_SECRET_ACCESS_KEY
+            value: ORMBtest12345
+          volumeMounts:
+          - name: models-mnt
+            mountPath: /mnt/models
+        securityContext:
+          runAsUser: 0
+          fsGroup: 10000
+        volumes:
+        - name: models-mnt
+          emptyDir: {}
+    graph:
+      name: pmml
+      children: []
+      modelUri: harbor-harbor-core.kleveross-system/release/pmml:v1
+      serviceAccountName: default
+      endpoint:
+        type: REST
+    name: pmml
+    replicas: 1

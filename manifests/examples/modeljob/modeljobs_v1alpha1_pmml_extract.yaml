@@ -1,10 +1,10 @@
 apiVersion: kleveross.io/v1alpha1
 kind: ModelJob
 metadata:
-  name: modeljob-mxnet-extract
+  name: modeljob-pmml-extract
   namespace: default
 spec:
   # Add fields here
-  model: "harbor.caicloud.com/release/mxnet:v1"
+  model: "harbor-harbor-core.kleveross-system/release/pmml:v1"
   extraction:
-    format: "MXNETParams"
+    format: "PMML"

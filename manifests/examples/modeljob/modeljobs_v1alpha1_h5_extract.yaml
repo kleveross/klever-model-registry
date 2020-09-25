@@ -1,11 +1,10 @@
 apiVersion: kleveross.io/v1alpha1
 kind: ModelJob
 metadata:
-  name: modeljob-graphdef-extract
+  name: modeljob-h5-extract
   namespace: default
 spec:
   # Add fields here
-  model: "harbor.caicloud.com/release/graphdef:v1"
+  model: "harbor-harbor-core.kleveross-system/release/h5:v1"
   extraction:
-    format: "GraphDef"
-
+    format: "H5"

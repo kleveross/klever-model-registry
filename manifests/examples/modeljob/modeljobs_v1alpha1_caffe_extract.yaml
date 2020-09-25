@@ -1,11 +1,11 @@
 apiVersion: kleveross.io/v1alpha1
 kind: ModelJob
 metadata:
-  name: modeljob-netdef-extract
+  name: modeljob-caffe-extract
   namespace: default
 spec:
   # Add fields here
-  model: "harbor.caicloud.com/release/netdef:v1"
+  model: "harbor-harbor-core.kleveross-system/release/caffe:v1"
   extraction:
-    format: "NetDef"
+    format: "CaffeModel"
 

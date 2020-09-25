@@ -5,8 +5,8 @@ metadata:
   namespace: default
 spec:
   # Add fields here
-  model: "harbor.caicloud.com/release/mxnet:v1"
-  desiredTag: "harbor.caicloud.com/release/onnx_convert:v2"
+  model: "harbor-harbor-core.kleveross-system/release/mxnet:v1"
+  desiredTag: "harbor-harbor-core.kleveross-system/release/onnx_convert:v2"
   conversion:
     mmdnn:
       from: "MXNETParams"
