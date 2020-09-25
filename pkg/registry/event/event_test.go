@@ -8,7 +8,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
-	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var _ = Describe("Event", func() {
@@ -23,7 +22,7 @@ var _ = Describe("Event", func() {
 
 	It("Should manager modeljob events successfully", func() {
 		// Create modeljob
-		modeljobCreated, err := modeljobController.Create(common.DefaultModelJobNamespace, modeljobObj)
+		modeljobCreated, err := modeljobController.Create("default", modeljobObj)
 		Expect(err).To(BeNil())
 
 		// Get modeljob events

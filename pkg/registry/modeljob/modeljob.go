@@ -41,11 +41,6 @@ func New(kleverossClient clientset.Interface, modeljobInformer v1alpha1.ModelJob
 }
 
 func (m ModelJobController) Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
-	err := ExchangeModelJobNameAndID(&modeljob.ObjectMeta)
-	if err != nil {
-		return nil, errors.RenderError(err)
-	}
-
 	result, err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Create(modeljob)
 	if err != nil {
 		return nil, errors.RenderError(err)
