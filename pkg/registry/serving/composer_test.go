@@ -100,8 +100,8 @@ var _ = BeforeEach(func() {
 						},
 						Parameters: []seldonv1.Parameter{
 							{
-								Name:  "cpu",
-								Value: "1",
+								Name:  "format",
+								Value: "SavedModel",
 							},
 						},
 					},
@@ -119,6 +119,23 @@ var _ = BeforeEach(func() {
 			Name: "deployment-name",
 			Predictors: []seldonv1.PredictorSpec{
 				{
+					ComponentSpecs: []*seldonv1.SeldonPodSpec{
+						{
+							Metadata: metav1.ObjectMeta{
+								Name: "test",
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Resources: corev1.ResourceRequirements{
+											Limits:   genTestResource(),
+											Requests: genTestResource(),
+										},
+									},
+								},
+							},
+						},
+					},
 					Graph: seldonv1.PredictiveUnit{
 						Name:               "graph1",
 						ModelURI:           "harbor-harbor-core.kleveross-system/release/savedmodel:v1",
@@ -129,14 +146,6 @@ var _ = BeforeEach(func() {
 							},
 						},
 						Parameters: []seldonv1.Parameter{
-							{
-								Name:  "cpu",
-								Value: "1",
-							},
-							{
-								Name:  "mem",
-								Value: "2Gi",
-							},
 							{
 								Name:  "format",
 								Value: "SavedModel",
@@ -173,8 +182,8 @@ var _ = BeforeEach(func() {
 						},
 						Parameters: []seldonv1.Parameter{
 							{
-								Name:  "cpu",
-								Value: "1",
+								Name:  "format",
+								Value: "PMML",
 							},
 						},
 					},
