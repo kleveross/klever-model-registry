@@ -5,8 +5,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/spf13/viper"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/common"
@@ -267,9 +269,11 @@ func Test_generateJobResource(t *testing.T) {
 }
 
 func Test_generateInitContainers(t *testing.T) {
+	viper.AutomaticEnv()
 	os.Setenv(common.ORMBDomainEnvKey, "demo.goharbo.com")
 	os.Setenv(common.ORMBUsernameEnvkey, "ormbtest")
 	os.Setenv(common.ORMBPasswordEnvKey, "ORMBtest12345")
+	initGlobalVar()
 	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
 
 	type args struct {
@@ -285,6 +289,9 @@ func Test_generateInitContainers(t *testing.T) {
 			name: "generateInitContainers successfully",
 			args: args{
 				modeljob: &modeljobsv1alpha1.ModelJob{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "test-modeljob",
+					},
 					Spec: modeljobsv1alpha1.ModelJobSpec{
 						Model: "demo.goharbor.com/release/testmodel:v1",
 					},

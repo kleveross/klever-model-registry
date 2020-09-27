@@ -91,8 +91,8 @@ var _ = Describe("Model Registry", func() {
 
 				found := false
 				for _, modelJob := range modelJobs.Iter() {
-					rawLabels := modelJob.Path("$.metadata.labels").Raw()
-					if rawLabels.(map[string]interface{})["resource_name"].(string) == name {
+					rawLabels := modelJob.Path("$.metadata.name").Raw()
+					if rawLabels.(string) == name {
 						found = true
 						// Set the name to the CRD name in the kubernetes cluster.
 						name = modelJob.Path("$.metadata.name").String().Raw()
