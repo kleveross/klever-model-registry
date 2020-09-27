@@ -5,6 +5,8 @@ import (
 	. "github.com/onsi/gomega"
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
 	"github.com/spf13/viper"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/serving"
@@ -51,6 +53,16 @@ var _ = BeforeEach(func() {
 	viper.Set("MODEL_INITIALIZER_CPU", "1")
 	viper.Set("MODEL_INITIALIZER_MEM", "1Gi")
 
+	genTestResource := func() corev1.ResourceList {
+		resourcesList := make(corev1.ResourceList)
+		cpuQuantity, _ := resource.ParseQuantity("1")
+		resourcesList[corev1.ResourceCPU] = cpuQuantity
+		memQuantity, _ := resource.ParseQuantity("1Gi")
+		resourcesList[corev1.ResourceMemory] = memQuantity
+
+		return resourcesList
+	}
+
 	sdepSingleGraph = &seldonv1.SeldonDeployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "sdep-name",
@@ -60,6 +72,23 @@ var _ = BeforeEach(func() {
 			Name: "deployment-name",
 			Predictors: []seldonv1.PredictorSpec{
 				{
+					ComponentSpecs: []*seldonv1.SeldonPodSpec{
+						{
+							Metadata: metav1.ObjectMeta{
+								Name: "test",
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Resources: corev1.ResourceRequirements{
+											Limits:   genTestResource(),
+											Requests: genTestResource(),
+										},
+									},
+								},
+							},
+						},
+					},
 					Graph: seldonv1.PredictiveUnit{
 						Name:               "graph1",
 						ModelURI:           "harbor-harbor-core.kleveross-system/release/savedmodel:v1",
@@ -73,14 +102,6 @@ var _ = BeforeEach(func() {
 							{
 								Name:  "cpu",
 								Value: "1",
-							},
-							{
-								Name:  "mem",
-								Value: "2Gi",
-							},
-							{
-								Name:  "format",
-								Value: "SavedModel",
 							},
 						},
 					},
@@ -124,6 +145,23 @@ var _ = BeforeEach(func() {
 					},
 				},
 				{
+					ComponentSpecs: []*seldonv1.SeldonPodSpec{
+						{
+							Metadata: metav1.ObjectMeta{
+								Name: "test",
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Resources: corev1.ResourceRequirements{
+											Limits:   genTestResource(),
+											Requests: genTestResource(),
+										},
+									},
+								},
+							},
+						},
+					},
 					Graph: seldonv1.PredictiveUnit{
 						Name:               "graph2",
 						ModelURI:           "harbor-harbor-core.kleveross-system/release/pmml:v1",
@@ -137,14 +175,6 @@ var _ = BeforeEach(func() {
 							{
 								Name:  "cpu",
 								Value: "1",
-							},
-							{
-								Name:  "mem",
-								Value: "2Gi",
-							},
-							{
-								Name:  "format",
-								Value: "PMML",
 							},
 						},
 					},

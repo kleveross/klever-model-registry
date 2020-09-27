@@ -6,6 +6,7 @@ import (
 	"github.com/caicloud/nirvana/log"
 	"github.com/caicloud/nirvana/plugins/reqlog"
 	"github.com/caicloud/nirvana/service"
+	"github.com/spf13/viper"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"github.com/kleveross/klever-model-registry/pkg/common"
@@ -18,6 +19,8 @@ import (
 )
 
 func main() {
+	viper.AutomaticEnv()
+
 	// Start nirvana
 	option := &config.Option{
 		Port: 8080,

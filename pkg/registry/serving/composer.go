@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/caicloud/nirvana/log"
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
@@ -60,99 +60,136 @@ const (
 	modelStorePath = "/mnt"
 )
 
+// validateComponentSpecs validate basic infomation in CRD, now, we are not support multi graph,
+// so the length for ComponentSpecs and Containers must be equal 1.
+func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
+	if len(p.ComponentSpecs) != 1 {
+		log.Warningf("Component's length must be equal 1 for simple model serving, the actual ComponentSpecs is %v", p.ComponentSpecs)
+		return fmt.Errorf("Component's length must be equal 1 for simple model serving")
+	}
+
+	if len(p.ComponentSpecs[0].Spec.Containers) != 1 {
+		log.Warningf("Component's length must be equal 1 for simple model serving, the actual Containers is %v", p.ComponentSpecs[0].Spec.Containers)
+		return fmt.Errorf("Container's length must be equal 1 for simple model serving")
+	}
+
+	return nil
+}
+
 func Compose(sdep *seldonv1.SeldonDeployment) error {
 	sdep.Spec.Name = sdep.ObjectMeta.Name
-	sdep.Spec.Transport = seldonv1.TransportRest
-
-	modelMountPath := getModelMountPath(sdep.Name)
 
 	for i, p := range sdep.Spec.Predictors {
+		if err := validateComponentSpecs(&p); err != nil {
+			return err
+		}
+
 		if sdep.Spec.Predictors[i].Annotations == nil {
 			sdep.Spec.Predictors[i].Annotations = make(map[string]string)
 		}
-
 		// use no-engine mode
 		sdep.Spec.Predictors[i].Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
-		modelTag, err := getModelTag(p.Graph.ModelURI)
-		if err != nil {
-			return err
-		}
-		podName := modelTag
-		containerName := sdep.Spec.Predictors[i].Graph.Name
+
 		sdep.Spec.Predictors[i].Name = sdep.Spec.Predictors[i].Graph.Name
 
-		resources, gpuFlag, err := getRuntimeResource(&sdep.Spec.Predictors[i].Graph)
-		if err != nil {
+		// compose user containers
+		composeUserContainer(sdep, &p, &p.ComponentSpecs[0].Spec.Containers[0])
+
+		// compose SeldonPodSpec
+		if err := composeSeldonPodSpec(&p, p.ComponentSpecs[0]); err != nil {
 			return err
 		}
-
-		modelFormat := getModelFormat(&sdep.Spec.Predictors[i].Graph)
-		// Must set probe, otherwise the default probe by seldon's webhook will cause error.
-		probe := getProbe(modelFormat, sdep.Name)
-
-		ports := getUserContainerPorts(modelFormat)
-
-		image := getUserContainerImage(modelFormat)
-		// compose user containers
-		container := corev1.Container{
-			Name:            containerName,
-			Image:           image,
-			ImagePullPolicy: corev1.PullAlways,
-			Env: []corev1.EnvVar{
-				{
-					Name:  "MODEL_STORE",
-					Value: modelStorePath,
-				},
-				{
-					Name:  "SERVING_NAME",
-					Value: sdep.Name,
-				},
-			},
-			// Must set ports, otherwise it will can not traffic diversion in unique port(default: 8000) for multi deployment.
-			// please refer https://github.com/SeldonIO/seldon-core/blob/master/operator/apis/machinelearning.seldon.io/v1/seldondeployment_webhook.go#L142-L145
-			Ports: ports,
-			VolumeMounts: []corev1.VolumeMount{
-				{
-					Name:      modelSharedMountName,
-					MountPath: modelMountPath,
-				},
-			},
-			ReadinessProbe: probe,
-			LivenessProbe:  probe,
-			// not support graph now, so there are one container only.
-			Resources: *resources,
-		}
-
-		// If not set GPU resource, must set env key is equal "NVIDIA_VISIBLE_DEVICES" and value is empty string.
-		if !gpuFlag {
-			container.Env = append(container.Env, corev1.EnvVar{
-				Name: envNvidiaVisibleDevices,
-			})
-		}
-
-		seldPodSpec := &seldonv1.SeldonPodSpec{
-			Metadata: metav1.ObjectMeta{
-				Name: podName,
-			},
-			Spec: corev1.PodSpec{
-				Containers: []corev1.Container{container},
-				Volumes: []corev1.Volume{
-					{
-						Name: modelSharedMountName,
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
-					},
-				},
-			},
-		}
-		composeSchedulerName(seldPodSpec)
-		sdep.Spec.Predictors[i].ComponentSpecs = []*seldonv1.SeldonPodSpec{seldPodSpec}
 	}
 
 	composeInitContainer(sdep)
 
 	return nil
+}
+
+func composeUserContainer(sdep *seldonv1.SeldonDeployment, p *seldonv1.PredictorSpec, container *corev1.Container) {
+	container.Name = p.Graph.Name
+
+	modelFormat := getModelFormat(&p.Graph)
+	image := getUserContainerImage(modelFormat)
+	container.Image = image
+
+	// Must set ports, otherwise it will can not traffic diversion in unique port(default: 8000) for multi deployment.
+	// please refer https://github.com/SeldonIO/seldon-core/blob/master/operator/apis/machinelearning.seldon.io/v1/seldondeployment_webhook.go#L142-L145
+	ports := getUserContainerPorts(modelFormat)
+	container.Ports = ports
+
+	// Must set probe, otherwise the default probe by seldon's webhook will cause error.
+	probe := getProbe(modelFormat, sdep.Name)
+	container.ReadinessProbe = probe
+	container.LivenessProbe = probe
+
+	// Set default env.
+	if len(container.Env) == 0 {
+		container.Env = []corev1.EnvVar{}
+	}
+	container.Env = append(container.Env, []corev1.EnvVar{
+		{
+			Name:  "MODEL_STORE",
+			Value: modelStorePath,
+		},
+		{
+			Name:  "SERVING_NAME",
+			Value: sdep.Name,
+		},
+	}...)
+	// If not set GPU resource, must set env key is equal "NVIDIA_VISIBLE_DEVICES" and value is empty string.
+	if getGPUAmount(container.Resources) == 0 {
+		container.Env = append(container.Env, corev1.EnvVar{
+			Name: envNvidiaVisibleDevices,
+		})
+	}
+
+	if len(container.VolumeMounts) == 0 {
+		container.VolumeMounts = []corev1.VolumeMount{}
+	}
+	modelMountPath := getModelMountPath(sdep.Name)
+	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
+		{
+			Name:      modelSharedMountName,
+			MountPath: modelMountPath,
+		},
+	}...)
+}
+
+func composeSeldonPodSpec(pu *seldonv1.PredictorSpec, pod *seldonv1.SeldonPodSpec) error {
+	modelTag, err := getModelTag(pu.Graph.ModelURI)
+	if err != nil {
+		return err
+	}
+	podName := modelTag
+	pod.Metadata.Name = podName
+
+	composeSchedulerName(pod)
+
+	if len(pod.Spec.Volumes) == 0 {
+		pod.Spec.Volumes = []corev1.Volume{}
+	}
+	pod.Spec.Volumes = append(pod.Spec.Volumes, []corev1.Volume{
+		{
+			Name: modelSharedMountName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		},
+	}...)
+
+	return nil
+}
+
+// getGPUAmount returns the number of GPUs in the resources.
+func getGPUAmount(resource corev1.ResourceRequirements) int64 {
+	for k, v := range resource.Limits {
+		if strings.Contains(strings.ToLower(k.String()), "gpu") {
+			return v.Value()
+		}
+	}
+
+	return 0
 }
 
 func getUserContainerPorts(format string) []corev1.ContainerPort {
@@ -244,68 +281,6 @@ func getUserContainerImage(format string) string {
 	}
 
 	return viper.GetString(envTRTServingImage)
-}
-
-// getRuntimeResource get resource from Graph.Parameters, eg:
-// "parameters": [
-// 	{
-// 		"name": "cpu",
-// 		"value": "1"
-// 	},
-// 	{
-// 		"name": "mem",
-// 		"value": "2Gi"
-// 	},
-// 	...
-// ]
-func getRuntimeResource(pu *seldonv1.PredictiveUnit) (*corev1.ResourceRequirements, bool, error) {
-	cpu := ""
-	mem := ""
-	gpuType := ""
-	gpuNum := ""
-	gpuFlag := false
-	for _, p := range pu.Parameters {
-		if p.Name == "cpu" {
-			cpu = p.Value
-		}
-		if p.Name == "mem" {
-			mem = p.Value
-		}
-		if p.Name == "gpuType" {
-			gpuType = p.Value
-		}
-		if p.Name == "gpuNum" {
-			gpuNum = p.Value
-		}
-	}
-
-	resourcesList := make(corev1.ResourceList)
-	cpuQuantity, err := resource.ParseQuantity(cpu)
-	if err != nil {
-		return nil, gpuFlag, err
-	}
-	resourcesList[corev1.ResourceCPU] = cpuQuantity
-
-	memQuantity, err := resource.ParseQuantity(mem)
-	if err != nil {
-		return nil, gpuFlag, err
-	}
-	resourcesList[corev1.ResourceMemory] = memQuantity
-
-	// Support gpu scheduling, the detail please refer https://kubernetes.io/zh/docs/tasks/manage-gpus/scheduling-gpus/
-	if gpuType != "" && gpuNum != "" {
-		gpuNumQuantity, err := resource.ParseQuantity(gpuNum)
-		if err != nil {
-			return nil, gpuFlag, err
-		}
-		resourcesList[corev1.ResourceName(gpuType)] = gpuNumQuantity
-		gpuFlag = true
-	}
-
-	return &corev1.ResourceRequirements{
-		Limits:   resourcesList,
-		Requests: resourcesList,
-	}, gpuFlag, nil
 }
 
 // getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
