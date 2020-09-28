@@ -1,4 +1,4 @@
-FROM cargo.caicloud.xyz/devops_release/miniconda:v4.7.12.1-py36
+FROM python:3.6-slim
 
 ENV LC_ALL="C.UTF-8" \
   LANG="C.UTF-8"

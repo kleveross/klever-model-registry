@@ -2,18 +2,76 @@ name: Publish
 
 on:
   push:
-    branches: 
-      - master
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-  pull_request:
-    branches: 
-      - master
-
+  
 jobs:
-  login:
+  klever-publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v1
+        with:
+           go-version: 1.14.7
+        id: go
+      - uses: actions/checkout@v2
+        with:
+         path: src/github.com/kleveross/klever-model-registry
+      - name: setup env
+        run: |
+          cd src/github.com/kleveross/klever-model-registry
+          pwd
+          go env
+          echo "::set-env name=GOPATH::$(go env GOPATH):$GITHUB_WORKSPACE"
+          echo "::add-path::$(go env GOPATH)/bin"
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: install
+        run: |
+          cd src/github.com/kleveross/klever-model-registry
+          make build
+      - name: docker-build
+        run: |
+          cd src/github.com/kleveross/klever-model-registry
+          docker build -t ghcr.io/kleveross/model-registry:${{ github.ref }} -f build/model-registry/Dockerfile .
+          docker build -t ghcr.io/kleveross/modeljob-operator:${{ github.ref }} -f build/modeljob-operator/Dockerfile .
+          docker build -t ghcr.io/kleveross/savedmodel-extract:${{ github.ref }} -f build/extract/savedmodel/Dockerfile .
+          docker build -t ghcr.io/kleveross/onnx-extract:${{ github.ref }} -f build/extract/onnx/Dockerfile .
+          docker build -t ghcr.io/kleveross/graphdef-extract:${{ github.ref }} -f build/extract/graphdef/Dockerfile .
+          docker build -t ghcr.io/kleveross/netdef-extract:${{ github.ref }} -f build/extract/caffe2/Dockerfile .
+          docker build -t ghcr.io/kleveross/pmml-extract:${{ github.ref }} -f build/extract/pmml/Dockerfile .
+          docker build -t ghcr.io/kleveross/h5-extract:${{ github.ref }} -f build/extract/h5/Dockerfile .
+          docker build -t ghcr.io/kleveross/mxnet-extract:${{ github.ref }} -f build/extract/mxnetparams/Dockerfile .
+          docker build -t ghcr.io/kleveross/torchscript-extract:${{ github.ref }} -f build/extract/torchscript/Dockerfile .
+          docker build -t ghcr.io/kleveross/caffetocaffe2:${{ github.ref }} -f build/convert/caffemodel_to_netdef/Dockerfile .
+          docker build -t ghcr.io/kleveross/keras2tf:${{ github.ref }} -f build/convert/h5_to_savedmodel/Dockerfile .
+          docker build -t ghcr.io/kleveross/mxnet2onnx:${{ github.ref }} -f build/convert/mxnetparams_to_onnx/Dockerfile .
+          docker build -t ghcr.io/kleveross/trtserver:${{ github.ref }} -f build/serving/tensorrt/Dockerfile .
+          docker build -t ghcr.io/kleveross/openscoring:${{ github.ref }} -f build/serving/openscoring/Dockerfile .
+          docker build -t ghcr.io/kleveross/mlserver:${{ github.ref }} -f build/serving/mlserver/Dockerfile .
       - name: Login to GitHub Container Registry
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u simon-cj --password-stdin
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+      - name: docker-push
+        run: |
+          docker push ghcr.io/kleveross/model-registry:${{ github.ref }}
+          docker push ghcr.io/kleveross/modeljob-operator:${{ github.ref }}
+          docker push ghcr.io/kleveross/savedmodel-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/onnx-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/graphdef-extract:${{ github.ref }} 
+          docker push ghcr.io/kleveross/netdef-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/pmml-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/h5-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/mxnet-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/torchscript-extract:${{ github.ref }}
+          docker push ghcr.io/kleveross/caffetocaffe2:${{ github.ref }}
+          docker push ghcr.io/kleveross/keras2tf:${{ github.ref }}
+          docker push ghcr.io/kleveross/mxnet2onnx:${{ github.ref }}
+          docker push docker build -t ghcr.io/kleveross/trtserver:${{ github.ref }}
+          docker build -t ghcr.io/kleveross/openscoring:${{ github.ref }}
+          docker build -t ghcr.io/kleveross/mlserver:${{ github.ref }}
