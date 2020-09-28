@@ -1,4 +1,4 @@
-FROM cargo.caicloud.xyz/library/centos:7.4.1708
+FROM centos:7.4.1708
 
 ARG openscore_url=https://github.com/openscoring/openscoring/releases/download/2.0.1/openscoring-server-executable-2.0.1.jar
 ARG ormb_version=v0.0.5
