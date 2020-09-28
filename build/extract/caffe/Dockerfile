@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM continuumio/miniconda:4.7.12
 
 ENV LC_ALL="C.UTF-8" \
   LANG="C.UTF-8"
