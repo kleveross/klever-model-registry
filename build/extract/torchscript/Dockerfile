@@ -7,7 +7,7 @@ ARG ormb_tar_filename=ormb_0.0.5_Linux_x86_64.tar.gz
 
 RUN apt update -y \
     && apt install wget -y \
-    && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+    # && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple \
     && pip install --no-cache-dir \
                 grpcio==1.26.0\
                 grpcio-tools\
