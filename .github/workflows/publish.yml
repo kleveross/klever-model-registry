@@ -9,7 +9,7 @@ on:
 jobs:
   klever-publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 120
     steps:
       - name: Set up Go 1.14
         uses: actions/setup-go@v1
@@ -67,6 +67,7 @@ jobs:
           docker push ghcr.io/kleveross/onnx-extract:$RELEASE_VERSION
           docker push ghcr.io/kleveross/graphdef-extract:$RELEASE_VERSION 
           docker push ghcr.io/kleveross/netdef-extract:$RELEASE_VERSION
+          docker push ghcr.io/kleveross/caffemodel-extract:$RELEASE_VERSION
           docker push ghcr.io/kleveross/pmml-extract:$RELEASE_VERSION
           docker push ghcr.io/kleveross/h5-extract:$RELEASE_VERSION
           docker push ghcr.io/kleveross/mxnet-extract:$RELEASE_VERSION
@@ -74,6 +75,6 @@ jobs:
           docker push ghcr.io/kleveross/caffetocaffe2:$RELEASE_VERSION
           docker push ghcr.io/kleveross/keras2tf:$RELEASE_VERSION
           docker push ghcr.io/kleveross/mxnet2onnx:$RELEASE_VERSION
-          docker push docker build -t ghcr.io/kleveross/trtserver:$RELEASE_VERSION
-          docker build -t ghcr.io/kleveross/openscoring:$RELEASE_VERSION
-          docker build -t ghcr.io/kleveross/mlserver:$RELEASE_VERSION
+          docker push ghcr.io/kleveross/trtserver:$RELEASE_VERSION
+          docker push ghcr.io/kleveross/openscoring:$RELEASE_VERSION
+          docker push ghcr.io/kleveross/mlserver:$RELEASE_VERSION
