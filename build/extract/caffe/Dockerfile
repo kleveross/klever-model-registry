@@ -1,4 +1,4 @@
-FROM continuumio/miniconda:4.7.12
+FROM ghcr.io/kleveross/miniconda:v4.7.12.1-py36
 
 ENV LC_ALL="C.UTF-8" \
   LANG="C.UTF-8"
