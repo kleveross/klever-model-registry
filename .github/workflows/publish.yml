@@ -5,7 +5,9 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-  
+  pull_request:
+    branches: [ master ]
+
 jobs:
   klever-publish:
     runs-on: ubuntu-latest
@@ -40,15 +42,7 @@ jobs:
       - name: docker-build
         run: |
           cd src/github.com/kleveross/klever-model-registry
-          docker build -t ghcr.io/kleveross/model-registry:$RELEASE_VERSION -f build/model-registry/Dockerfile .
-          docker build -t ghcr.io/kleveross/modeljob-operator:$RELEASE_VERSION -f build/modeljob-operator/Dockerfile .
-          docker build -t ghcr.io/kleveross/savedmodel-extract:$RELEASE_VERSION -f build/extract/savedmodel/Dockerfile .
-          docker build -t ghcr.io/kleveross/onnx-extract:$RELEASE_VERSION -f build/extract/onnx/Dockerfile .
-          docker build -t ghcr.io/kleveross/graphdef-extract:$RELEASE_VERSION -f build/extract/graphdef/Dockerfile .
-          docker build -t ghcr.io/kleveross/netdef-extract:$RELEASE_VERSION -f build/extract/caffe2/Dockerfile .
-          docker build -t ghcr.io/kleveross/caffemodel-extract:$RELEASE_VERSION -f build/extract/caffe/Dockerfile .
-          docker build -t ghcr.io/kleveross/pmml-extract:$RELEASE_VERSION -f build/extract/pmml/Dockerfile .
-          docker build -t ghcr.io/kleveross/h5-extract:$RELEASE_VERSION -f build/extract/h5/Dockerfile .
+          docker build -t ghcr.io/kleveross/h5-extract:v0.1.0 -f build/extract/h5/Dockerfile .
           docker build -t ghcr.io/kleveross/mxnet-extract:$RELEASE_VERSION -f build/extract/mxnetparams/Dockerfile .
           docker build -t ghcr.io/kleveross/torchscript-extract:$RELEASE_VERSION -f build/extract/torchscript/Dockerfile .
           docker build -t ghcr.io/kleveross/caffetocaffe2:$RELEASE_VERSION -f build/convert/caffemodel_to_netdef/Dockerfile .
@@ -57,6 +51,14 @@ jobs:
           docker build -t ghcr.io/kleveross/trtserver:$RELEASE_VERSION -f build/serving/tensorrt/Dockerfile .
           docker build -t ghcr.io/kleveross/openscoring:$RELEASE_VERSION -f build/serving/openscoring/Dockerfile .
           docker build -t ghcr.io/kleveross/mlserver:$RELEASE_VERSION -f build/serving/mlserver/Dockerfile .
+          docker build -t ghcr.io/kleveross/model-registry:$RELEASE_VERSION -f build/model-registry/Dockerfile .
+          docker build -t ghcr.io/kleveross/modeljob-operator:$RELEASE_VERSION -f build/modeljob-operator/Dockerfile .
+          docker build -t ghcr.io/kleveross/savedmodel-extract:$RELEASE_VERSION -f build/extract/savedmodel/Dockerfile .
+          docker build -t ghcr.io/kleveross/onnx-extract:$RELEASE_VERSION -f build/extract/onnx/Dockerfile .
+          docker build -t ghcr.io/kleveross/graphdef-extract:$RELEASE_VERSION -f build/extract/graphdef/Dockerfile .
+          docker build -t ghcr.io/kleveross/netdef-extract:$RELEASE_VERSION -f build/extract/caffe2/Dockerfile .
+          docker build -t ghcr.io/kleveross/caffemodel-extract:$RELEASE_VERSION -f build/extract/caffe/Dockerfile .
+          docker build -t ghcr.io/kleveross/pmml-extract:$RELEASE_VERSION -f build/extract/pmml/Dockerfile .
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
       - name: docker-push
