@@ -20,7 +20,6 @@ RUN apt update -y \
 #Set timezone
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
 
-COPY ormb /usr/local/bin/ormb
 COPY scripts/shell/run.sh /scripts/run.sh
 COPY scripts/extract  /scripts
 WORKDIR /scripts
