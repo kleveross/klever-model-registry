@@ -16,7 +16,7 @@ Klever Model Registry 是一个云原生的模型仓库。通过 Klever Model Re
 - 利用已有的镜像仓库基础设施，对模型进行版本化和分发
 - 跟踪模型的变化情况，查看模型的超参数等信息，帮助决策
 - 对模型进行格式的转换，自动化地在 TensorFlow SavedModel，ONNX 等格式间转换，方便部署
-- 利用模型，进行推理服务（Coming Soon!）
+- 利用模型，进行推理服务
 - 利用模型，获得适合边缘部署的独立二进制，便捷地进行边缘推理（Coming Soon!）
 
 Klever Model Registry 的特性包括：

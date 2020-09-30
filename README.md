@@ -18,7 +18,7 @@ Klever Model Registry is a Cloud Native ML model registry. Use Klever Model Regi
 - Version and deliver your ML models with the existing infrastructures
 - Keep track of ML models' hyperparameters and so on to help decision makers
 - Convert models between different formats ( e.g. TensorFlow SavedModel, ONNX )
-- Serve the model ( Coming Soon! )
+- Serve the model
 - Get the standalone executable program to deploy ML model inference services on edge devices/servers ( Coming Soon! )
 
 Klever Model Registry's features:
