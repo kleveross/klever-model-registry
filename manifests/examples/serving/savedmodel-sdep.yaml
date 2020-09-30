@@ -15,7 +15,7 @@ spec:
           name: savedmodel
         containers:
         - name: savedmodel
-          image: lever-dev.cargo.io/release/trtserver:0.1.0
+          image: ghcr.io/kleveross/trtserver:v0.1.0
           ports:
           - name: http
             protocol: TCP
@@ -56,7 +56,7 @@ spec:
         initContainers:
         - name: model-initializer
           args: ["harbor-harbor-core.kleveross-system/release/ol-classify:v1", "/mnt/models"]
-          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.4
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6
           imagePullPolicy: Always
           env:
           - name: AWS_ACCESS_KEY_ID
