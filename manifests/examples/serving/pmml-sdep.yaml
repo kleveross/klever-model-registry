@@ -17,7 +17,7 @@ spec:
           name: pmml
         containers:
         - name: pmml
-          image: ghcr.io/kleveross/openscoring:0.1.0
+          image: ghcr.io/kleveross/openscoring:v0.1.0
           env:
           - name: MODEL_STORE
             value: /mnt
@@ -51,7 +51,7 @@ spec:
         initContainers:
         - name: model-initializer
           args: ["harbor-harbor-core.kleveross-system/release/pmml:v1", "/mnt/models"]
-          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.4
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6
           env:
           - name: AWS_ACCESS_KEY_ID
             value: admin
