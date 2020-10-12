@@ -66,6 +66,21 @@ var listServing = definition.Definition{
 	},
 }
 
+var updateServing = definition.Definition{
+	Method:      definition.Update,
+	Summary:     "Updates serving",
+	Description: "Updates serving",
+	Parameters: []definition.Parameter{
+		definition.PathParameterFor("namespace", "namespace"),
+		definition.PathParameterFor("servingID", "serving id"),
+		definition.BodyParameterFor("serving body"),
+	},
+	Results: definition.DataErrorResults("serving updated"),
+	Function: func(ctx context.Context, namespace string, servingID string, body []byte) (*seldonv1.SeldonDeployment, error) {
+		return servingController.Update(namespace, servingID, body)
+	},
+}
+
 var getServing = definition.Definition{
 	Method:      definition.Get,
 	Summary:     "Get Serving",

@@ -17,10 +17,10 @@ To get started, complete the [Klever Tutorial]() and go through our
 
 See the following topics and our [API Docs](https://kleveross.github.io/klever-model-registry/api/) to learn how to use Klever in your project:
 
-- [Model Management](##Model-Management)
-- [Model Extraction](##Model-Extraction)
-- [Model Conversion](##Model-Conversion)
-- [Model Serving](##Model-Serving)
+- [Model Management](#Model-Management)
+- [Model Extraction](#Model-Extraction)
+- [Model Conversion](#Model-Conversion)
+- [Model Serving](#Model-Serving)
 
 ## Model Management
 

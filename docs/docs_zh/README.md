@@ -15,10 +15,10 @@ Klever Model Registry 是一个开源项目，遵循 [Apache 2.0 开源协议](h
 
 阅读以下文档以及我们的 [API 文档](https://kleveross.github.io/klever-model-registry/api/) 来学习如何使用 Klever Model Registry:
 
-- [管理模型](##管理模型)
-- [模型解析](##模型解析)
-- [模型转换](##模型转换)
-- [模型服务](##模型服务)
+- [管理模型](#管理模型)
+- [模型解析](#模型解析)
+- [模型转换](#模型转换)
+- [模型服务](#模型服务)
 
 ## 管理模型
 

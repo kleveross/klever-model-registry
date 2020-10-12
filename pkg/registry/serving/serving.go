@@ -1,6 +1,7 @@
 package serving
 
 import (
+	"encoding/json"
 	"sort"
 
 	"github.com/caicloud/nirvana/log"
@@ -79,13 +80,25 @@ func (s ServingController) List(namespace string, opt *paging.ListOption) (*Serv
 	return toServingList(sdeps.Items, opt), nil
 }
 
-func (s ServingController) Update(namespace string, sdep *seldonv1.SeldonDeployment) error {
-	_, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Update(sdep)
+func (s ServingController) Update(namespace string, sdepID string, rawSdep []byte) (*seldonv1.SeldonDeployment, error) {
+	// 1. get original seldon deployment
+	sdep, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Get(sdepID, metav1.GetOptions{})
 	if err != nil {
-		return errors.RenderError(err)
+		return nil, errors.RenderError(err)
 	}
 
-	return nil
+	// 2. overwrite it with given value
+	result := sdep.DeepCopy()
+	if err = json.Unmarshal(rawSdep, result); err != nil {
+		return nil, errors.RenderError(err)
+	}
+
+	// 3. execute the update & return
+	result, err = s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Update(sdep)
+	if err != nil {
+		return nil, errors.RenderError(err)
+	}
+	return result, nil
 }
 
 func (s ServingController) Delete(namespace, sdepID string) error {
