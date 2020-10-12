@@ -25,7 +25,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# FROM https://github.com/NVIDIA/tensorrt-inference-server/blob/r19.08/nvidia_entrypoint.sh
+# FROM https://github.com/NVIDIA/tensorrt-inference-server/blob/r20.08/nvidia_entrypoint.sh
 
 set -e
 cat <<EOF
@@ -44,9 +44,7 @@ if [[ "$(find /usr -name libcuda.so.1 | grep -v "compat") " == " " || "$(ls /dev
   echo "WARNING: The NVIDIA Driver was not detected.  GPU functionality will not be available."
   echo "   Use 'nvidia-docker run' to start this container; see"
   echo "   https://github.com/NVIDIA/nvidia-docker/wiki/nvidia-docker ."
-  ln -s `find / -name libcuda.so.1 -print -quit` /opt/tensorrtserver/lib/libcuda.so.1
-  ln -s `find / -name libnvidia-ml.so -print -quit` /opt/tensorrtserver/lib/libnvidia-ml.so.1
-  ln -s `find / -name libnvidia-fatbinaryloader.so.${CUDA_DRIVER_VERSION} -print -quit` /opt/tensorrtserver/lib/libnvidia-fatbinaryloader.so.${CUDA_DRIVER_VERSION}
+  ln -s `find / -name libnvidia-ml.so -print -quit` /opt/tritonserver/lib/libnvidia-ml.so.1
   export TENSORRT_SERVER_CPU_ONLY=1
 else
   ( /usr/local/bin/checkSMVER.sh )
@@ -68,6 +66,15 @@ else
   fi
 fi
 
+if ! cat /proc/cpuinfo | grep flags | sort -u | grep avx >& /dev/null; then
+  echo
+  echo "ERROR: This container was built for CPUs supporting at least the AVX instruction set, but"
+  echo "       the CPU detected was $(cat /proc/cpuinfo |grep "model name" | sed 's/^.*: //' | sort -u), which does not report"
+  echo "       support for AVX.  An Illegal Instrution exception at runtime is likely to result."
+  echo "       See https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX ."
+  sleep 2
+fi
+
 if [[ "$(df -k /dev/shm |grep ^shm |awk '{print $2}') " == "65536 " ]]; then
   echo
   echo "NOTE: The SHMEM allocation limit is set to the default of 64MB.  This may be"
@@ -87,4 +94,4 @@ python3 /opt/wrapper/preprocessor.py
 # We found that warn caused the program to exit unexpectedly, such as (failed to get power usage for GPU 0,
 # NVML_ERROR 3) or (failed to get energy consumption for GPU 0, NVML_ERROR 3), so we tried to use this option to
 # avoid accidental exit.
-trtserver --model-repository=${MODEL_STORE} --strict-model-config=false --log-warning=false
+tritonserver --model-repository=${MODEL_STORE} --strict-model-config=false --log-warning=false

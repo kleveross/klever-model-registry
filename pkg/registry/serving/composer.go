@@ -230,7 +230,7 @@ func getUserContainerPorts(format string) []corev1.ContainerPort {
 
 // getProbe generate readiness and liveiness.
 func getProbe(format, servingName string) *corev1.Probe {
-	path := fmt.Sprintf("/api/status/%v", servingName)
+	path := fmt.Sprintf("/v2/models/%v", servingName)
 	port := defaultInferenceHTTPPort
 	if format == string(modeljobsv1alpha1.FormatPMML) {
 		path = fmt.Sprintf("/openscoring/model/%v", servingName)
