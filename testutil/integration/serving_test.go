@@ -85,5 +85,31 @@ var _ = Describe("Model Registry", func() {
 				"default").Expect().Status(http.StatusOK).
 				JSON().Object().Value("items").Array().Length().Equal(1)
 		})
+		It("Should update the Serving with HPA successfully", func() {
+			var minReplicas int32 = 2
+			seldonCoreDeploy := &seldonv1.SeldonDeployment{
+				Spec: seldonv1.SeldonDeploymentSpec{
+					Predictors: []seldonv1.PredictorSpec{
+						{
+							ComponentSpecs: []*seldonv1.SeldonPodSpec{
+								{
+									HpaSpec: &seldonv1.SeldonHpaSpec{
+										MinReplicas: &minReplicas,
+										MaxReplicas: 3,
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			e.PUT("/api/v1alpha1/namespaces/{namespace}/servings/{servingID}", "default", "test").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusOK)
+		})
+		It("Should get the updated Serving with correct HPA", func() {
+			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/{servingID}", "default", "test").
+				Expect().Status(http.StatusOK).JSON().Object().Value("spec").Object().Value("predictors").
+				Array().Element(0).Object().Value("componentSpecs").Array().Element(0).Object().ContainsKey("hpaSpec").
+				Value("hpaSpec").Object().ValueEqual("minReplicas", 2).ValueEqual("maxReplicas", 3)
+		})
 	})
 })

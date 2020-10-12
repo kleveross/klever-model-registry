@@ -94,7 +94,7 @@ func (s ServingController) Update(namespace string, sdepID string, rawSdep []byt
 	}
 
 	// 3. execute the update & return
-	result, err = s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Update(sdep)
+	result, err = s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Update(result)
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}

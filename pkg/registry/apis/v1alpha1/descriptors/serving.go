@@ -31,7 +31,7 @@ var servingAPI = definition.Descriptor{
 		},
 		{
 			Path:        "/namespaces/{namespace}/servings/{servingID}",
-			Definitions: []definition.Definition{deleteServing, getServing},
+			Definitions: []definition.Definition{deleteServing, updateServing, getServing},
 		},
 	},
 }
