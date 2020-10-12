@@ -126,6 +126,7 @@ func DownloadFile(ctx context.Context, tenant, user, projectName, modelName, ver
 	if err != nil {
 		return errors.RenderInternalServerError(err)
 	}
+	defer os.RemoveAll(zipFileName)
 
 	file, err := os.Open(zipFileName)
 	if err != nil {

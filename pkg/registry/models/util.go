@@ -160,7 +160,7 @@ func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *
 		model.ModelName, model.VersionName)
 	err = client.Pull(modelRef)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to pull model, err: %v", err)
 	}
 	defer func() {
 		err := client.Remove(modelRef)
@@ -171,15 +171,14 @@ func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *
 
 	err = client.Export(modelRef, filePath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to export model, err: %v", err)
 	}
 
 	zipFileName := filePath + ".zip"
 	err = util.Archive(filePath, zipFileName)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to archive model, err: %v", err)
 	}
-	defer os.RemoveAll(zipFileName)
 
 	return zipFileName, nil
 }
@@ -202,14 +201,14 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		return err
 	}
 
-	err = validateModelDir(deCompressDir, model)
+	modelDir, err := validateModelDir(deCompressDir, model)
 	if err != nil {
 		return err
 	}
 
 	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ProjectName,
 		model.ModelName, model.VersionName)
-	err = client.Save(deCompressDir, modelRef)
+	err = client.Save(modelDir, modelRef)
 	if err != nil {
 		return err
 	}
@@ -229,54 +228,22 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 }
 
 // validateModelDir validates the model dir.
-func validateModelDir(dirPath string, model *Model) error {
+func validateModelDir(dirPath string, model *Model) (string, error) {
 	rootDir, err := ioutil.ReadDir(dirPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if len(rootDir) != 1 || !rootDir[0].IsDir() {
-		return fmt.Errorf("check model dir err， need one dir in dir %s ", dirPath)
+		return "", fmt.Errorf("check model dir err， need one dir in dir %s ", dirPath)
 	}
-	// ORMB dir structure as follow
-	// -| model
-	//      -| modelFile
-	//    ormbfile.yaml
-	ormbModelDir := path.Join(dirPath, "model")
-	err = os.MkdirAll(ormbModelDir, 0755)
+
+	modelDir := path.Join(dirPath, rootDir[0].Name())
+	err = writeORMBFile(path.Join(modelDir, "ormbfile.yaml"), model)
 	if err != nil {
-		return err
-	}
-	fileListPath := path.Join(dirPath, rootDir[0].Name())
-	fileList, err := ioutil.ReadDir(fileListPath)
-	if err != nil {
-		return err
+		return "", err
 	}
 
-	// if `fileListPath != ormbModelDir` logic is special for issue
-	// https://github.com/kleveross/klever-model-registry/issues/100
-	if fileListPath != ormbModelDir {
-		for _, file := range fileList {
-			err = util.ExecOSCommand("mv",
-				[]string{
-					path.Join(fileListPath, file.Name()),
-					ormbModelDir})
-
-			if err != nil {
-				return err
-			}
-		}
-		err = util.ExecOSCommand("rm", []string{"-rf", fileListPath})
-		if err != nil {
-			return err
-		}
-	}
-
-	err = writeORMBFile(path.Join(dirPath, "ormbfile.yaml"), model)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return modelDir, nil
 }
 
 func writeORMBFile(filePath string, model *Model) error {
