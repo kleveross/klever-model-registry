@@ -31,7 +31,7 @@ var servingAPI = definition.Descriptor{
 		},
 		{
 			Path:        "/namespaces/{namespace}/servings/{servingID}",
-			Definitions: []definition.Definition{deleteServing, getServing},
+			Definitions: []definition.Definition{deleteServing, updateServing, getServing},
 		},
 	},
 }
@@ -63,6 +63,21 @@ var listServing = definition.Definition{
 	Results: definition.DataErrorResults("definition list"),
 	Function: func(ctx context.Context, namespace string, opt *paging.ListOption) (*serving.ServingList, error) {
 		return servingController.List(namespace, opt)
+	},
+}
+
+var updateServing = definition.Definition{
+	Method:      definition.Update,
+	Summary:     "Updates serving",
+	Description: "Updates serving",
+	Parameters: []definition.Parameter{
+		definition.PathParameterFor("namespace", "namespace"),
+		definition.PathParameterFor("servingID", "serving id"),
+		definition.BodyParameterFor("serving body"),
+	},
+	Results: definition.DataErrorResults("serving updated"),
+	Function: func(ctx context.Context, namespace string, servingID string, body []byte) (*seldonv1.SeldonDeployment, error) {
+		return servingController.Update(namespace, servingID, body)
 	},
 }
 

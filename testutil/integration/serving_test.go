@@ -7,6 +7,7 @@ import (
 
 	httpexpect "github.com/gavv/httpexpect/v2"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,9 +82,43 @@ var _ = Describe("Model Registry", func() {
 			e.POST("/api/v1alpha1/namespaces/{namespace}/servings", "default").WithJSON(seldonCoreDeploy).Expect().Status(http.StatusCreated)
 		})
 		It("Should get the Servings successfully", func() {
-			e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
-				"default").Expect().Status(http.StatusOK).
-				JSON().Object().Value("items").Array().Length().Equal(1)
+			Eventually(func() int {
+				// TODO: better attersions
+				return int(e.GET("/api/v1alpha1/namespaces/{namespace}/servings/",
+					"default").Expect().Status(http.StatusOK).
+					JSON().Object().Value("items").Array().Length().Raw())
+			}, timeout, interval).Should(Equal(1))
+		})
+		It("Should update the Serving with HPA successfully", func() {
+			reqBody := []byte(`{
+				"spec": {
+					"predictors": [
+						{
+							"componentSpecs": [
+								{
+									"hpaSpec": {
+										"minReplicas": 2,
+										"maxReplicas": 4
+									}
+								}
+							]
+						}
+					]
+				}
+			}`)
+			Eventually(
+				func() int {
+					return e.PUT("/api/v1alpha1/namespaces/{namespace}/servings/{servingID}", "default", "test").
+						WithHeader("Content-Type", "application/json").WithBytes(reqBody).Expect().Raw().StatusCode
+				}, timeout, interval).Should(Equal(http.StatusOK))
+		})
+		It("Should get the updated Serving with correct HPA", func() {
+			Eventually(func() bool {
+				_, ok := e.GET("/api/v1alpha1/namespaces/{namespace}/servings/{servingID}", "default", "test").
+					Expect().Status(http.StatusOK).JSON().Object().Value("spec").Object().Value("predictors").
+					Array().Element(0).Object().Value("componentSpecs").Array().Element(0).Object().Raw()["hpaSpec"]
+				return ok
+			}, timeout, interval).Should(BeTrue())
 		})
 	})
 })
