@@ -85,19 +85,22 @@ ormb:
 #
 externalAddress: ""
 
-# 
+#
 model:
   serving:
-    trt: 
+    trt:
       image: ghcr.io/kleveross/trtserver
       tag: v0.1.0
-    pmml: 
+    pmml:
       image: ghcr.io/kleveross/openscoring
       tag: v0.1.0
-    mlserver: 
+    mlserver:
       image: ghcr.io/kleveross/mlserver
       tag: v0.1.0
-    initializer: 
+    mlflowserver:
+      image: ghcr.io/kleveross/mlflowserver
+      tag: v0.1.0
+    initializer:
       image: ghcr.io/kleveross/klever-ormb-storage-initializer
       tag: v0.0.6
 

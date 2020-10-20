@@ -131,6 +131,8 @@ const (
 	FormatTensorRT    Format = "TensorRT"
 	FormatSKLearn     Format = "SKLearn"
 	FormatXGBoost     Format = "XGBoost"
+	// TODO: we have exactly same data structure in ormb
+	FormatMLflow Format = "MLflow"
 )
 
 type ModelJobPhase string

@@ -52,10 +52,10 @@ func replaceModelRefDomain(inputModelRef, ormbDomain string) (string, error) {
 func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, error) {
 	var dstFormat modeljobsv1alpha1.Format
 	var dstFramework modeljobsv1alpha1.Framework
-	srcModelRef := ""
-	dstModelRef := ""
-	image := ""
-	ormbDomain := ""
+	var image string
+	var srcModelRef string
+	var dstModelRef string
+	var ormbDomain string
 	var err error
 
 	if modeljob.Spec.Conversion != nil {

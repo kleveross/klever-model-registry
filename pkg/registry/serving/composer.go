@@ -29,6 +29,9 @@ const (
 	// envMLServerLImage is the preset image for mlserver.
 	envMLServerImage = "MLSERVER_IMAGE"
 
+	// envMLServerLImage is the preset image for mlflow server.
+	envMLflowServerImage = "MLFLOW_SERVRE_IMAGE"
+
 	// envModelInitializerImage is the preset image for model initializer.
 	envModelInitializerImage = "MODEL_INITIALIZER_IMAGE"
 
@@ -399,14 +402,25 @@ func getModelFormat(pu *seldonv1.PredictiveUnit) string {
 
 // getUserContainerImage get image by different model format.
 func getUserContainerImage(format string) string {
-	if format == string(modeljobsv1alpha1.FormatPMML) {
+	switch format {
+	// Group1 for PMML image
+	case string(modeljobsv1alpha1.FormatPMML):
 		return viper.GetString(envPMMLServingImage)
-	}
-	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
-		return viper.GetString(envMLServerImage)
-	}
 
-	return viper.GetString(envTRTServingImage)
+	// Group2 for mlserver image
+	case string(modeljobsv1alpha1.FormatSKLearn):
+		fallthrough
+	case string(modeljobsv1alpha1.FormatXGBoost):
+		return viper.GetString(envMLServerImage)
+
+	// Group3 for mlflow server image
+	case string(modeljobsv1alpha1.FormatMLflow):
+		return viper.GetString(envMLflowServerImage)
+
+	// Group4 for TRT server image
+	default:
+		return viper.GetString(envTRTServingImage)
+	}
 }
 
 // getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
