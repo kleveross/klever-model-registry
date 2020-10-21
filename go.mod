@@ -3,7 +3,7 @@ module github.com/kleveross/klever-model-registry
 go 1.14
 
 require (
-	github.com/caicloud/nirvana v0.2.5-0.20200825065332-cabc5559748c
+	github.com/caicloud/nirvana v0.2.10
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/frankban/quicktest v1.10.2 // indirect
 	github.com/gavv/httpexpect/v2 v2.1.0

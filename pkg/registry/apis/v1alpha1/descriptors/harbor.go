@@ -15,6 +15,7 @@ package descriptors
 
 import (
 	"github.com/caicloud/nirvana/definition"
+	"github.com/caicloud/nirvana/service"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/harbor"
 )
@@ -35,8 +36,8 @@ func HarborAPIPrefixDescriptor(domain, username, password string) definition.Des
 		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
-				Method:  definition.Any,
-				Handler: harbor.NewProxy(domain, username, password),
+				Method:   definition.Any,
+				Function: service.WrapHTTPHandler(harbor.NewProxy(domain, username, password)),
 			},
 		},
 	}
@@ -51,8 +52,8 @@ func HarborServicePrefixDescriptor(domain, username, password string) definition
 		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
-				Method:  definition.Any,
-				Handler: harbor.NewProxy(domain, username, password),
+				Method:   definition.Any,
+				Function: service.WrapHTTPHandler(harbor.NewProxy(domain, username, password)),
 			},
 		},
 	}
@@ -67,8 +68,8 @@ func HarborCPrefixDescriptor(domain, username, password string) definition.Descr
 		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
-				Method:  definition.Any,
-				Handler: harbor.NewProxy(domain, username, password),
+				Method:   definition.Any,
+				Function: service.WrapHTTPHandler(harbor.NewProxy(domain, username, password)),
 			},
 		},
 	}
@@ -83,8 +84,8 @@ func HarborV2PrefixDescriptor(domain, username, password string) definition.Desc
 		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
-				Method:  definition.Any,
-				Handler: harbor.NewProxy(domain, username, password),
+				Method:   definition.Any,
+				Function: service.WrapHTTPHandler(harbor.NewProxy(domain, username, password)),
 			},
 		},
 	}
@@ -98,8 +99,8 @@ func HarborV2Descriptor(domain, username, password string) definition.Descriptor
 		Produces:    []string{definition.MIMEAll},
 		Definitions: []definition.Definition{
 			{
-				Method:  definition.Any,
-				Handler: harbor.NewProxy(domain, username, password),
+				Method:   definition.Any,
+				Function: service.WrapHTTPHandler(harbor.NewProxy(domain, username, password)),
 			},
 		},
 	}
