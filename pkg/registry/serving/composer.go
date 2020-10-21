@@ -44,6 +44,10 @@ const (
 	// envSchedulerName will set podSpec's SchedulerName.
 	envSchedulerName = "SCHEDULER_NAME"
 
+	// envModelStorePath is for custome image.
+	// if the image is not empty, must set MODEL_STORE in each SeldonPodSpec's env.
+	envModelStorePath = "MODEL_STORE"
+
 	// defaultInferenceHTTPPort is default port for http.
 	defaultInferenceHTTPPort = 8000
 
@@ -87,39 +91,137 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 		if sdep.Spec.Predictors[i].Annotations == nil {
 			sdep.Spec.Predictors[i].Annotations = make(map[string]string)
 		}
-		// use no-engine mode
+		// Use no-engine mode
 		sdep.Spec.Predictors[i].Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
 
 		sdep.Spec.Predictors[i].Name = sdep.Spec.Predictors[i].Graph.Name
 
-		// compose user containers
-		composeUserContainer(sdep, &p, &p.ComponentSpecs[0].Spec.Containers[0])
+		componentSpecMap := getComponentsMap(p.ComponentSpecs)
 
-		// compose SeldonPodSpec
-		if err := composeSeldonPodSpec(&p, p.ComponentSpecs[0]); err != nil {
+		// Compose user containers
+		if p.ComponentSpecs[0].Spec.Containers[0].Image != "" {
+			// For custome image
+			err := composeCustomesUserContainer(sdep, &p.Graph, componentSpecMap)
+			if err != nil {
+				return err
+			}
+		} else {
+			// For default image
+			err := composeDefaultUserContainer(sdep, &p.Graph, componentSpecMap)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Compose SeldonPodSpec
+		if err := composeSeldonPodSpec(&p.Graph, componentSpecMap); err != nil {
 			return err
 		}
-	}
 
-	composeInitContainer(sdep)
+		// Conpose init container for pod
+		composeInitContainer(sdep, &p)
+	}
 
 	return nil
 }
 
-func composeUserContainer(sdep *seldonv1.SeldonDeployment, p *seldonv1.PredictorSpec, container *corev1.Container) {
-	container.Name = p.Graph.Name
+// getComponentsMap convert []*seldonv1.SeldonPodSpec as map struct, the key is SeldonPodSpec.Metadata.Name, the value is SeldonPodSpec.
+func getComponentsMap(componentSpecs []*seldonv1.SeldonPodSpec) map[string]*seldonv1.SeldonPodSpec {
+	componentSpecMap := make(map[string]*seldonv1.SeldonPodSpec)
+	for _, cs := range componentSpecs {
+		componentSpecMap[cs.Metadata.Name] = cs
+	}
 
-	modelFormat := getModelFormat(&p.Graph)
+	return componentSpecMap
+}
+
+// composeCustomeUserContainer compose user container for custome image
+func composeCustomesUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.PredictiveUnit, componentSpecMap map[string]*seldonv1.SeldonPodSpec) error {
+	// Find the Graph node's PodSpec and Container
+	var seldonPodSpec *seldonv1.SeldonPodSpec
+	var ok bool
+	if seldonPodSpec, ok = componentSpecMap[pu.Name]; !ok {
+		return fmt.Errorf("can't find ComponentSpec for graph %v", pu.Name)
+	}
+	if len(seldonPodSpec.Spec.Containers) == 0 {
+		return fmt.Errorf("container length is zero")
+	}
+	container := &seldonPodSpec.Spec.Containers[0]
+	container.Name = pu.Name
+
+	// Set default env.
+	if len(container.Env) == 0 {
+		container.Env = []corev1.EnvVar{}
+	}
+	container.Env = append(container.Env, []corev1.EnvVar{
+		{
+			Name:  "SERVING_NAME",
+			Value: sdep.Name,
+		},
+	}...)
+
+	// Set Probe
+	probe := &corev1.Probe{
+		Handler: corev1.Handler{
+			Exec: &corev1.ExecAction{
+				Command: []string{"ls", "/"},
+			},
+			HTTPGet:   nil,
+			TCPSocket: nil,
+		},
+		TimeoutSeconds:   5,
+		FailureThreshold: 5,
+	}
+	container.ReadinessProbe = probe
+	container.LivenessProbe = probe
+
+	// Set VolumeMounts
+	if len(container.VolumeMounts) == 0 {
+		container.VolumeMounts = []corev1.VolumeMount{}
+	}
+	modelMountPath := getModelMountPath(container, sdep.Name)
+	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
+		{
+			Name:      modelSharedMountName,
+			MountPath: modelMountPath,
+		},
+	}...)
+
+	for idx := range pu.Children {
+		err := composeCustomesUserContainer(sdep, &pu.Children[idx], componentSpecMap)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// composeDefaultUserContainer compose user container for default image
+func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.PredictiveUnit, componentSpecMap map[string]*seldonv1.SeldonPodSpec) error {
+	// Find the Graph node's PodSpec and Container
+	var seldonPodSpec *seldonv1.SeldonPodSpec
+	var ok bool
+	if seldonPodSpec, ok = componentSpecMap[pu.Name]; !ok {
+		return fmt.Errorf("can't find ComponentSpec for graph %v", pu.Name)
+	}
+	if len(seldonPodSpec.Spec.Containers) == 0 {
+		return fmt.Errorf("container length is zero")
+	}
+	container := &seldonPodSpec.Spec.Containers[0]
+
+	container.Name = pu.Name
+	modelFormat := getModelFormat(pu)
 	image := getUserContainerImage(modelFormat)
 	container.Image = image
 
 	// Must set ports, otherwise it will can not traffic diversion in unique port(default: 8000) for multi deployment.
 	// please refer https://github.com/SeldonIO/seldon-core/blob/master/operator/apis/machinelearning.seldon.io/v1/seldondeployment_webhook.go#L142-L145
-	ports := getUserContainerPorts(modelFormat)
+	ports := getDefaultUserContainerPorts(modelFormat)
 	container.Ports = ports
 
 	// Must set probe, otherwise the default probe by seldon's webhook will cause error.
-	probe := getProbe(modelFormat, sdep.Name)
+	probe := getDefaultProbe(modelFormat, sdep.Name)
 	container.ReadinessProbe = probe
 	container.LivenessProbe = probe
 
@@ -129,7 +231,7 @@ func composeUserContainer(sdep *seldonv1.SeldonDeployment, p *seldonv1.Predictor
 	}
 	container.Env = append(container.Env, []corev1.EnvVar{
 		{
-			Name:  "MODEL_STORE",
+			Name:  envModelStorePath,
 			Value: modelStorePath,
 		},
 		{
@@ -147,29 +249,43 @@ func composeUserContainer(sdep *seldonv1.SeldonDeployment, p *seldonv1.Predictor
 	if len(container.VolumeMounts) == 0 {
 		container.VolumeMounts = []corev1.VolumeMount{}
 	}
-	modelMountPath := getModelMountPath(sdep.Name)
+	modelMountPath := getModelMountPath(container, sdep.Name)
 	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
 		{
 			Name:      modelSharedMountName,
 			MountPath: modelMountPath,
 		},
 	}...)
+
+	for idx := range pu.Children {
+		err := composeDefaultUserContainer(sdep, &pu.Children[idx], componentSpecMap)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func composeSeldonPodSpec(pu *seldonv1.PredictorSpec, pod *seldonv1.SeldonPodSpec) error {
-	modelTag, err := getModelTag(pu.Graph.ModelURI)
+func composeSeldonPodSpec(pu *seldonv1.PredictiveUnit, componentSpecMap map[string]*seldonv1.SeldonPodSpec) error {
+	var seldonPodSpec *seldonv1.SeldonPodSpec
+	var ok bool
+	if seldonPodSpec, ok = componentSpecMap[pu.Name]; !ok {
+		return fmt.Errorf("can't find ComponentSpec for graph %v", pu.Name)
+	}
+
+	modelTag, err := getModelTag(pu.ModelURI)
 	if err != nil {
 		return err
 	}
 	podName := modelTag
-	pod.Metadata.Name = podName
+	seldonPodSpec.Metadata.Name = podName
 
-	composeSchedulerName(pod)
+	composeSchedulerName(seldonPodSpec)
 
-	if len(pod.Spec.Volumes) == 0 {
-		pod.Spec.Volumes = []corev1.Volume{}
+	if len(seldonPodSpec.Spec.Volumes) == 0 {
+		seldonPodSpec.Spec.Volumes = []corev1.Volume{}
 	}
-	pod.Spec.Volumes = append(pod.Spec.Volumes, []corev1.Volume{
+	seldonPodSpec.Spec.Volumes = append(seldonPodSpec.Spec.Volumes, []corev1.Volume{
 		{
 			Name: modelSharedMountName,
 			VolumeSource: corev1.VolumeSource{
@@ -177,6 +293,13 @@ func composeSeldonPodSpec(pu *seldonv1.PredictorSpec, pod *seldonv1.SeldonPodSpe
 			},
 		},
 	}...)
+
+	for idx := range pu.Children {
+		err := composeSeldonPodSpec(&pu.Children[idx], componentSpecMap)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -192,7 +315,8 @@ func getGPUAmount(resource corev1.ResourceRequirements) int64 {
 	return 0
 }
 
-func getUserContainerPorts(format string) []corev1.ContainerPort {
+// getDefaultUserContainerPorts get container ports for default image.
+func getDefaultUserContainerPorts(format string) []corev1.ContainerPort {
 	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
 		ports := []corev1.ContainerPort{
 			{
@@ -228,8 +352,8 @@ func getUserContainerPorts(format string) []corev1.ContainerPort {
 	return ports
 }
 
-// getProbe generate readiness and liveiness.
-func getProbe(format, servingName string) *corev1.Probe {
+// getDefaultProbe generate readiness and liveiness.
+func getDefaultProbe(format, servingName string) *corev1.Probe {
 	path := fmt.Sprintf("/v2/models/%v", servingName)
 	port := defaultInferenceHTTPPort
 	if format == string(modeljobsv1alpha1.FormatPMML) {
@@ -250,6 +374,8 @@ func getProbe(format, servingName string) *corev1.Probe {
 				Scheme: corev1.URISchemeHTTP,
 			},
 		},
+		TimeoutSeconds:   5,
+		FailureThreshold: 5,
 	}
 }
 
@@ -295,7 +421,16 @@ func getModelTag(modelUri string) (string, error) {
 
 // getModelMountPath will generate model mount path in container,
 // ormb-storage-initializer will pull and export model to this path.
-func getModelMountPath(servingName string) string {
+// For default image, it is /mnt/servingName
+// For custom image, it is /<modelStorePath>/servingName, modelStorePath is come from env of container.
+func getModelMountPath(container *corev1.Container, servingName string) string {
+	for _, env := range container.Env {
+		// for custom image, the mount path is pass by frontend.
+		if env.Name == envModelStorePath && env.Value != "" {
+			return fmt.Sprintf("%v/%v", env.Value, servingName)
+		}
+	}
+
 	return fmt.Sprintf("%v/%v", modelStorePath, servingName)
 }
 
@@ -327,53 +462,52 @@ func composeModelInitailzerContainerResource(container *corev1.Container) error 
 	return nil
 }
 
-func composeInitContainer(sdep *seldonv1.SeldonDeployment) error {
-	modelMountPath := getModelMountPath(sdep.Name)
+func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.PredictorSpec) error {
+	p := pu.ComponentSpecs[0]
 
-	for _, p := range sdep.Spec.Predictors {
-		// simple model serving, the number of ComponentSpecs is 1
-		if len(p.ComponentSpecs) != 1 {
-			return fmt.Errorf("too many or too less componentspecs")
-		}
-
-		container := &corev1.Container{
-			Name:  "model-initializer",
-			Image: viper.GetString(envModelInitializerImage),
-			Args:  []string{p.Graph.ModelURI, modelMountPath},
-			// Get username and password from environment
-			// Here AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID are used
-			// because Seldon Core does not support renaming the environment variable name.
-			// it is used in ormb-storage-initializer.
-			// please refenence https://github.com/kleveross/ormb/blob/master/cmd/ormb-storage-initializer/cmd/pull-and-export.go#L47
-			Env: []corev1.EnvVar{
-				{
-					Name:  "AWS_ACCESS_KEY_ID",
-					Value: common.ORMBUserName,
-				},
-				{
-					Name:  "AWS_SECRET_ACCESS_KEY",
-					Value: common.ORMBPassword,
-				},
-				{
-					Name:  "ROOTPATH",
-					Value: "/mnt",
-				},
-			},
-			VolumeMounts: []corev1.VolumeMount{
-				{
-					Name:      modelSharedMountName,
-					MountPath: modelMountPath,
-				},
-			},
-		}
-
-		err := composeModelInitailzerContainerResource(container)
-		if err != nil {
-			return err
-		}
-
-		p.ComponentSpecs[0].Spec.InitContainers = []corev1.Container{*container}
+	if len(p.Spec.Containers) == 0 {
+		return fmt.Errorf("there are no container in SeldonPodSpec")
 	}
+	userContainer := &p.Spec.Containers[0]
+	modelMountPath := getModelMountPath(userContainer, sdep.Name)
+
+	initContainer := &corev1.Container{
+		Name:  "model-initializer",
+		Image: viper.GetString(envModelInitializerImage),
+		Args:  []string{pu.Graph.ModelURI, modelMountPath},
+		// Get username and password from environment
+		// Here AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID are used
+		// because Seldon Core does not support renaming the environment variable name.
+		// it is used in ormb-storage-initializer.
+		// please refenence https://github.com/kleveross/ormb/blob/master/cmd/ormb-storage-initializer/cmd/pull-and-export.go#L47
+		Env: []corev1.EnvVar{
+			{
+				Name:  "AWS_ACCESS_KEY_ID",
+				Value: common.ORMBUserName,
+			},
+			{
+				Name:  "AWS_SECRET_ACCESS_KEY",
+				Value: common.ORMBPassword,
+			},
+			{
+				Name:  "ROOTPATH",
+				Value: modelStorePath,
+			},
+		},
+		VolumeMounts: []corev1.VolumeMount{
+			{
+				Name:      modelSharedMountName,
+				MountPath: modelMountPath,
+			},
+		},
+	}
+
+	err := composeModelInitailzerContainerResource(initContainer)
+	if err != nil {
+		return err
+	}
+
+	p.Spec.InitContainers = []corev1.Container{*initContainer}
 
 	return nil
 }

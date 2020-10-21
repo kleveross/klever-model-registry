@@ -14,6 +14,7 @@ import (
 
 var sdepSingleGraph *seldonv1.SeldonDeployment
 var sdepDoubleGraph *seldonv1.SeldonDeployment
+var sdepCustomImageGraph *seldonv1.SeldonDeployment
 
 var _ = Describe("Composer", func() {
 
@@ -47,6 +48,20 @@ var _ = Describe("Composer", func() {
 		Expect(sdepDoubleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].VolumeMounts[0].MountPath).Should(Equal("/mnt/sdep-name"))
 		Expect(sdepDoubleGraph.Spec.Predictors[1].ComponentSpecs[0].Spec.Containers[0].VolumeMounts[0].MountPath).Should(Equal("/mnt/sdep-name"))
 	})
+
+	It("Should compose custom image graph successfully", func() {
+		err := serving.Compose(sdepCustomImageGraph)
+		Expect(err).To(BeNil())
+
+		Expect(len(sdepCustomImageGraph.Spec.Predictors)).Should(Equal(1))
+		Expect(len(sdepCustomImageGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(1))
+		Expect(sdepCustomImageGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports[0].ContainerPort).Should(Equal(int32(8000)))
+
+		Expect(len(sdepCustomImageGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].VolumeMounts)).Should(Equal(1))
+		Expect(sdepCustomImageGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].VolumeMounts[0].MountPath).Should(Equal("/model_store/sdep-name"))
+
+		Expect(len(sdepCustomImageGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.InitContainers[0].VolumeMounts)).Should(Equal(1))
+	})
 })
 
 var _ = BeforeEach(func() {
@@ -75,11 +90,73 @@ var _ = BeforeEach(func() {
 					ComponentSpecs: []*seldonv1.SeldonPodSpec{
 						{
 							Metadata: metav1.ObjectMeta{
-								Name: "test",
+								Name: "graph1",
 							},
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
 									{
+										Resources: corev1.ResourceRequirements{
+											Limits:   genTestResource(),
+											Requests: genTestResource(),
+										},
+									},
+								},
+							},
+						},
+					},
+					Graph: seldonv1.PredictiveUnit{
+						Name:               "graph1",
+						ModelURI:           "harbor-harbor-core.kleveross-system/release/savedmodel:v1",
+						ServiceAccountName: "default",
+						Endpoints: []seldonv1.Endpoint{
+							{
+								Type: seldonv1.REST,
+							},
+						},
+						Parameters: []seldonv1.Parameter{
+							{
+								Name:  "format",
+								Value: "SavedModel",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	sdepCustomImageGraph = &seldonv1.SeldonDeployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "sdep-name",
+			Namespace: "default",
+		},
+		Spec: seldonv1.SeldonDeploymentSpec{
+			Name: "deployment-name",
+			Predictors: []seldonv1.PredictorSpec{
+				{
+					ComponentSpecs: []*seldonv1.SeldonPodSpec{
+						{
+							Metadata: metav1.ObjectMeta{
+								Name: "graph1",
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Image: "lever-dev.cargo.io/release/trtserver:v0.2.0",
+										Env: []corev1.EnvVar{
+											{
+												Name:  "MODEL_STORE",
+												Value: "/model_store",
+											},
+										},
+										Ports: []corev1.ContainerPort{
+											{
+												Name:          "http",
+												ContainerPort: 8000,
+												Protocol:      corev1.ProtocolTCP,
+											},
+										},
+										Command: []string{"/entrypoint.sh"},
 										Resources: corev1.ResourceRequirements{
 											Limits:   genTestResource(),
 											Requests: genTestResource(),
@@ -122,7 +199,7 @@ var _ = BeforeEach(func() {
 					ComponentSpecs: []*seldonv1.SeldonPodSpec{
 						{
 							Metadata: metav1.ObjectMeta{
-								Name: "test",
+								Name: "graph1",
 							},
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
@@ -157,7 +234,7 @@ var _ = BeforeEach(func() {
 					ComponentSpecs: []*seldonv1.SeldonPodSpec{
 						{
 							Metadata: metav1.ObjectMeta{
-								Name: "test",
+								Name: "graph2",
 							},
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
