@@ -29,7 +29,7 @@ github.com/Microsoft/hcsshim/osversion
 github.com/ajg/form
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
-# github.com/caicloud/nirvana v0.2.5-0.20200825065332-cabc5559748c
+# github.com/caicloud/nirvana v0.2.10
 ## explicit
 github.com/caicloud/nirvana
 github.com/caicloud/nirvana/config
