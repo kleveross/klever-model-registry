@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import shutil
-import time
 import json
 from loguru import logger
 
@@ -12,6 +10,7 @@ from utils.model_formatter import ModelFormatter
 
 SKLEARN_MODEL = "model.joblib"
 XGBOOST_MODEL = "model.xgboost"
+
 
 class Preprocessor:
     """
@@ -29,7 +28,7 @@ class Preprocessor:
             """
             try:
                 var = os.environ[env]
-            except KeyError as _:
+            except KeyError:
                 logger.error(f"{env} not defined")
                 sys.exit(1)
             else:
@@ -40,12 +39,13 @@ class Preprocessor:
 
         self._trtis_conifig_generator = TRTISConfigGenerator()
         self.model_root_path = self._model_store
-        self.model_path = os.path.join(self.model_root_path, self._serving_name, "1")
-        
+        self.model_path = os.path.join(
+            self.model_root_path, self._serving_name, "1")
 
     def _extract_yaml(self):
         try:
-            buffer, yaml_data = check_model(self._model_store, self._serving_name)
+            buffer, yaml_data = check_model(
+                self._model_store, self._serving_name)
         except Exception as e:
             logger.error('error when checking model: ', e)
             sys.exit(1)
@@ -55,12 +55,14 @@ class Preprocessor:
 
     def _generate_config_pbtxt(self, yaml_data):
         try:
-            config_pbtext_path = os.path.join(self.model_root_path, self._serving_name)
-            self._trtis_conifig_generator.generate_config(yaml_data, config_pbtext_path, self._serving_name)
+            config_pbtext_path = os.path.join(
+                self.model_root_path, self._serving_name)
+            self._trtis_conifig_generator.generate_config(
+                yaml_data, config_pbtext_path, self._serving_name)
         except Exception as e:
             logger.error('error when generating config.pbtxt: ', e)
             sys.exit(1)
-    
+
     def _generate_model_setting(self, format):
         setting = {}
         if format == 'SKLearn':
@@ -92,11 +94,13 @@ class Preprocessor:
             formatter = ModelFormatter(format)
             formatter.format(self.model_path)
         except Exception as e:
-            logger.error(f'error when formatting directory {self.model_path}: ', e)
+            logger.error(
+                f'error when formatting directory {self.model_path}: ', e)
             sys.exit(1)
 
     def start(self):
-        ormb_file_path = os.path.join(self.model_root_path, self._serving_name, "ormbfile.yaml")
+        ormb_file_path = os.path.join(
+            self.model_root_path, self._serving_name, "ormbfile.yaml")
         if not os.path.exists(ormb_file_path):
             return
 
@@ -106,7 +110,7 @@ class Preprocessor:
 
         # Phase 2: Generate 'config.pbtxt' if need
         if format != 'PMML' and format != 'SKLearn' and format != 'XGBoost':
-           self._generate_config_pbtxt(yaml_data)
+            self._generate_config_pbtxt(yaml_data)
 
         # Phase 3: Generate 'model setting' if need
         if format == 'SKLearn' or format == 'XGBoost':
@@ -115,7 +119,8 @@ class Preprocessor:
         # Phase 4: Re-organize directory format
         self._format_model(format)
 
-        os.remove(ormb_file_path)  
+        os.remove(ormb_file_path)
+
 
 if __name__ == '__main__':
 

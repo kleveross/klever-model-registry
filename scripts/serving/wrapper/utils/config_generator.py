@@ -95,7 +95,6 @@ class TRTISConfigGenerator(object):
 
         Return: None
         """
-        max_bs = 1
         format = manifest['format'].lower()
         platform = hp.get_platform_by_format(format)
         assert platform in TRTISConfigGenerator._implemented_runtimes
@@ -103,8 +102,9 @@ class TRTISConfigGenerator(object):
         inputs_str = self._gen_xputs(manifest['signature']['inputs'])
         outputs_str = self._gen_xputs(manifest['signature']['outputs'])
 
-        max_batch_size_content = '' #('' if self._fixed_dim(manifest['inputs'])
-                                 # else f"max_batch_size: {max_bs}")
+        # ('' if self._fixed_dim(manifest['inputs'])
+        max_batch_size_content = ''
+        # else f"max_batch_size: {max_bs}")
 
         config_pbtxt = self.overall_template.format(
             name=serving_name,
