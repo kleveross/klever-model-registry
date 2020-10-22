@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import zipfile
-import shutil
 import yaml
 from loguru import logger
 
@@ -13,6 +11,7 @@ def check_model(dir_path, serving_name):
         buffer = mf.read()
         manifest = yaml.load(buffer)
     return buffer, manifest
+
 
 @logger.catch()
 def find_xx_file(search_dir, ext, show_all=False):

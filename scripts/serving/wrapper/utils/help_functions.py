@@ -20,6 +20,7 @@ def rename(dir_path, ori_name, new_name):
     new_name_full = os.path.join(dir_path, new_name)
     os.rename(ori_name_full, new_name_full)
 
+
 @logger.catch()
 def get_platform_by_format(format):
     format_platform_dict = {
@@ -33,5 +34,5 @@ def get_platform_by_format(format):
         'sklearn': 'scikitlearn_sklearn',
         'xgboost': 'xgboost_xgboost'
     }
-    
+
     return format_platform_dict[format]

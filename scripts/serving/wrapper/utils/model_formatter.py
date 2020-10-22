@@ -79,6 +79,7 @@ class TFGraphDefFormatter(ModelFormatInterface):
         hp.rename(target_dir, pb_file[0],
                   TFGraphDefFormatter._target_graphdef_filename)
 
+
 class PMMLFormatter(ModelFormatInterface):
     _target_pmml_filename = 'model.pmml'
 
@@ -87,6 +88,7 @@ class PMMLFormatter(ModelFormatInterface):
         assert len(pmml_file) == 1
         hp.rename(target_dir, pmml_file[0],
                   PMMLFormatter._target_pmml_filename)
+
 
 class TensorRTFormatter(ModelFormatInterface):
     _target_plan_filename = 'model.plan'
@@ -97,6 +99,7 @@ class TensorRTFormatter(ModelFormatInterface):
         hp.rename(target_dir, tensorrt_file[0],
                   TensorRTFormatter._target_plan_filename)
 
+
 class SKLearnFormatter(ModelFormatInterface):
     _target_sklearn_filename = 'model.joblib'
 
@@ -106,6 +109,7 @@ class SKLearnFormatter(ModelFormatInterface):
         hp.rename(target_dir, sklearn_file[0],
                   SKLearnFormatter._target_sklearn_filename)
 
+
 class XGBoostFormatter(ModelFormatInterface):
     _target_xgboost_filename = 'model.xgboost'
 
@@ -114,6 +118,7 @@ class XGBoostFormatter(ModelFormatInterface):
         assert len(xgboost_file) == 1
         hp.rename(target_dir, xgboost_file[0],
                   XGBoostFormatter._target_xgboost_filename)
+
 
 class ModelFormatter:
     _implemented_dict = {
@@ -127,6 +132,7 @@ class ModelFormatter:
         'scikitlearn_sklearn': SKLearnFormatter,
         'xgboost_xgboost': XGBoostFormatter
     }
+
     def __init__(self, format):
         platform = hp.get_platform_by_format(format)
         assert platform in ModelFormatter._implemented_dict
