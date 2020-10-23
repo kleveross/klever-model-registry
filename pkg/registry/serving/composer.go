@@ -89,8 +89,6 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 				return err
 			}
 
-			setupNoEngineMode(&p)
-
 			componentSpecMap := getComponentsMap(p.ComponentSpecs)
 
 			// Compose user containers
@@ -108,11 +106,10 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 				}
 			}
 
-			// Compose SeldonPodSpec
-			if err := composeSeldonPodSpec(&p.Graph, componentSpecMap); err != nil {
-				return err
-			}
 		}
+
+		// Setup no-engine mode
+		setupNoEngineMode(&p)
 
 		// Conpose init container for pod
 		composeInitContainer(sdep, &p)
@@ -129,6 +126,16 @@ func getComponentsMap(componentSpecs []*seldonv1.SeldonPodSpec) map[string]*seld
 	}
 
 	return componentSpecMap
+}
+
+func setupNoEngineMode(pu *seldonv1.PredictorSpec) {
+	if pu.Annotations == nil {
+		pu.Annotations = make(map[string]string)
+	}
+	// use no-engine mode
+	pu.Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
+
+	pu.Name = pu.Graph.Name
 }
 
 // composeCustomeUserContainer compose user container for custome image
@@ -191,16 +198,6 @@ func composeCustomesUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.
 	}
 
 	return nil
-}
-
-func setupNoEngineMode(pu *seldonv1.PredictorSpec) {
-	if pu.Annotations == nil {
-		pu.Annotations = make(map[string]string)
-	}
-	// use no-engine mode
-	pu.Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
-
-	pu.Name = pu.Graph.Name
 }
 
 // composeDefaultUserContainer compose user container for default image
