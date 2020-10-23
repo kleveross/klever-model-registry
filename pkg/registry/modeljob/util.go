@@ -33,16 +33,15 @@ func GenerateExtractionModelJob(domain, project, modelName, versionName, format 
 	return &modeljob
 }
 
-var formatNeedNotExtraction = map[string]bool{
-	string(modeljobsv1alpha1.FormatTensorRT): true,
-	string(modeljobsv1alpha1.FormatMLflow):   true,
-}
-
 // IsExtractModel return bool which is represent whether extract model or not.
 // For `TensorRT` format, since extract MUST have GPU, but GPU resource is precious, so not extract.
+// For `MLflow` format, we current do not support model extraction. models will be handled by MLflow server.
 // For `Others` format, not extract.
 func IsExtractModel(format string) bool {
-	if _, ok := formatNeedNotExtraction[format]; ok {
+	switch format {
+	case string(modeljobsv1alpha1.FormatTensorRT):
+		fallthrough
+	case string(modeljobsv1alpha1.FormatMLflow):
 		return false
 	}
 

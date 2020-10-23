@@ -36,7 +36,7 @@ Klever Model Registry's features:
     - CaffeModel
     - TorchScript
     - MXNetParams
-    - PMML 
+    - PMML
 - Convert models from:
     - MXNetParams to ONNX
     - Keras H5 to SavedModel
