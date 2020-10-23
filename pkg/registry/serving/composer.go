@@ -84,7 +84,7 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 	sdep.Spec.Name = sdep.ObjectMeta.Name
 
 	for _, p := range sdep.Spec.Predictors {
-		if !seldonv1.IsPrepack(&p.Graph) {
+		if p.Graph.Implementation == nil || !seldonv1.IsPrepack(&p.Graph) {
 			if err := validateComponentSpecs(&p); err != nil {
 				return err
 			}
