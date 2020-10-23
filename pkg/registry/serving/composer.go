@@ -106,13 +106,12 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 				}
 			}
 
+			// Conpose init container for pod
+			composeInitContainer(sdep, &p)
 		}
 
 		// Setup no-engine mode
 		setupNoEngineMode(&p)
-
-		// Conpose init container for pod
-		composeInitContainer(sdep, &p)
 	}
 
 	return nil
