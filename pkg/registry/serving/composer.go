@@ -29,9 +29,6 @@ const (
 	// envMLServerLImage is the preset image for mlserver.
 	envMLServerImage = "MLSERVER_IMAGE"
 
-	// envMLServerLImage is the preset image for mlflow server.
-	envMLflowServerImage = "MLFLOW_SERVRE_IMAGE"
-
 	// envModelInitializerImage is the preset image for model initializer.
 	envModelInitializerImage = "MODEL_INITIALIZER_IMAGE"
 
@@ -419,11 +416,7 @@ func getUserContainerImage(format string) string {
 	case string(modeljobsv1alpha1.FormatXGBoost):
 		return viper.GetString(envMLServerImage)
 
-	// Group3 for mlflow server image
-	case string(modeljobsv1alpha1.FormatMLflow):
-		return viper.GetString(envMLflowServerImage)
-
-	// Group4 for TRT server image
+	// Group3 for TRT server image
 	default:
 		return viper.GetString(envTRTServingImage)
 	}
