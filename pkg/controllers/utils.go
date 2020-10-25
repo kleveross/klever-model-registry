@@ -205,11 +205,11 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 			WorkingDir: "/models",
 			Env: []corev1.EnvVar{
 				corev1.EnvVar{
-					Name:  "AWS_ACCESS_KEY_ID",
+					Name:  "ORMB_USERNAME",
 					Value: ormbUsername,
 				},
 				corev1.EnvVar{
-					Name:  "AWS_SECRET_ACCESS_KEY",
+					Name:  "ORMB_PASSWORD",
 					Value: ormbPassword,
 				},
 			},

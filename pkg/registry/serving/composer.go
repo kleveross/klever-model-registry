@@ -490,17 +490,13 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 		Image: viper.GetString(envModelInitializerImage),
 		Args:  []string{pu.Graph.ModelURI, modelMountPath},
 		// Get username and password from environment
-		// Here AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID are used
-		// because Seldon Core does not support renaming the environment variable name.
-		// it is used in ormb-storage-initializer.
-		// please refenence https://github.com/kleveross/ormb/blob/master/cmd/ormb-storage-initializer/cmd/pull-and-export.go#L47
 		Env: []corev1.EnvVar{
 			{
-				Name:  "AWS_ACCESS_KEY_ID",
+				Name:  "ORMB_USERNAME",
 				Value: common.ORMBUserName,
 			},
 			{
-				Name:  "AWS_SECRET_ACCESS_KEY",
+				Name:  "ORMB_PASSWORD",
 				Value: common.ORMBPassword,
 			},
 			{
