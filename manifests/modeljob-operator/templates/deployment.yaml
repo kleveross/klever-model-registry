@@ -38,12 +38,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: ormb
-                  key: ormbUsername
+                  key: ORMB_USERNAME
             - name: SERVER_ORMB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: ormb
-                  key: ormbPassword
+                  key: ORMB_PASSWORD
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -11,7 +11,6 @@ from utils.model_formatter import ModelFormatter
 SKLEARN_MODEL = "model.joblib"
 XGBOOST_MODEL = "model.xgboost"
 
-
 class Preprocessor:
     """
     Preprocessor formats its directory structure and
@@ -39,8 +38,8 @@ class Preprocessor:
 
         self._trtis_conifig_generator = TRTISConfigGenerator()
         self.model_root_path = self._model_store
-        self.model_path = os.path.join(
-            self.model_root_path, self._serving_name, "1")
+        self.model_path = os.path.join(self.model_root_path, self._serving_name, "1")
+
 
     def _extract_yaml(self):
         try:
@@ -108,12 +107,16 @@ class Preprocessor:
         yaml_data = self._extract_yaml()
         format = yaml_data["format"]
 
+        MODEL_NEED_NOT_CONFIG_PBTXT = {'PMML', 'SKLearn', 'XGBoost'}
+
         # Phase 2: Generate 'config.pbtxt' if need
-        if format != 'PMML' and format != 'SKLearn' and format != 'XGBoost':
-            self._generate_config_pbtxt(yaml_data)
+        if format not in MODEL_NEED_MODEL_SETTING:
+           self._generate_config_pbtxt(yaml_data)
+
+        MODEL_NEED_MODEL_SETTING = {'SKLearn', 'XGBoost'}
 
         # Phase 3: Generate 'model setting' if need
-        if format == 'SKLearn' or format == 'XGBoost':
+        if format in MODEL_NEED_MODEL_SETTING:
             self._generate_model_setting(format)
 
         # Phase 4: Re-organize directory format
@@ -123,6 +126,5 @@ class Preprocessor:
 
 
 if __name__ == '__main__':
-
     p = Preprocessor()
     p.start()

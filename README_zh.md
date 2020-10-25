@@ -25,6 +25,7 @@ Klever Model Registry 的特性包括：
 - 对现有工作流的零侵入性
 - 像 Docker 一样管理机器学习模型（在 [kleveross/ormb](https://github.com/kleveross/ormb) 的帮助下）
 - 复用 Harbor 进行模型管理，不引入额外的基础设施
+- 对于 MLflow 管理的模型支持启动模型服务
 - 对以下格式的模型进行签名解析
     - SavedModel
     - ONNX
@@ -34,11 +35,11 @@ Klever Model Registry 的特性包括：
     - CaffeModel
     - TorchScript
     - MXNetParams
-    - PMML 
+    - PMML
 - 自动地进行模型格式间的转换（持续增加中）
     - MXNetParams 转为 ONNX
     - Keras H5 转为 SavedModel
-    - CaffeModel 转为 NetDef 
+    - CaffeModel 转为 NetDef
 
 查看我们的 [官方文档](/docs/docs_zh/README.md) 获取更多信息。
 

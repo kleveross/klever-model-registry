@@ -131,6 +131,7 @@ const (
 	FormatTensorRT    Format = "TensorRT"
 	FormatSKLearn     Format = "SKLearn"
 	FormatXGBoost     Format = "XGBoost"
+	FormatMLflow      Format = "MLflow"
 )
 
 type ModelJobPhase string

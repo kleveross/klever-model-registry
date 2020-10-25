@@ -83,43 +83,38 @@ func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
 func Compose(sdep *seldonv1.SeldonDeployment) error {
 	sdep.Spec.Name = sdep.ObjectMeta.Name
 
-	for i, p := range sdep.Spec.Predictors {
-		if err := validateComponentSpecs(&p); err != nil {
-			return err
-		}
-
-		if sdep.Spec.Predictors[i].Annotations == nil {
-			sdep.Spec.Predictors[i].Annotations = make(map[string]string)
-		}
-		// Use no-engine mode
-		sdep.Spec.Predictors[i].Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
-
-		sdep.Spec.Predictors[i].Name = sdep.Spec.Predictors[i].Graph.Name
-
-		componentSpecMap := getComponentsMap(p.ComponentSpecs)
-
-		// Compose user containers
-		if p.ComponentSpecs[0].Spec.Containers[0].Image != "" {
-			// For custome image
-			err := composeCustomesUserContainer(sdep, &p.Graph, componentSpecMap)
-			if err != nil {
+	for _, p := range sdep.Spec.Predictors {
+		if p.Graph.Implementation == nil || !seldonv1.IsPrepack(&p.Graph) {
+			if err := validateComponentSpecs(&p); err != nil {
 				return err
 			}
-		} else {
-			// For default image
-			err := composeDefaultUserContainer(sdep, &p.Graph, componentSpecMap)
-			if err != nil {
-				return err
+
+			componentSpecMap := getComponentsMap(p.ComponentSpecs)
+
+			// Compose user containers
+			if p.ComponentSpecs[0].Spec.Containers[0].Image != "" {
+				// For custome image
+				err := composeCustomesUserContainer(sdep, &p.Graph, componentSpecMap)
+				if err != nil {
+					return err
+				}
+			} else {
+				// For default image
+				err := composeDefaultUserContainer(sdep, &p.Graph, componentSpecMap)
+				if err != nil {
+					return err
+				}
 			}
+
+			// Conpose init container for pod
+			composeInitContainer(sdep, &p)
 		}
 
-		// Compose SeldonPodSpec
-		if err := composeSeldonPodSpec(&p.Graph, componentSpecMap); err != nil {
-			return err
-		}
+		// Setup no-engine mode
+		setupNoEngineMode(&p)
 
-		// Conpose init container for pod
-		composeInitContainer(sdep, &p)
+		p.Name = p.Graph.Name
+
 	}
 
 	return nil
@@ -133,6 +128,14 @@ func getComponentsMap(componentSpecs []*seldonv1.SeldonPodSpec) map[string]*seld
 	}
 
 	return componentSpecMap
+}
+
+func setupNoEngineMode(p *seldonv1.PredictorSpec) {
+	if p.Annotations == nil {
+		p.Annotations = make(map[string]string)
+	}
+	// use no-engine mode
+	p.Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
 }
 
 // composeCustomeUserContainer compose user container for custome image
@@ -399,14 +402,21 @@ func getModelFormat(pu *seldonv1.PredictiveUnit) string {
 
 // getUserContainerImage get image by different model format.
 func getUserContainerImage(format string) string {
-	if format == string(modeljobsv1alpha1.FormatPMML) {
+	switch format {
+	// Group1 for PMML image
+	case string(modeljobsv1alpha1.FormatPMML):
 		return viper.GetString(envPMMLServingImage)
-	}
-	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
-		return viper.GetString(envMLServerImage)
-	}
 
-	return viper.GetString(envTRTServingImage)
+	// Group2 for mlserver image
+	case string(modeljobsv1alpha1.FormatSKLearn):
+		fallthrough
+	case string(modeljobsv1alpha1.FormatXGBoost):
+		return viper.GetString(envMLServerImage)
+
+	// Group3 for TRT server image
+	default:
+		return viper.GetString(envTRTServingImage)
+	}
 }
 
 // getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
@@ -472,21 +482,21 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 	modelMountPath := getModelMountPath(userContainer, sdep.Name)
 
 	initContainer := &corev1.Container{
-		Name:  "model-initializer",
+		// mimics the behavior of seldon model initializer for it will disable the default init container injection
+		// in case of a pre-packaged server implementation was selected: https://github.com/SeldonIO/seldon-core/blob/0bd83773228a18e7f376270f4b85cbef69395b8f/operator/controllers/model_initializer_injector.go#L142
+		// the default name will be generated here:
+		// https://github.com/SeldonIO/seldon-core/blob/0ef45fd234a674fc9b6c8d034cd2e42b4c9ebd05/operator/controllers/model_initializer_injector.go#L118
+		Name:  pu.Name + "-model-initializer",
 		Image: viper.GetString(envModelInitializerImage),
 		Args:  []string{pu.Graph.ModelURI, modelMountPath},
 		// Get username and password from environment
-		// Here AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID are used
-		// because Seldon Core does not support renaming the environment variable name.
-		// it is used in ormb-storage-initializer.
-		// please refenence https://github.com/kleveross/ormb/blob/master/cmd/ormb-storage-initializer/cmd/pull-and-export.go#L47
 		Env: []corev1.EnvVar{
 			{
-				Name:  "AWS_ACCESS_KEY_ID",
+				Name:  "ORMB_USERNAME",
 				Value: common.ORMBUserName,
 			},
 			{
-				Name:  "AWS_SECRET_ACCESS_KEY",
+				Name:  "ORMB_PASSWORD",
 				Value: common.ORMBPassword,
 			},
 			{

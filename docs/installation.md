@@ -27,6 +27,8 @@ $ helm install seldon-core seldon-core-operator \
     --set image.registry=ghcr.io \
     --set image.repository=kleveross/seldon-core-operator \
     --set image.tag=0.1.0 \
+    --set storageInitializer.image=ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6 \
+    --set predictiveUnit.defaultEnvSecretRefName=ormb \
     --namespace seldon-system
 ```
 

@@ -39,7 +39,7 @@ Klever Model Registry 是一个开源项目，遵循 [Apache 2.0 开源协议](h
   - CaffeModel
   - TorchScript
   - MXNetParams
-  - PMML 
+  - PMML
 
 模型的具体解析过程由 `ModelJob` 生成并控制的 `Job` 的镜像来完成，在解析完毕后会生成更新后的 `ormbfile.yaml` 并推送到 `Harbor`。镜像中的解析脚本代码详见 [extract](/scripts/extract/extract.py)。
 
