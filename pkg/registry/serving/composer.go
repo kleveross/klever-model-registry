@@ -112,6 +112,9 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 
 		// Setup no-engine mode
 		setupNoEngineMode(&p)
+
+		p.Name = p.Graph.Name
+
 	}
 
 	return nil
@@ -127,14 +130,12 @@ func getComponentsMap(componentSpecs []*seldonv1.SeldonPodSpec) map[string]*seld
 	return componentSpecMap
 }
 
-func setupNoEngineMode(pu *seldonv1.PredictorSpec) {
-	if pu.Annotations == nil {
-		pu.Annotations = make(map[string]string)
+func setupNoEngineMode(p *seldonv1.PredictorSpec) {
+	if p.Annotations == nil {
+		p.Annotations = make(map[string]string)
 	}
 	// use no-engine mode
-	pu.Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
-
-	pu.Name = pu.Graph.Name
+	p.Annotations[seldonv1.ANNOTATION_NO_ENGINE] = "true"
 }
 
 // composeCustomeUserContainer compose user container for custome image
