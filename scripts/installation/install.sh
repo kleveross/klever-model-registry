@@ -49,6 +49,8 @@ helm install harbor harbor --version=v1.4.2 \
     --set externalURL=http://$MASTER_IP:$HARBOR_PORT \
     --set core.image.tag=v2.1.0 \
     --set harborAdminPassword="ORMBtest12345" \
+    --set storageInitializer.image=ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6 \
+    --set predictiveUnit.defaultEnvSecretRefName=ormb \
     --namespace harbor-system
 
 #

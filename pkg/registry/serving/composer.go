@@ -486,7 +486,7 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 		// in case of a pre-packaged server implementation was selected: https://github.com/SeldonIO/seldon-core/blob/0bd83773228a18e7f376270f4b85cbef69395b8f/operator/controllers/model_initializer_injector.go#L142
 		// the default name will be generated here:
 		// https://github.com/SeldonIO/seldon-core/blob/0ef45fd234a674fc9b6c8d034cd2e42b4c9ebd05/operator/controllers/model_initializer_injector.go#L118
-		Name:  pu.Name + "-" + "model-initializer",
+		Name:  pu.Name + "-model-initializer",
 		Image: viper.GetString(envModelInitializerImage),
 		Args:  []string{pu.Graph.ModelURI, modelMountPath},
 		// Get username and password from environment

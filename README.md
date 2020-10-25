@@ -27,6 +27,7 @@ Klever Model Registry's features:
 - Keep non-Invasive for your business
 - Manage ML models like Docker ( With the help of [kleveross/ormb](https://github.com/kleveross/ormb) )
 - Reuse Harbor to store models, without any new infrastructure
+- Support model serving for models managed by MLflow
 - Extract models signatures for:
     - SavedModel
     - ONNX
