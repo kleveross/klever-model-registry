@@ -120,6 +120,11 @@ class XGBoostFormatter(ModelFormatInterface):
                   XGBoostFormatter._target_xgboost_filename)
 
 
+class MLlibFormatter(ModelFormatInterface):
+    def execute(self, target_dir):
+        print("do nothing since mllib model is a directory")
+
+
 class ModelFormatter:
     _implemented_dict = {
         'onnxruntime_onnx': ONNXFormatter,
@@ -130,7 +135,8 @@ class ModelFormatter:
         'pmmlruntime_pmml': PMMLFormatter,
         'tensorrt_plan': TensorRTFormatter,
         'scikitlearn_sklearn': SKLearnFormatter,
-        'xgboost_xgboost': XGBoostFormatter
+        'xgboost_xgboost': XGBoostFormatter,
+        'mllib_mllib': MLlibFormatter,
     }
 
     def __init__(self, format):

@@ -32,7 +32,8 @@ def get_platform_by_format(format):
         'pmml': 'pmmlruntime_pmml',
         'tensorrt': 'tensorrt_plan',
         'sklearn': 'scikitlearn_sklearn',
-        'xgboost': 'xgboost_xgboost'
+        'xgboost': 'xgboost_xgboost',
+        'mllib': 'mllib_mllib'
     }
 
     return format_platform_dict[format]
