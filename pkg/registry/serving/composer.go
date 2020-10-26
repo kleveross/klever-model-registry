@@ -320,7 +320,7 @@ func getGPUAmount(resource corev1.ResourceRequirements) int64 {
 
 // getDefaultUserContainerPorts get container ports for default image.
 func getDefaultUserContainerPorts(format string) []corev1.ContainerPort {
-	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
+	if isMLServerModel(format) {
 		ports := []corev1.ContainerPort{
 			{
 				Name:          "http",
@@ -361,7 +361,7 @@ func getDefaultProbe(format, servingName string) *corev1.Probe {
 	port := defaultInferenceHTTPPort
 	if format == string(modeljobsv1alpha1.FormatPMML) {
 		path = fmt.Sprintf("/openscoring/model/%v", servingName)
-	} else if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) {
+	} else if isMLServerModel(format) {
 		path = fmt.Sprintf("/v2/models/%v/ready", servingName)
 		port = defaultMLServerHTTPPort
 	}
@@ -402,21 +402,18 @@ func getModelFormat(pu *seldonv1.PredictiveUnit) string {
 
 // getUserContainerImage get image by different model format.
 func getUserContainerImage(format string) string {
-	switch format {
 	// Group1 for PMML image
-	case string(modeljobsv1alpha1.FormatPMML):
+	if format == string(modeljobsv1alpha1.FormatPMML) {
 		return viper.GetString(envPMMLServingImage)
-
-	// Group2 for mlserver image
-	case string(modeljobsv1alpha1.FormatSKLearn):
-		fallthrough
-	case string(modeljobsv1alpha1.FormatXGBoost):
-		return viper.GetString(envMLServerImage)
-
-	// Group3 for TRT server image
-	default:
-		return viper.GetString(envTRTServingImage)
 	}
+	// Group2 for mlserver image
+	if isMLServerModel(format) {
+		return viper.GetString(envMLServerImage)
+	}
+
+	// Group3 for default TRT server image
+	return viper.GetString(envTRTServingImage)
+
 }
 
 // getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
@@ -529,4 +526,11 @@ func composeSchedulerName(seldonPodSpec *seldonv1.SeldonPodSpec) {
 		return
 	}
 	seldonPodSpec.Spec.SchedulerName = schedulerName
+}
+
+func isMLServerModel(format string) bool {
+	if format == string(modeljobsv1alpha1.FormatSKLearn) || format == string(modeljobsv1alpha1.FormatXGBoost) || format == string(modeljobsv1alpha1.FormatMLlib) {
+		return true
+	}
+	return false
 }

@@ -132,6 +132,7 @@ const (
 	FormatSKLearn     Format = "SKLearn"
 	FormatXGBoost     Format = "XGBoost"
 	FormatMLflow      Format = "MLflow"
+	FormatMLlib       Format = "MLlib"
 )
 
 type ModelJobPhase string

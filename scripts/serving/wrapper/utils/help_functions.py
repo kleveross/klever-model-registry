@@ -2,6 +2,10 @@
 import os
 from loguru import logger
 
+mlserver_model = [
+    'SKLearn', 'XGBoost', 'MLlib'
+]
+
 
 @logger.catch()
 def find_file_ends_with(dir_path, ext):
@@ -22,6 +26,20 @@ def rename(dir_path, ori_name, new_name):
 
 
 @logger.catch()
+def isTritonModel(format):
+    if format != 'PMML' and format not in mlserver_model:
+        return True
+    return False
+
+
+@logger.catch()
+def isMLServerModel(format):
+    if format in mlserver_model:
+        return True
+    return False
+
+
+@logger.catch()
 def get_platform_by_format(format):
     format_platform_dict = {
         'onnx': 'onnxruntime_onnx',
@@ -32,7 +50,8 @@ def get_platform_by_format(format):
         'pmml': 'pmmlruntime_pmml',
         'tensorrt': 'tensorrt_plan',
         'sklearn': 'scikitlearn_sklearn',
-        'xgboost': 'xgboost_xgboost'
+        'xgboost': 'xgboost_xgboost',
+        'mllib': 'mllib_mllib'
     }
 
     return format_platform_dict[format]

@@ -7,9 +7,11 @@ from loguru import logger
 from utils.get_model import check_model
 from utils.config_generator import TRTISConfigGenerator
 from utils.model_formatter import ModelFormatter
+from utils.help_functions import isTritonModel, isMLServerModel
 
 SKLEARN_MODEL = "model.joblib"
 XGBOOST_MODEL = "model.xgboost"
+
 
 class Preprocessor:
     """
@@ -38,8 +40,8 @@ class Preprocessor:
 
         self._trtis_conifig_generator = TRTISConfigGenerator()
         self.model_root_path = self._model_store
-        self.model_path = os.path.join(self.model_root_path, self._serving_name, "1")
-
+        self.model_path = os.path.join(
+            self.model_root_path, self._serving_name, "1")
 
     def _extract_yaml(self):
         try:
@@ -62,12 +64,12 @@ class Preprocessor:
             logger.error('error when generating config.pbtxt: ', e)
             sys.exit(1)
 
-    def _generate_model_setting(self, format):
+    def _generate_model_setting(self, format, version):
         setting = {}
         if format == 'SKLearn':
             setting = {
                 'name': self._serving_name,
-                'version': 'v0.1.0',
+                'version': version,
                 'implementation': 'mlserver.models.SKLearnModel',
                 'parameters': {
                     'uri': os.path.join(self.model_path, SKLEARN_MODEL)
@@ -76,10 +78,27 @@ class Preprocessor:
         elif format == 'XGBoost':
             setting = {
                 'name': self._serving_name,
-                'version': 'v0.1.0',
+                'version': version,
                 'implementation': 'mlserver.models.XGBoostModel',
                 'parameters': {
                     'uri': os.path.join(self.model_path, XGBOOST_MODEL)
+                }
+            }
+        elif format == 'MLlib':
+            try:
+                mllibformat = os.environ["MLLIB_FORMAT"]
+            except KeyError:
+                logger.error("MLLIB_FORMAT not defined")
+                sys.exit(1)
+
+            setting = {
+                'name': self._serving_name,
+                'version': version,
+                'implementation': 'mlservermllib.models.MLLibModel',
+                'parameters': {
+                    'uri': os.path.join(
+                        self.model_root_path, self._serving_name, "1"),
+                    'format': mllibformat
                 }
             }
 
@@ -101,23 +120,32 @@ class Preprocessor:
         ormb_file_path = os.path.join(
             self.model_root_path, self._serving_name, "ormbfile.yaml")
         if not os.path.exists(ormb_file_path):
+            logger.error(f'{ormb_file_path} does not exist')
             return
 
         # Phase 1: Extract model_format and yaml
         yaml_data = self._extract_yaml()
+        if 'format' in yaml_data.items():
+            logger.error('model format missing')
+            return
         format = yaml_data["format"]
 
-        MODEL_NEED_NOT_CONFIG_PBTXT = {'PMML', 'SKLearn', 'XGBoost'}
+        # Phase 2: Generate 'config.pbtxt' for triton models
+        if isTritonModel(format):
+            self._generate_config_pbtxt(yaml_data)
 
-        # Phase 2: Generate 'config.pbtxt' if need
-        if format not in MODEL_NEED_MODEL_SETTING:
-           self._generate_config_pbtxt(yaml_data)
+        # Phase 3: Generate 'model setting' for mlserver models
+        if isMLServerModel(format):
+            # set env for mlserver
+            os.putenv('MODEL_FORMAT', format)
 
-        MODEL_NEED_MODEL_SETTING = {'SKLearn', 'XGBoost'}
+            # get version from ormbfile
+            if 'version' in yaml_data.items():
+                version = yaml_data["version"]
+            else:
+                version = 'v1.0.0'
 
-        # Phase 3: Generate 'model setting' if need
-        if format in MODEL_NEED_MODEL_SETTING:
-            self._generate_model_setting(format)
+            self._generate_model_setting(format, version)
 
         # Phase 4: Re-organize directory format
         self._format_model(format)
