@@ -2,6 +2,10 @@
 import os
 from loguru import logger
 
+mlserver_model = [
+    'SKLearn', 'XGBoost', 'MLlib'
+]
+
 
 @logger.catch()
 def find_file_ends_with(dir_path, ext):
@@ -19,6 +23,20 @@ def rename(dir_path, ori_name, new_name):
     ori_name_full = os.path.join(dir_path, ori_name)
     new_name_full = os.path.join(dir_path, new_name)
     os.rename(ori_name_full, new_name_full)
+
+
+@logger.catch()
+def isTritonModel(format):
+    if format != 'PMML' and format not in mlserver_model:
+        return True
+    return False
+
+
+@logger.catch()
+def isMLServerModel(format):
+    if format in mlserver_model:
+        return True
+    return False
 
 
 @logger.catch()

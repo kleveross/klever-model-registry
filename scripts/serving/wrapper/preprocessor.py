@@ -7,6 +7,7 @@ from loguru import logger
 from utils.get_model import check_model
 from utils.config_generator import TRTISConfigGenerator
 from utils.model_formatter import ModelFormatter
+from utils.help_functions import isTritonModel, isMLServerModel
 
 SKLEARN_MODEL = "model.joblib"
 XGBOOST_MODEL = "model.xgboost"
@@ -19,9 +20,6 @@ class Preprocessor:
     """
     env_list = [
         'MODEL_STORE', 'SERVING_NAME'
-    ]
-    mlserver_model = [
-        'SKLearn', 'XGBoost', 'MLlib'
     ]
 
     def __init__(self):
@@ -131,20 +129,22 @@ class Preprocessor:
             logger.error('model format missing')
             return
         format = yaml_data["format"]
-        # set env for mlserver
-        os.putenv('MODEL_FORMAT', format)
 
-        if 'version' in yaml_data.items():
-            version = yaml_data["version"]
-        else:
-            version = 'v1.0.0'
-
-        # Phase 2: Generate 'config.pbtxt' if need
-        if format != 'PMML' and format not in Preprocessor.mlserver_model:
+        # Phase 2: Generate 'config.pbtxt' for triton models
+        if isTritonModel(format):
             self._generate_config_pbtxt(yaml_data)
 
-        # Phase 3: Generate 'model setting' if need
-        if format in Preprocessor.mlserver_model:
+        # Phase 3: Generate 'model setting' for mlserver models
+        if isMLServerModel(format):
+            # set env for mlserver
+            os.putenv('MODEL_FORMAT', format)
+
+            # get version from ormbfile
+            if 'version' in yaml_data.items():
+                version = yaml_data["version"]
+            else:
+                version = 'v1.0.0'
+
             self._generate_model_setting(format, version)
 
         # Phase 4: Re-organize directory format
