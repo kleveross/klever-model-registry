@@ -83,7 +83,12 @@ func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
 func Compose(sdep *seldonv1.SeldonDeployment) error {
 	sdep.Spec.Name = sdep.ObjectMeta.Name
 
-	for _, p := range sdep.Spec.Predictors {
+	for i, p := range sdep.Spec.Predictors {
+		// Setup no-engine mode
+		setupNoEngineMode(&sdep.Spec.Predictors[i])
+
+		sdep.Spec.Predictors[i].Name = p.Graph.Name
+
 		if p.Graph.Implementation == nil || !seldonv1.IsPrepack(&p.Graph) {
 			if err := validateComponentSpecs(&p); err != nil {
 				return err
@@ -106,15 +111,14 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 				}
 			}
 
+			// Compose SeldonPodSpec
+			if err := composeSeldonPodSpec(&p.Graph, componentSpecMap); err != nil {
+				return err
+			}
+
 			// Conpose init container for pod
-			composeInitContainer(sdep, &p)
+			composeInitContainer(sdep, &sdep.Spec.Predictors[i])
 		}
-
-		// Setup no-engine mode
-		setupNoEngineMode(&p)
-
-		p.Name = p.Graph.Name
-
 	}
 
 	return nil
