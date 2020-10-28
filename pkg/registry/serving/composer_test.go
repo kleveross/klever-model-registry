@@ -22,6 +22,8 @@ var _ = Describe("Composer", func() {
 		err := serving.Compose(sdepSingleGraph)
 		Expect(err).To(BeNil())
 
+		Expect(sdepSingleGraph.Spec.Predictors[0].Name).Should(Equal(sdepSingleGraph.Spec.Predictors[0].Graph.Name))
+
 		Expect(len(sdepSingleGraph.Spec.Predictors)).Should(Equal(1))
 		Expect(len(sdepSingleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(2))
 		Expect(sdepSingleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports[0].ContainerPort).Should(Equal(int32(8000)))
@@ -36,6 +38,8 @@ var _ = Describe("Composer", func() {
 	It("Should compose double graph successfully", func() {
 		err := serving.Compose(sdepDoubleGraph)
 		Expect(err).To(BeNil())
+
+		Expect(sdepDoubleGraph.Spec.Predictors[0].Name).Should(Equal(sdepDoubleGraph.Spec.Predictors[0].Graph.Name))
 
 		Expect(len(sdepDoubleGraph.Spec.Predictors)).Should(Equal(2))
 		Expect(len(sdepDoubleGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(2))
@@ -52,6 +56,8 @@ var _ = Describe("Composer", func() {
 	It("Should compose custom image graph successfully", func() {
 		err := serving.Compose(sdepCustomImageGraph)
 		Expect(err).To(BeNil())
+
+		Expect(sdepCustomImageGraph.Spec.Predictors[0].Name).Should(Equal(sdepCustomImageGraph.Spec.Predictors[0].Graph.Name))
 
 		Expect(len(sdepCustomImageGraph.Spec.Predictors)).Should(Equal(1))
 		Expect(len(sdepCustomImageGraph.Spec.Predictors[0].ComponentSpecs[0].Spec.Containers[0].Ports)).Should(Equal(1))
