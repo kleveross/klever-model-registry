@@ -75,6 +75,7 @@ func main() {
 			descriptors.InitLogController()
 			descriptors.InitEventController()
 			descriptors.InitServingController()
+			descriptors.InitPodController()
 
 			return nil
 		},
