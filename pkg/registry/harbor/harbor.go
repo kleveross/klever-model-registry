@@ -58,6 +58,11 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			resp.Header["Location"] = []string{strings.ReplaceAll(location[0], p.Domain,
 				viper.GetString(envModelRestirtyExternalAddress))}
 		}
+
+		// There are errors for cookies, eg: there are error like `"message": "CSRF token invalid"`.
+		// So we set no cookies to avoid it.
+		resp.Header["Set-Cookie"] = []string{}
+
 		// It is to solve https://github.com/kleveross/klever-model-registry/issues/104
 		resp.Header.Set("content-type", "application/json")
 		return nil
