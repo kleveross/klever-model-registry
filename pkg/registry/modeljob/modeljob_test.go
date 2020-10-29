@@ -34,7 +34,7 @@ var _ = Describe("Modeljob API", func() {
 		}, timeout, interval).Should(Succeed())
 
 		// List modeljob
-		modeljobeListed, err := modeljobController.List(modeljobCreated.Namespace, &paging.ListOption{
+		modeljobeListed, err := modeljobController.List(modeljobCreated.Namespace, "", &paging.ListOption{
 			Start: 0,
 		})
 		Expect(err).To(BeNil())
