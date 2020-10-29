@@ -28,6 +28,7 @@ rules:
   resources:
   - configmaps
   - events
+  - pods/log
   - ingresses/status
   verbs:
   - get
