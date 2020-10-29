@@ -19,10 +19,10 @@ import (
 	"context"
 
 	"github.com/caicloud/nirvana/definition"
-	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/event"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 )
 
 var (
@@ -58,12 +58,13 @@ var getModelJobEvents = definition.Definition{
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "modeljob namespace"),
 		definition.PathParameterFor("modeljobID", "modeljob id"),
+		paging.PageDefinitionParameter(),
 	},
 	Results: []definition.Result{
 		definition.DataResultFor("modeljob events"),
 		definition.ErrorResult(),
 	},
-	Function: func(ctx context.Context, namespace, modeljobID string) (*corev1.EventList, error) {
-		return eventController.GetModelJobEvents(namespace, modeljobID)
+	Function: func(ctx context.Context, namespace, modeljobID string, opt *paging.ListOption) (*event.EventList, error) {
+		return eventController.GetModelJobEvents(namespace, modeljobID, opt)
 	},
 }
