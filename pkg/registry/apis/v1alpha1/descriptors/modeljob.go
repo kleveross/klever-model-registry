@@ -73,11 +73,12 @@ var listModelJob = definition.Definition{
 	Description: "List modeljob",
 	Parameters: []definition.Parameter{
 		definition.PathParameterFor("namespace", "namespace"),
+		definition.QueryParameterFor("filter", "filter type, enum: [extract, convert]"),
 		paging.PageDefinitionParameter(),
 	},
 	Results: definition.DataErrorResults("modeljob list"),
-	Function: func(ctx context.Context, namespace string, opt *paging.ListOption) (*modeljob.ModelJobList, error) {
-		return modeljobController.List(namespace, opt)
+	Function: func(ctx context.Context, namespace, filter string, opt *paging.ListOption) (*modeljob.ModelJobList, error) {
+		return modeljobController.List(namespace, filter, opt)
 	},
 }
 

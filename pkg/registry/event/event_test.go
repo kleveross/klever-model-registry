@@ -8,6 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 )
 
 var _ = Describe("Event", func() {
@@ -24,16 +25,23 @@ var _ = Describe("Event", func() {
 		// Create modeljob
 		modeljobCreated, err := modeljobController.Create("default", modeljobObj)
 		Expect(err).To(BeNil())
+		limit := 10
 
 		// Get modeljob events
 		By("Expecting get event successfully")
 		Eventually(func() error {
-			_, err := eventController.GetModelJobEvents("default", modeljobCreated.Name)
+			_, err := eventController.GetModelJobEvents("default", modeljobCreated.Name, &paging.ListOption{
+				Start: 0,
+				Limit: &limit,
+			})
 			return err
 		}, timeout, interval).Should(Succeed())
 
 		// Get modeljob events, have error modeljob name
-		_, err = eventController.GetModelJobEvents("default", "nonModelJobName")
+		_, err = eventController.GetModelJobEvents("default", "nonModelJobName", &paging.ListOption{
+			Start: 0,
+			Limit: &limit,
+		})
 		Expect(err).To(HaveOccurred())
 	})
 })

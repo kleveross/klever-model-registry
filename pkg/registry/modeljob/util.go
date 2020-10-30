@@ -9,6 +9,11 @@ import (
 	"github.com/kleveross/klever-model-registry/pkg/util"
 )
 
+const (
+	extractLabelKey = "modeljob/extract"
+	convertLabelKey = "modeljob/convert"
+)
+
 // GenerateExtractionModelJob will generate ModelJob by base information.
 func GenerateExtractionModelJob(domain, project, modelName, versionName, format string) *modeljobsv1alpha1.ModelJob {
 	modeljob := modeljobsv1alpha1.ModelJob{
@@ -19,6 +24,9 @@ func GenerateExtractionModelJob(domain, project, modelName, versionName, format 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      util.RandomNameWithPrefix(fmt.Sprintf("modeljob-%v-%v-%v", project, modelName, versionName)),
 			Namespace: "default",
+			Labels: map[string]string{
+				extractLabelKey: "true",
+			},
 		},
 		Spec: modeljobsv1alpha1.ModelJobSpec{
 			Model: fmt.Sprintf("%v/%v/%v:%v", domain, project, modelName, versionName),

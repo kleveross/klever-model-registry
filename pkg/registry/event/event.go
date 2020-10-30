@@ -26,6 +26,7 @@ import (
 	modeljobscheme "github.com/kleveross/klever-model-registry/pkg/clientset/clientset/versioned/scheme"
 	"github.com/kleveross/klever-model-registry/pkg/clientset/informers/externalversions/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
+	"github.com/kleveross/klever-model-registry/pkg/registry/paging"
 )
 
 type EventController struct {
@@ -44,7 +45,29 @@ func New(kubeMainClient kubernetes.Interface, kleverossClient kleverossv1alpha1.
 	}
 }
 
-func (e EventController) GetModelJobEvents(namespace, modeljobID string) (*corev1.EventList, error) {
+// EventList is the response of List Interface.
+type EventList struct {
+	ListMeta paging.ListMeta `json:"metadata"`
+	Items    []corev1.Event  `json:"items"`
+}
+
+// toEventList is convert to ModelJobList struct.
+func toEventList(items []corev1.Event, opt *paging.ListOption) *EventList {
+	datas := paging.Page(items, opt)
+	eventList := &EventList{
+		ListMeta: paging.ListMeta{
+			TotalItems: datas.TotalItems,
+		},
+		Items: []corev1.Event{},
+	}
+
+	for _, d := range datas.Items {
+		eventList.Items = append(eventList.Items, d.(corev1.Event))
+	}
+	return eventList
+}
+
+func (e EventController) GetModelJobEvents(namespace, modeljobID string, opt *paging.ListOption) (*EventList, error) {
 	modeljob, err := e.modeljobInformer.Lister().ModelJobs(namespace).Get(modeljobID)
 	if err != nil {
 		return nil, errors.RenderError(err)
@@ -60,5 +83,9 @@ func (e EventController) GetModelJobEvents(namespace, modeljobID string) (*corev
 		}
 	}
 
-	return events, nil
+	if events != nil {
+		return toEventList(events.Items, opt), nil
+	}
+
+	return &EventList{}, nil
 }

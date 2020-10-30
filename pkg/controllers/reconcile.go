@@ -8,6 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -96,16 +97,19 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 
 	if job.Status.StartTime == nil {
 		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobPending
+		r.Event(modeljob, "Normal", "Pending", "ModelJob Pending")
 		return
 	}
 
 	if job.Status.Active != 0 {
 		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobRunning
+		r.Event(modeljob, "Normal", "StartRunning", "ModelJob running")
 		return
 	}
 
 	if job.Status.Succeeded != 0 {
 		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobSucceeded
+		r.Event(modeljob, "Normal", "Succeed", "ModelJob run successfully")
 		return
 	}
 
@@ -113,11 +117,14 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
 
 		pods := corev1.PodList{}
-		err := r.List(context.TODO(), &pods,
-			&client.MatchingLabels{"job-name": job.Name},
-			&client.MatchingFields{"metadata.namespace": job.ObjectMeta.Namespace})
+		opt := client.ListOptions{
+			LabelSelector: labels.SelectorFromSet(labels.Set(map[string]string{"job-name": modeljob.Name})),
+			Namespace:     job.Namespace,
+		}
+		err := r.List(context.TODO(), &pods, &opt)
 		if err != nil {
 			r.Log.Error(err, fmt.Sprintf("Get pod for modeljob %v", modeljob.Name))
+			r.Event(modeljob, "Warning", "Failed", "ModelJob failed")
 			return
 		}
 
@@ -133,7 +140,12 @@ func getModelJobFailedMesage(pods *corev1.PodList) string {
 		return ""
 	}
 
-	cs := pods.Items[0].Status.ContainerStatuses
+	cs := pods.Items[0].Status.InitContainerStatuses
+	if cs != nil && cs[0].State.Terminated != nil {
+		return "run model-initializer error"
+	}
+
+	cs = pods.Items[0].Status.ContainerStatuses
 	if cs != nil && cs[0].State.Terminated != nil {
 		switch cs[0].State.Terminated.ExitCode {
 		case ErrORMBLogin:

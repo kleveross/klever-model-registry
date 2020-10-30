@@ -89,8 +89,13 @@ func toModelJobList(items []*modeljobsv1alpha1.ModelJob, opt *paging.ListOption)
 	return servingList
 }
 
-func (m ModelJobController) List(namespace string, opt *paging.ListOption) (*ModelJobList, error) {
-	modeljobs, err := m.modeljobInformer.Lister().ModelJobs(namespace).List(labels.Everything())
+func (m ModelJobController) List(namespace, typeFilter string, opt *paging.ListOption) (*ModelJobList, error) {
+	selecor := labels.Everything()
+	if typeFilter != "" {
+		selecor = labels.SelectorFromSet(labels.Set(map[string]string{typeFilter: "true"}))
+	}
+
+	modeljobs, err := m.modeljobInformer.Lister().ModelJobs(namespace).List(selecor)
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}
