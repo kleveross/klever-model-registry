@@ -19,12 +19,14 @@ package client
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -62,28 +64,31 @@ func New(config *rest.Config, options Options) (Client, error) {
 	// Init a Mapper if none provided
 	if options.Mapper == nil {
 		var err error
-		options.Mapper, err = apiutil.NewDynamicRESTMapper(config)
+		options.Mapper, err = apiutil.NewDiscoveryRESTMapper(config)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	clientcache := &clientCache{
-		config:         config,
-		scheme:         options.Scheme,
-		mapper:         options.Mapper,
-		codecs:         serializer.NewCodecFactory(options.Scheme),
-		resourceByType: make(map[schema.GroupVersionKind]*resourceMeta),
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return nil, err
 	}
 
 	c := &client{
 		typedClient: typedClient{
-			cache:      clientcache,
+			cache: clientCache{
+				config:         config,
+				scheme:         options.Scheme,
+				mapper:         options.Mapper,
+				codecs:         serializer.NewCodecFactory(options.Scheme),
+				resourceByType: make(map[reflect.Type]*resourceMeta),
+			},
 			paramCodec: runtime.NewParameterCodec(options.Scheme),
 		},
 		unstructuredClient: unstructuredClient{
-			cache:      clientcache,
-			paramCodec: noConversionParamCodec{},
+			client:     dynamicClient,
+			restMapper: options.Mapper,
 		},
 	}
 

@@ -31,4 +31,11 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.8
 )
 
-replace github.com/seldonio/seldon-core/operator => github.com/kleveross/seldon-core/operator v0.0.0-20200917064040-3e7d8727897f
+replace (
+	github.com/seldonio/seldon-core/operator => github.com/kleveross/seldon-core/operator v0.0.0-20200917064040-3e7d8727897f
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.3.0
+	k8s.io/api => k8s.io/api v0.15.12
+	k8s.io/apimachinery => k8s.io/apimachinery v0.15.12
+	k8s.io/client-go => k8s.io/client-go v0.15.12
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.15.12
+)

@@ -112,7 +112,10 @@ func (ResourceVersionChangedPredicate) Update(e event.UpdateEvent) bool {
 		log.Error(nil, "UpdateEvent has no new metadata", "event", e)
 		return false
 	}
-	return e.MetaNew.GetResourceVersion() != e.MetaOld.GetResourceVersion()
+	if e.MetaNew.GetResourceVersion() == e.MetaOld.GetResourceVersion() {
+		return false
+	}
+	return true
 }
 
 // GenerationChangedPredicate implements a default update predicate function on Generation change.
@@ -153,5 +156,8 @@ func (GenerationChangedPredicate) Update(e event.UpdateEvent) bool {
 		log.Error(nil, "Update event has no new metadata", "event", e)
 		return false
 	}
-	return e.MetaNew.GetGeneration() != e.MetaOld.GetGeneration()
+	if e.MetaNew.GetGeneration() == e.MetaOld.GetGeneration() {
+		return false
+	}
+	return true
 }

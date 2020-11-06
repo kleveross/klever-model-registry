@@ -93,10 +93,7 @@ type Options struct {
 	// Mapper is the RESTMapper to use for mapping GroupVersionKinds to Resources
 	Mapper meta.RESTMapper
 
-	// Resync is the base frequency the informers are resynced.
-	// Defaults to defaultResyncTime.
-	// A 10 percent jitter will be added to the Resync period between informers
-	// So that all informers will not send list requests simultaneously.
+	// Resync is the resync period. Defaults to defaultResyncTime.
 	Resync *time.Duration
 
 	// Namespace restricts the cache's ListWatch to the desired namespace
