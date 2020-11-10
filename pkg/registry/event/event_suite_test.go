@@ -39,7 +39,7 @@ var _ = BeforeSuite(func() {
 		panic(fmt.Errorf("failed to wait for modeljob synced"))
 	}
 
-	eventController = event.New(mainClient, kleverossClient, modeljobInformer)
+	eventController = event.New(mainClient, kleverossClient, modeljobInformer, nil)
 	modeljobController = modeljob.New(kleverossClient, modeljobInformer)
 })
 
