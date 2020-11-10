@@ -2,6 +2,7 @@ package modeljob
 
 import (
 	"fmt"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -39,6 +40,10 @@ func GenerateExtractionModelJob(domain, project, modelName, versionName, format 
 	}
 
 	return &modeljob
+}
+
+func generateModelJobName() string {
+	return util.RandomNameWithPrefix(fmt.Sprintf("modeljob-%v", time.Now().Format("20160102")))
 }
 
 // IsExtractModel return bool which is represent whether extract model or not.
