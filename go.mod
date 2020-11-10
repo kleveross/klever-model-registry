@@ -31,4 +31,6 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.8
 )
 
-replace github.com/seldonio/seldon-core/operator => github.com/kleveross/seldon-core/operator v0.0.0-20200917064040-3e7d8727897f
+replace (
+	github.com/seldonio/seldon-core/operator => github.com/kleveross/seldon-core/operator v0.0.0-20200917064040-3e7d8727897f
+)

@@ -38,6 +38,7 @@ func InitEventController() {
 	eventController = event.New(client.GetKubeMainClient(),
 		client.GetKubeKleverOssClient(),
 		client.GetKubeKleverOssModelJobInformer(),
+		client.GetKubeSeldonClient(),
 	)
 }
 
@@ -47,6 +48,10 @@ var eventAPI = definition.Descriptor{
 		{
 			Path:        "/namespaces/{namespace}/modeljobs/{modeljobID}/events",
 			Definitions: []definition.Definition{getModelJobEvents},
+		},
+		{
+			Path:        "/namespaces/{namespace}/servings/{servingID}/events",
+			Definitions: []definition.Definition{getServingEvents},
 		},
 	},
 }
@@ -66,5 +71,23 @@ var getModelJobEvents = definition.Definition{
 	},
 	Function: func(ctx context.Context, namespace, modeljobID string, opt *paging.ListOption) (*event.EventList, error) {
 		return eventController.GetModelJobEvents(namespace, modeljobID, opt)
+	},
+}
+
+var getServingEvents = definition.Definition{
+	Method:      definition.Get,
+	Summary:     "Get serving events",
+	Description: "Get serving events",
+	Parameters: []definition.Parameter{
+		definition.PathParameterFor("namespace", "serving namespace"),
+		definition.PathParameterFor("servingID", "serving id"),
+		paging.PageDefinitionParameter(),
+	},
+	Results: []definition.Result{
+		definition.DataResultFor("modeljob events"),
+		definition.ErrorResult(),
+	},
+	Function: func(ctx context.Context, namespace, servingID string, opt *paging.ListOption) (*event.EventList, error) {
+		return eventController.GetServingEvents(namespace, servingID, opt)
 	},
 }

@@ -41,6 +41,16 @@ func New(kleverossClient clientset.Interface, modeljobInformer v1alpha1.ModelJob
 }
 
 func (m ModelJobController) Create(namespace string, modeljob *modeljobsv1alpha1.ModelJob) (*modeljobsv1alpha1.ModelJob, error) {
+	if modeljob.ObjectMeta.Name == "" {
+		modeljob.ObjectMeta.Name = generateModelJobName()
+	}
+
+	// Create will create convert task, so we will set "modeljob/convert"="true" label to flag it.
+	if modeljob.ObjectMeta.Labels == nil {
+		modeljob.ObjectMeta.Labels = map[string]string{}
+	}
+	modeljob.ObjectMeta.Labels[convertLabelKey] = "true"
+
 	result, err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Create(modeljob)
 	if err != nil {
 		return nil, errors.RenderError(err)
