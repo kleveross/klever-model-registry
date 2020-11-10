@@ -34,7 +34,7 @@ func main() {
 	s.AddFlags(flag.CommandLine)
 	flag.Parse()
 
-	ctrl.SetLogger(zap.New())
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	if err := app.Run(s); err != nil {
 		log.Fatalf("%v\n", err)
