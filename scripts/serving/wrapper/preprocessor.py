@@ -124,11 +124,22 @@ class Preprocessor:
             return
 
         # Phase 1: Extract model_format and yaml
-        yaml_data = self._extract_yaml()
-        if 'format' in yaml_data.items():
-            logger.error('model format missing')
-            return
-        format = yaml_data["format"]
+        format = ""
+        yaml_data = {}
+        if os.getenv("MODEL_METADATA_FROM_ENV", "") != "":
+            inputs = os.getenv("INPUTS", "")
+            outputs = os.getenv("OUTPUTS", "")
+            format = os.getenv("FORMAT", "")
+            yaml_data["format"] = format
+            yaml_data["signature"] = {}
+            yaml_data["signature"]["inputs"] = json.loads(inputs)
+            yaml_data["signature"]["outputs"] = json.loads(outputs)
+        else:
+            yaml_data = self._extract_yaml()
+            if 'format' in yaml_data.items():
+                logger.error('model format missing')
+                return
+            format = yaml_data["format"]
 
         # Phase 2: Generate 'config.pbtxt' for triton models
         if isTritonModel(format):

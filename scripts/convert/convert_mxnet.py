@@ -21,9 +21,13 @@ class MXNetToONNX(BaseConvert):
         self.output_dir = self.args.output_dir
         self.model_name = self.args.model_name
         self.input_value = []
-        try:
-            ormbfile_content = self.read_ormbfile(self.input_dir)
-            self.input_value = ormbfile_content["signature"]["inputs"]
+        try:            
+            if os.getenv("MODEL_METADATA_FROM_ENV", "") != "":
+                inputs = os.getenv("INPUTS", "")
+                self.input_value = json.loads(inputs)
+            else:
+                ormbfile_content = self.read_ormbfile(self.input_dir)
+                self.input_value = ormbfile_content["signature"]["inputs"]
         except Exception as e:
             raise e
 
