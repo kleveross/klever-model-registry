@@ -53,7 +53,7 @@ func GVKForObject(obj runtime.Object, scheme *runtime.Scheme) (schema.GroupVersi
 		return schema.GroupVersionKind{}, err
 	}
 	if isUnversioned {
-		return schema.GroupVersionKind{}, fmt.Errorf("cannot create a new informer for the unversioned type %T", obj)
+		return schema.GroupVersionKind{}, fmt.Errorf("cannot create group-version-kind for unversioned type %T", obj)
 	}
 
 	if len(gvks) < 1 {
@@ -74,7 +74,7 @@ func GVKForObject(obj runtime.Object, scheme *runtime.Scheme) (schema.GroupVersi
 func RESTClientForGVK(gvk schema.GroupVersionKind, baseConfig *rest.Config, codecs serializer.CodecFactory) (rest.Interface, error) {
 	cfg := createRestConfig(gvk, baseConfig)
 	if cfg.NegotiatedSerializer == nil {
-		cfg.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: codecs}
+		cfg.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: codecs}
 	}
 	return rest.RESTClientFor(cfg)
 }
