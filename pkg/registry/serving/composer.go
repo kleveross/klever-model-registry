@@ -280,13 +280,6 @@ func composeSeldonPodSpec(pu *seldonv1.PredictiveUnit, componentSpecMap map[stri
 		return fmt.Errorf("can't find ComponentSpec for graph %v", pu.Name)
 	}
 
-	modelTag, err := getModelTag(pu.ModelURI)
-	if err != nil {
-		return err
-	}
-	podName := modelTag
-	seldonPodSpec.Metadata.Name = podName
-
 	composeSchedulerName(seldonPodSpec)
 
 	if len(seldonPodSpec.Spec.Volumes) == 0 {
@@ -418,16 +411,6 @@ func getUserContainerImage(format string) string {
 	// Group3 for default TRT server image
 	return viper.GetString(envTRTServingImage)
 
-}
-
-// getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
-func getModelTag(modelUri string) (string, error) {
-	modelURISlice := strings.Split(modelUri, ":")
-	if len(modelURISlice) < 2 {
-		return "", fmt.Errorf("modelUri's format is error")
-	}
-
-	return modelURISlice[len(modelURISlice)-1], nil
 }
 
 // getModelMountPath will generate model mount path in container,
