@@ -254,15 +254,14 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 	}
 
 	if len(container.VolumeMounts) == 0 {
-		container.VolumeMounts = []corev1.VolumeMount{}
+		modelMountPath := getModelMountPath(container, sdep.Name)
+		container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
+			{
+				Name:      modelSharedMountName,
+				MountPath: modelMountPath,
+			},
+		}...)
 	}
-	modelMountPath := getModelMountPath(container, sdep.Name)
-	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
-		{
-			Name:      modelSharedMountName,
-			MountPath: modelMountPath,
-		},
-	}...)
 
 	for idx := range pu.Children {
 		err := composeDefaultUserContainer(sdep, &pu.Children[idx], componentSpecMap)
@@ -283,16 +282,15 @@ func composeSeldonPodSpec(pu *seldonv1.PredictiveUnit, componentSpecMap map[stri
 	composeSchedulerName(seldonPodSpec)
 
 	if len(seldonPodSpec.Spec.Volumes) == 0 {
-		seldonPodSpec.Spec.Volumes = []corev1.Volume{}
-	}
-	seldonPodSpec.Spec.Volumes = append(seldonPodSpec.Spec.Volumes, []corev1.Volume{
-		{
-			Name: modelSharedMountName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
+		seldonPodSpec.Spec.Volumes = append(seldonPodSpec.Spec.Volumes, []corev1.Volume{
+			{
+				Name: modelSharedMountName,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
 			},
-		},
-	}...)
+		}...)
+	}
 
 	for idx := range pu.Children {
 		err := composeSeldonPodSpec(&pu.Children[idx], componentSpecMap)
@@ -463,7 +461,14 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 		return fmt.Errorf("there are no container in SeldonPodSpec")
 	}
 	userContainer := &p.Spec.Containers[0]
-	modelMountPath := getModelMountPath(userContainer, sdep.Name)
+
+	var volumeMounts []corev1.VolumeMount
+	if len(userContainer.VolumeMounts) != 0 {
+		volumeMounts = userContainer.VolumeMounts
+	} else {
+		return fmt.Errorf("there are no volumeMounts in userContainer")
+	}
+	modelMountPath := volumeMounts[0].MountPath
 
 	initContainer := &corev1.Container{
 		// mimics the behavior of seldon model initializer for it will disable the default init container injection
