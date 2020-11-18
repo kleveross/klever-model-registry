@@ -9,6 +9,9 @@ import sys
 
 from base_convert.base_convert import BaseConvert
 
+METADATA_SOURCE_ENV = "MODEL_METADATA_FROM_ENV"
+INPUTS_ENV = "INPUTS"
+
 class MXNetToONNX(BaseConvert):
     def __init__(self):
         self.parser = argparse.ArgumentParser(
@@ -22,8 +25,8 @@ class MXNetToONNX(BaseConvert):
         self.model_name = self.args.model_name
         self.input_value = []
         try:            
-            if os.getenv("MODEL_METADATA_FROM_ENV", "") != "":
-                inputs = os.getenv("INPUTS", "")
+            if os.getenv(METADATA_SOURCE_ENV, "") != "":
+                inputs = os.getenv(INPUTS_ENV, "")
                 self.input_value = json.loads(inputs)
             else:
                 ormbfile_content = self.read_ormbfile(self.input_dir)

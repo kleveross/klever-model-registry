@@ -12,6 +12,11 @@ from utils.help_functions import isTritonModel, isMLServerModel
 SKLEARN_MODEL = "model.joblib"
 XGBOOST_MODEL = "model.xgboost"
 
+METADATA_SOURCE_ENV = "MODEL_METADATA_FROM_ENV"
+INPUTS_ENV = "INPUTS"
+OUTPUTS_ENV = "OUTPUTS"
+FORMAT_ENV = "FORMAT"
+
 
 class Preprocessor:
     """
@@ -126,10 +131,10 @@ class Preprocessor:
         # Phase 1: Extract model_format and yaml
         format = ""
         yaml_data = {}
-        if os.getenv("MODEL_METADATA_FROM_ENV", "") != "":
-            inputs = os.getenv("INPUTS", "")
-            outputs = os.getenv("OUTPUTS", "")
-            format = os.getenv("FORMAT", "")
+        if os.getenv(METADATA_SOURCE_ENV, "") != "":
+            inputs = os.getenv(INPUTS_ENV, "")
+            outputs = os.getenv(OUTPUTS_ENV, "")
+            format = os.getenv(FORMAT_ENV, "")
             yaml_data["format"] = format
             yaml_data["signature"] = {}
             yaml_data["signature"]["inputs"] = json.loads(inputs)
