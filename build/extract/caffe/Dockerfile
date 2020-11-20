@@ -8,7 +8,6 @@ ARG ormb_tar_filename=ormb_0.0.5_Linux_x86_64.tar.gz
 
 RUN conda install caffe==1.0 \
     && conda clean -ya \
-    && pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ &&\
     pip install --no-cache-dir \
                 grpcio==1.26.0\
                 grpcio-tools\
