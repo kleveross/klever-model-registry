@@ -25,11 +25,12 @@ CWD=$(pwd)
 # Install istio, please reference https://istio.io/v1.2/docs/setup/kubernetes/install/helm/
 #
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.2 sh -
+# If install patch in k8s 1.14.8
+# Please reference https://github.com/istio/istio/issues/22366
+cp -rf $CWD/patch/istio/istio-1.2.2/install/kubernetes/helm/istio/charts/gateways/templates/* $CWD/istio/istio-1.2.2/install/kubernetes/helm/istio/charts/gateways
 kubectl create namespace istio-system
 helm template istio-init $CWD/istio-1.2.2/install/kubernetes/helm/istio-init --namespace istio-system | kubectl apply -f -
 kubectl get crds | grep 'istio.io\|certmanager.k8s.io' | wc -l
-# If syntax errors in gateway templates with go1.14
-# Please reference https://github.com/istio/istio/issues/22366
 helm template istio $CWD/istio-1.2.2/install/kubernetes/helm/istio --namespace istio-system | kubectl apply -f -
 
 #
@@ -49,7 +50,7 @@ helm install harbor harbor --version=v1.4.2 \
     --set externalURL=http://$MASTER_IP:$HARBOR_PORT \
     --set core.image.tag=v2.1.0 \
     --set harborAdminPassword="ORMBtest12345" \
-    --set storageInitializer.image=ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6 \
+    --set storageInitializer.image=ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7 \
     --set predictiveUnit.defaultEnvSecretRefName=ormb \
     --namespace harbor-system
 
