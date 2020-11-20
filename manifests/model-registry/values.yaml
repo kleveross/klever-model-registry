@@ -90,13 +90,13 @@ model:
   serving:
     trt:
       image: ghcr.io/kleveross/trtserver
-      tag: v0.1.0
+      tag: v0.2.0
     pmml:
       image: ghcr.io/kleveross/openscoring
-      tag: v0.1.0
+      tag: v0.2.0
     mlserver:
       image: ghcr.io/kleveross/mlserver
-      tag: v0.1.0
+      tag: v0.2.0
     initializer:
       image: ghcr.io/kleveross/klever-ormb-storage-initializer
       tag: v0.0.7

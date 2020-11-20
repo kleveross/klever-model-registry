@@ -17,7 +17,7 @@ spec:
           name: graphdef
         containers:
         - name: graphdef
-          image: ghcr.io/kleveross/trtserver:v0.1.0
+          image: ghcr.io/kleveross/trtserver:v0.2.0
           env:
           - name: MODEL_STORE
             value: /mnt
@@ -51,7 +51,7 @@ spec:
         initContainers:
         - name: model-initializer
           args: ["harbor-harbor-core.kleveross-system/release/graphdef:v1", "/mnt/models"]
-          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7
           env:
           - name: AWS_ACCESS_KEY_ID
             value: admin

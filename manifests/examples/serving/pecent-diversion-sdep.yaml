@@ -15,7 +15,7 @@ spec:
           name: savedmodel
         containers:
         - name: savedmodel
-          image: lever-dev.cargo.io/release/trtserver:0.1.0
+          image: lever-dev.cargo.io/release/trtserver:v0.2.0
           imagePullPolicy: Always
           ports:
           - name: http
@@ -53,7 +53,7 @@ spec:
         initContainers:
         - name: model-initializer
           args: ["harbor-harbor-core.kleveross-system/release/savedmodel:v1", "/mnt/models"]
-          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7
           imagePullPolicy: Always
           env:
           - name: AWS_ACCESS_KEY_ID
@@ -91,7 +91,7 @@ spec:
           name: pmml
         containers:
         - name: pmml
-          image: lever-dev.cargo.io/release/openscoring:0.1.0
+          image: lever-dev.cargo.io/release/openscoring:v0.2.0
           imagePullPolicy: Always
           ports:
           - name: http
@@ -129,7 +129,7 @@ spec:
         initContainers:
         - name: model-initializer
           args: ["harbor-harbor-core.kleveross-system/release/pmml:v1", "/mnt/models"]
-          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.6
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7
           imagePullPolicy: Always
           env:
           - name: AWS_ACCESS_KEY_ID
