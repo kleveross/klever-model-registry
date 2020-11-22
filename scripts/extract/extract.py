@@ -1,51 +1,29 @@
 import os
 import argparse
+import json
 import yaml
+import logging
 
 from extractor import Extractor
 
-ID = os.environ.get('ANALYZE_ID', 'NULL')
-IP = os.environ.get('ANALYZE_HOST', '0.0.0.0:8081')
-
-
-def dict2pb(d, pb):
-
-    for Input in d['Inputs']:
-        temp_input = pb.Inputs.add()
-        temp_input.Name = Input.get('signatureConst', Input['name'])
-        temp_input.DataType = Input['dataType']
-        for dim in Input['dims']:
-            temp_input.Dims.append(dim)
-
-    for Output in d['Outputs']:
-        temp_output = pb.Outputs.add()
-        temp_output.Name = Output.get('signatureConst', Output['name'])
-        temp_output.DataType = Output['dataType']
-        for dim in Output['dims']:
-            temp_output.Dims.append(dim)
-
-    for name, num in d['Operators'].items():
-        pb.Operators[name] = num
+logging.basicConfig(
+    format='[%(levelname).1s%(asctime)s\t%(name)s] %(message)s',
+    datefmt='%m%d %I:%M:%S')
 
 
 def update_yaml(dir, res_dict):
-    print(res_dict)
 
-    data = dict
     with open(os.path.join(dir, "ormbfile.yaml"), 'r') as f:
         data = yaml.load(f)
 
     with open(os.path.join(dir, "ormbfile.yaml"), 'w') as f:
         data["framework"] = os.environ["FRAMEWORK"]
         data["format"] = os.environ["FORMAT"]
-        layersMap = dict(res_dict["Operators"])
-        layers = []
-        for (k, v) in  layersMap.items(): 
-            layers.append({"name": k})
+        layers = res_dict["Operators"]
 
         if "signature" not in data:
             data["signature"] = {}
-    
+
         data["signature"]["layers"] = layers
 
         if len(res_dict["Inputs"]) != 0:
@@ -53,8 +31,9 @@ def update_yaml(dir, res_dict):
 
         if len(res_dict["Outputs"]) != 0:
             data["signature"]["outputs"] = res_dict["Outputs"]
-        print("save ormbfile.yaml", data)
+        logging.info('save ormbfile.yaml: ' + json.dumps(data))
         yaml.dump(data, f)
+
 
 if __name__ == "__main__":
 
@@ -66,7 +45,7 @@ if __name__ == "__main__":
 
     try:
         res_dict = extractor.extract()
-        print(res_dict)
+        logging.info('origin data from extractor: ' + json.dumps(res_dict))
         update_yaml(args.dir, res_dict)
     except Exception as e:
-        print(str(e))
+        logging.error(e)

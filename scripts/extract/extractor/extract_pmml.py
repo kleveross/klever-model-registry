@@ -3,6 +3,7 @@ import os
 from .base_extract import BaseExtrctor
 import json
 
+
 class PMMLExtractor(BaseExtrctor):
     def _extrat_params(self, name):
         for file in os.listdir(os.path.join(self.dir, "model")):
@@ -10,12 +11,16 @@ class PMMLExtractor(BaseExtrctor):
                 file_path = os.path.join(self.dir, "model", file)
                 with open(file_path) as f:
                     content = f.read()
-                    resp = requests.put("http://127.0.0.1:8080/openscoring/model/extract-"+ name, data=content)
-                    data = json.loads(resp.text.encode("utf-8").decode("utf-8"))
+                    resp = requests.put(
+                        "http://127.0.0.1:8080/openscoring/model/extract-" +
+                        name,
+                        data=content)
+                    data = json.loads(
+                        resp.text.encode("utf-8").decode("utf-8"))
                     print(data)
                     return data
                 break
-        
+
     def _extract_inputs(self):
         data = self._extrat_params("input")
         inputs = []
@@ -40,7 +45,7 @@ class PMMLExtractor(BaseExtrctor):
 
         if "schema" in data and "outputFields" in data["schema"]:
             outputFields = data["schema"]["outputFields"]
-        
+
             for item in outputFields:
                 item["name"] = item["id"]
                 item["dtype"] = item["dataType"]
@@ -63,7 +68,7 @@ class PMMLExtractor(BaseExtrctor):
                 outputs.append(item)
 
         return outputs
-    
+
     def _extract_ops(self):
         return {}
 

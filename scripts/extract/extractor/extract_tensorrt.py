@@ -39,7 +39,7 @@ class TensorrtExtractor(BaseExtrctor):
         return outputs
 
     def _extract_ops(self):
-        return {'layers': self.engine.num_layers}
+        return dict(layers=self.engine.num_layers)
 
     def _load_model(self):
         try:
