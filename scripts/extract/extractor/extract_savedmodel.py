@@ -60,7 +60,8 @@ class TensorflowExtractor(BaseExtrctor):
           String representation of all tag-sets in the SavedModel.
         """
         sess = tf.Session()
-        MetaGraphDef = saved_model.load(sess, [saved_model.SERVING], self.dir)
+        MetaGraphDef = saved_model.load(sess, [saved_model.SERVING],
+                                        os.path.join(self.dir, 'model'))
         sig = None
         if DEFAULT_SERVING_SIGNATURE_DEF_KEY not in MetaGraphDef.signature_def:
             for sig_itr in MetaGraphDef.signature_def:

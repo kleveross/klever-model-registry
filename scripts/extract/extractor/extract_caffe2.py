@@ -5,8 +5,8 @@ import collections
 from caffe2.proto import caffe2_pb2
 from .base_extract import BaseExtrctor
 MODEL_TYPE = 'CAFFE2'
-INIT_NET = 'init_model.netdef'
-PREDICT_NET = 'model.netdef'
+INIT_NET = 'init_net.pb'
+PREDICT_NET = 'predict_net.pb'
 
 
 class Caffe2Extractor(BaseExtrctor):

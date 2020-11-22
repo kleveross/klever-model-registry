@@ -1,4 +1,5 @@
 import os
+os.environ['GLOG_minloglevel'] = '2'
 import json
 import collections
 

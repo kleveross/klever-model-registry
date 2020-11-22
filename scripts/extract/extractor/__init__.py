@@ -23,5 +23,5 @@ elif module == 'tensorrt':
     from .extract_tensorrt import TensorrtExtractor as Extractor
 else:
     raise ImportError(
-        'module must be in one of [onnx, caffe, netdef, graphdef, h5, mxnetparams, savedmodel, torchscript, tensorrt]'
+        'module must be in one of [onnx, caffemodel, netdef, graphdef, h5, mxnetparams, savedmodel, torchscript, pmml, tensorrt]'
     )

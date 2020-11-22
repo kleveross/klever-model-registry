@@ -26,7 +26,6 @@ class BaseExtrctor(object):
             "Inputs": inputs,
             "Outputs": outputs,
             "Operators": ops,
-            "format": MODEL_TYPE
         }
         return res_dict
 
