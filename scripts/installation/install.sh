@@ -16,6 +16,7 @@ export HARBOR_PORT=30022
 
 # Set klever-model-registry NodePort port.
 export KLEVER_MODEL_REGISTRY_PORT=30100
+export KLEVER_WEB_PORT=30200
 
 # 
 # Go to manifests directory, it is workdir.
@@ -37,6 +38,8 @@ helm template istio $CWD/istio-1.2.2/install/kubernetes/helm/istio --namespace i
 # Install harbor
 #
 kubectl create namespace harbor-system
+helm repo add harbor https://helm.goharbor.io
+helm repo update
 helm install harbor harbor --version=v1.4.2 \
     --repo https://helm.goharbor.io \
     --set expose.nodePort.ports.http.nodePort=$HARBOR_PORT \
@@ -87,3 +90,8 @@ helm install klever-model-registry $CWD/klever-model-registry/manifests/model-re
     --set service.nodePort=$KLEVER_MODEL_REGISTRY_PORT \
     --namespace=kleveross-system 
 
+# Install Klever-web
+git clone https://github.com/kleveross/klever-web
+helm install klever-web $CWD/klever-web/manifests/klever-web \
+    --namespace=kleveross-system \
+    --set service.nodePort=$KLEVER_WEB_PORT
