@@ -4,5 +4,6 @@ FROM debian:stretch
 
 WORKDIR /
 COPY bin/model-registry  /model-registry
+COPY /crds /crds
 
 ENTRYPOINT ["/model-registry"]
