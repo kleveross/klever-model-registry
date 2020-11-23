@@ -192,8 +192,8 @@ docker-push:
 		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
 	done
 
-kelver-docker-build-push:
-	build
+klever-docker-build-push: 
+	build 
 	@for target in $(TARGETS); do  \
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \

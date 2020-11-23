@@ -38,4 +38,4 @@ jobs:
       - name: docker-build-push
         run: |
           cd src/github.com/kleveross/klever-model-registry
-          make kelver-docker-build-push
+          make klever-docker-build-push
