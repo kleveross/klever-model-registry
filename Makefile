@@ -145,7 +145,7 @@ generate: controller-gen
 
 # Build the docker image
 docker-build: 
-	build
+	build-linux
 	@for target in $(TARGETS); do  \
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
@@ -198,14 +198,14 @@ kelver-docker-build-push:
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
-		docker rmi $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done
 	# build && push extractor
 	@for target in $(EXTRACT_TARGETS); do  \
 		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile .;  \
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
-		docker rmi $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done
 
 	# build && push convertor
@@ -221,7 +221,7 @@ kelver-docker-build-push:
 		image=$(SERVING_IMAGE_PREFIX)$${target}$(SERVING_IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/serving/$${target}/Dockerfile .;  \
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
-		docker rmi $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done
 # find or download controller-gen
 # download controller-gen if necessary
