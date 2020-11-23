@@ -148,7 +148,7 @@ var _ = BeforeEach(func() {
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
 									{
-										Image: "lever-dev.cargo.io/release/trtserver:v0.2.0",
+										Image: "lever-dev.cargo.io/release/tritonserver:v0.2.0",
 										Env: []corev1.EnvVar{
 											{
 												Name:  "MODEL_STORE",

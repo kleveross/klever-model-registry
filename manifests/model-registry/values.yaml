@@ -89,7 +89,7 @@ externalAddress: ""
 model:
   serving:
     trt:
-      image: ghcr.io/kleveross/trtserver
+      image: ghcr.io/kleveross/tritonserver
       tag: v0.2.0
     pmml:
       image: ghcr.io/kleveross/openscoring

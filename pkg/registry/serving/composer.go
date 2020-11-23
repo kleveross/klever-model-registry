@@ -20,7 +20,7 @@ const (
 	// the model from harbor by ormb pull will store in the mount point.
 	modelSharedMountName = "models-mnt"
 
-	// envTRTServingImage is the preset image for trtserver.
+	// envTRTServingImage is the preset image for tritonserver.
 	envTRTServingImage = "TRT_SERVING_IMAGE"
 
 	// envPMMLServingImage is the preset image for pmml.
@@ -60,7 +60,7 @@ const (
 	// defaultMLServerGRPCPort is default port for grpc.
 	defaultMLServerGRPCPort = 8081
 
-	// modelStorePath is trtserver param --model-repository path.
+	// modelStorePath is tritonserver param --model-repository path.
 	modelStorePath = "/mnt"
 )
 

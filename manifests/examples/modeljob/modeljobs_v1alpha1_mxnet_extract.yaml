@@ -1,7 +1,7 @@
 apiVersion: kleveross.io/v1alpha1
 kind: ModelJob
 metadata:
-  name: modeljob-mxnet-extract
+  name: modeljob-mxnetparams-extract
   namespace: default
 spec:
   # Add fields here
