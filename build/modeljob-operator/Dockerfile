@@ -4,6 +4,7 @@ FROM gcr.io/distroless/static:nonroot
 
 WORKDIR /
 COPY bin/modeljob-operator  /modeljob-operator
+COPY /crds /crds
 USER nonroot:nonroot
 
 ENTRYPOINT ["/modeljob-operator"]
