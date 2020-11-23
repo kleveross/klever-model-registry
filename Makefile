@@ -57,6 +57,7 @@ BUILD_DIR := ./build
 
 # Current version of the project.
 VERSION ?= $(shell git describe --tags --always --dirty)
+RELEASE_VERSION ?= $(shell git describe --tags)
 GITSHA ?= $(shell git rev-parse --short HEAD)
 
 # Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.

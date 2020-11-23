@@ -26,7 +26,6 @@ jobs:
           go env
           echo "GOPATH=$(go env GOPATH):$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          echo "RELEASE_VERSION=$(git describe --tags)" >> $GITHUB_ENV
       - uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
