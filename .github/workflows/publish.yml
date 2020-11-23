@@ -33,13 +33,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: docker-build
-        run: |
-          cd src/github.com/kleveross/klever-model-registry
-          make docker-build
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-      - name: docker-push
+      - name: docker-build-push
         run: |
           cd src/github.com/kleveross/klever-model-registry
-          make docker-push
+          make kelver-docker-build-push

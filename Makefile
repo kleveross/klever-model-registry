@@ -192,6 +192,37 @@ docker-push:
 		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
 	done
 
+kelver-docker-build-push:
+	build
+	@for target in $(TARGETS); do  \
+		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+	# build && push extractor
+	@for target in $(EXTRACT_TARGETS); do  \
+		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+
+	# build && push convertor
+	@for target in $(CONVERT_TARGETS); do  \
+		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+
+	# build && push serving
+	@for target in $(SERVING_TARGETS); do  \
+		image=$(SERVING_IMAGE_PREFIX)$${target}$(SERVING_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/serving/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
 # find or download controller-gen
 # download controller-gen if necessary
 controller-gen:
