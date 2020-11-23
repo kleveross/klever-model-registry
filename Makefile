@@ -145,8 +145,7 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
-docker-build: 
-	build-linux
+docker-build: build-linux
 	@for target in $(TARGETS); do  \
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
@@ -193,8 +192,7 @@ docker-push:
 		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
 	done
 
-klever-docker-build-push: 
-	build 
+klever-docker-build-push: build
 	@for target in $(TARGETS); do  \
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
