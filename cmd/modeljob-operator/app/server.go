@@ -206,8 +206,8 @@ func ensureCRD(config *rest.Config) error {
 	for _, crd := range crds {
 		_, err = client.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
 		if err != nil {
-			setupLog.Error(err, "unable to ensure crds")
 			if !errors.IsAlreadyExists(err) {
+				setupLog.Error(err, "unable to ensure crds")
 				return err
 			}
 		}
