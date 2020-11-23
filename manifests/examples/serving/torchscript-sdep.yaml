@@ -17,7 +17,7 @@ spec:
           name: torchscript
         containers:
         - name: torchscript
-          image: ghcr.io/kleveross/trtserver:v0.2.0
+          image: ghcr.io/kleveross/tritonserver:v0.2.0
           env:
           - name: MODEL_STORE
             value: /mnt

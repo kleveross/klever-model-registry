@@ -1,13 +1,13 @@
 apiVersion: v1
 data:
-  caffemodel-convert: '{{ .Values.docker.registry }}/caffetocaffe2:v0.2.0'
-  mxnetparams-convert: '{{ .Values.docker.registry }}/mxnet2onnx:v0.2.0'
-  h5-convert: '{{ .Values.docker.registry }}/keras2tf:v0.2.0'
+  caffemodel-convert: '{{ .Values.docker.registry }}/caffemodel_to_netdef:v0.2.0'
+  mxnetparams-convert: '{{ .Values.docker.registry }}/mxnetparams_to_onnx:v0.2.0'
+  h5-convert: '{{ .Values.docker.registry }}/h5_to_savedmodel:v0.2.0'
   caffemodel-extract: '{{ .Values.docker.registry }}/caffemodel-extract:v0.2.0'
   netdef-extract: '{{ .Values.docker.registry }}/netdef-extract:v0.2.0'
   graphdef-extract: '{{ .Values.docker.registry }}/graphdef-extract:v0.2.0'
   h5-extract: '{{ .Values.docker.registry }}/h5-extract:v0.2.0'
-  mxnetparams-extract: '{{ .Values.docker.registry }}/mxnet-extract:v0.2.0'
+  mxnetparams-extract: '{{ .Values.docker.registry }}/mxnetparams-extract:v0.2.0'
   onnx-extract: '{{ .Values.docker.registry }}/onnx-extract:v0.2.0'
   savedmodel-extract: '{{ .Values.docker.registry }}/savedmodel-extract:v0.2.0'
   torchscript-extract: '{{ .Values.docker.registry }}/torchscript-extract:v0.2.0'

@@ -27,6 +27,18 @@ ROOT := github.com/kleveross/klever-model-registry
 # Target binaries. You can build multiple binaries for a single project.
 TARGETS := model-registry modeljob-operator
 
+EXTRACT_TARGETS := caffe caffe2 graphdef h5 mxnetparams onnx pmml savedmodel torchscript
+EXTRACT_IMAGE_PREFIX ?= $(strip )
+EXTRACT_IMAGE_SUFFIX ?= $(strip -extract)
+
+CONVERT_TARGETS := caffemodel_to_netdef h5_to_savedmodel mxnetparams_to_onnx
+CONVERT_IMAGE_PREFIX ?= $(strip )
+CONVERT_IMAGE_SUFFIX ?= $(strip )
+
+SERVING_TARGETS := mlserver openscoring tritonserver
+SERVING_IMAGE_PREFIX ?= $(strip )
+SERVING_IMAGE_SUFFIX ?= $(strip )
+
 # Container image prefix and suffix added to targets.
 # The final built images are:
 #   $[REGISTRY]/$[IMAGE_PREFIX]$[TARGET]$[IMAGE_SUFFIX]:$[VERSION]
@@ -45,6 +57,7 @@ BUILD_DIR := ./build
 
 # Current version of the project.
 VERSION ?= $(shell git describe --tags --always --dirty)
+RELEASE_VERSION ?= $(shell git describe --tags)
 GITSHA ?= $(shell git rev-parse --short HEAD)
 
 # Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.
@@ -133,17 +146,82 @@ generate: controller-gen
 
 # Build the docker image
 docker-build: build-linux
-	@for target in $(TARGETS); do                                                      \
-	  image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);                                  \
-	  docker build -t $(REGISTRY)/$${image}:$(VERSION)                                 \
-	    --label $(DOCKER_LABELS)                                                       \
-	    -f $(BUILD_DIR)/$${target}/Dockerfile .;                                       \
+	@for target in $(TARGETS); do  \
+		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
+	done
+	# build extractor
+	@for target in $(EXTRACT_TARGETS); do  \
+		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile .;  \
+	done
+
+	# build convertor
+	@for target in $(CONVERT_TARGETS); do  \
+		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile .;  \
+	done
+
+	# build serving
+	@for target in $(SERVING_TARGETS); do  \
+		image=$(SERVING_IMAGE_PREFIX)$${target}$(SERVING_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/serving/$${target}/Dockerfile .;  \
 	done
 
 # Push the docker image
 docker-push:
-	docker push ${IMG}
+	@for target in $(TARGETS); do  \
+		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
+		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
+	done
+	# push extractor
+	@for target in $(EXTRACT_TARGETS); do  \
+		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
+		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
+	done
 
+	# push convertor
+	@for target in $(CONVERT_TARGETS); do  \
+		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
+		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
+	done
+
+	#push serving 
+	@for target in $(SERVING_TARGETS); do  \
+		image=$(SERVING_IMAGE_PREFIX)$${target}$(SERVING_IMAGE_SUFFIX);   \
+		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
+	done
+
+klever-docker-build-push: build
+	@for target in $(TARGETS); do  \
+		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+	# build && push extractor
+	@for target in $(EXTRACT_TARGETS); do  \
+		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+
+	# build && push convertor
+	@for target in $(CONVERT_TARGETS); do  \
+		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+
+	# build && push serving
+	@for target in $(SERVING_TARGETS); do  \
+		image=$(SERVING_IMAGE_PREFIX)$${target}$(SERVING_IMAGE_SUFFIX);   \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/serving/$${target}/Dockerfile .;  \
+		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
 # find or download controller-gen
 # download controller-gen if necessary
 controller-gen:

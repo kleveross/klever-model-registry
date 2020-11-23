@@ -15,7 +15,7 @@ spec:
           name: tensorrt
         containers:
         - name: tensorrt
-          image: ghcr.io/kleveross/trtserver:v0.2.0
+          image: ghcr.io/kleveross/tritonserver:v0.2.0
           ports:
           - name: http
             protocol: TCP

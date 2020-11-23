@@ -15,7 +15,7 @@ spec:
           name: savedmodel
         containers:
         - name: savedmodel
-          image: lever-dev.cargo.io/release/trtserver:v0.2.0
+          image: lever-dev.cargo.io/release/tritonserver:v0.2.0
           imagePullPolicy: Always
           ports:
           - name: http
