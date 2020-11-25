@@ -85,6 +85,24 @@ docker:
 model:
   registry:
     address: klever-model-registry.kleveross-system:8080
+  ormb-storage-initializer: "klever-ormb-storage-initializer:v0.0.7"
 
+extraction:
+  caffemodel-extract: 'caffemodel-extract:v0.2.0'
+  netdef-extract: 'netdef-extract:v0.2.0'
+  graphdef-extract: 'graphdef-extract:v0.2.0'
+  h5-extract: 'h5-extract:v0.2.0'
+  mxnetparams-extract: 'mxnetparams-extract:v0.2.0'
+  onnx-extract: 'onnx-extract:v0.2.0'
+  savedmodel-extract: 'savedmodel-extract:v0.2.0'
+  torchscript-extract: 'torchscript-extract:v0.2.0'
+  pmml-extract: 'pmml-extract:v0.2.0'
+
+conversion:
+  caffemodel-convert: 'caffemodel_to_netdef:v0.2.0'
+  mxnetparams-convert: 'mxnetparams_to_onnx:v0.2.0'
+  h5-convert: 'h5_to_savedmodel:v0.2.0'
+    
+  
 scheduler:
   name: ""
