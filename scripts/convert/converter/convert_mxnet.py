@@ -6,7 +6,7 @@ from mxnet.contrib import onnx as onnx_mxnet
 from onnx import checker
 import onnx
 
-from base_convert import BaseConverter
+from .base_convert import BaseConverter
 
 ExtenSymbol = 'symbol.json'
 ExtenParams = '.params'
@@ -22,9 +22,9 @@ class MXNetToONNX(BaseConverter):
         self.input_shape = []
         self.data_type = None
         for input in self.input_value:
-            self.input_shape.append(tuple(input['Dims']))
+            self.input_shape.append(tuple(input['size']))
             if self.data_type is None:
-                self.data_type = np.dtype(input['DataType'])
+                self.data_type = np.dtype(input['dType'])
 
     def _convert(self):
         self._load_model()

@@ -3,7 +3,7 @@ import os
 import tensorflow.keras as tf_keras
 import tensorflow as tf
 
-from base_convert import BaseConverter
+from .base_convert import BaseConverter
 
 EXTENSTION = '.h5'
 

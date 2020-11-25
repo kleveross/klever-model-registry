@@ -22,6 +22,7 @@ class BaseConverter(object):
             output_ormbfile['author'] = self.author
 
         output_ormbfile['format'] = os.environ['FORMAT']
+        output_ormbfile['signature'] = {}
         output_ormbfile['signature']['inputs'] = self.input_value
         output_ormbfile['signature']['outputs'] = self.output_value
 
@@ -29,7 +30,7 @@ class BaseConverter(object):
             yaml.dump(output_ormbfile, f)
 
     def _find_with_extension(self, extension):
-        dir = os.path.join(self.dir, 'model')
+        dir = os.path.join(self.input_dir, 'model')
         filelist = list(
             filter(lambda f: f.endswith(extension) and not f.startswith('.'),
                    os.listdir(dir)))
@@ -38,7 +39,7 @@ class BaseConverter(object):
         return os.path.join(dir, filelist[0])
 
     def _find_with_name(self, name):
-        dir = os.path.join(self.dir, 'model')
+        dir = os.path.join(self.input_dir, 'model')
         filelist = list(filter(lambda f: f == name, os.listdir(dir)))
         assert (len(filelist) == 1
                 ), 'expected one %s file,but found %s' % (name, len(filelist))

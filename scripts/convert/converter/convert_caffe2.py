@@ -7,7 +7,7 @@ import onnx
 import caffe2.python.onnx.frontend
 from caffe2.proto import caffe2_pb2
 
-from base_convert import BaseConverter
+from .base_convert import BaseConverter
 
 INIT_NET = 'init_net.pb'
 PREDICT_NET = 'predict_net.pb'
@@ -42,8 +42,8 @@ class Caffe2ToONNX(BaseConverter):
     def _parse_input(self):
         value_info = {}
         for input in self.input_value:
-            value_info[input['Name']] = (np2onnx(input['DataType']),
-                                         tuple(input['Dims']))
+            value_info[input['name']] = (np2onnx(input['dType']),
+                                         tuple(input['size']))
         return value_info
 
     def _convert(self):

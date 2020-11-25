@@ -7,7 +7,7 @@ from caffe2.python.caffe_translator import TranslateModel
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core, utils, workspace
 
-from base_convert import BaseConverter
+from .base_convert import BaseConverter
 
 INIT_NET = 'init_net.pb'
 PREDICT_NET = 'predict_net.pb'
