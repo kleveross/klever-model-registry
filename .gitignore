@@ -12,3 +12,7 @@ config.json
 
 .DS_Store
 cache/
+
+
+# pycache
+__pycache__
