@@ -48,46 +48,15 @@ then
         java -Dconfig.file=/opt/openscoring/application.conf -jar /opt/openscoring/openscoring-server-executable-2.0.1.jar --port 8080 &
         sleep 15s;
         ;;
-    NetDef )
-        cp $input_dir/model/predict_net.pb $input_dir/model/model.netdef
-        cp $input_dir/model/init_net.pb $input_dir/model/init_model.netdef
-        ;;
-    GraphDef )
-        cp $input_dir/model/*.pb  $input_dir/model/model.graphdef
-        ;;
-    TorchScript )
-        cp $input_dir/model/*.pt  $input_dir/model/model.pt
-        ;;
     esac
 
     # execute python script to extract
     python3 /scripts/extract.py -d $input_dir
     checkOrExit $? $ormb_run_task_err
 
-    case $format in
-    NetDef )
-        rm -rf $input_dir/model/model.netdef
-        rm -rf $input_dir/model/init_model.netdef
-        ;;
-    GraphDef )
-        rm -rf $input_dir/model/model.graphdef
-        ;;
-    TorchScript )
-        # rm -rf $input_dir/model/model.pt
-        ;;
-    esac
 else
-    case $format in
-    ONNX )
-        python3 /scripts/convert/convert_mxnet.py --input_dir=$input_dir --output_dir=$output_dir
-        ;;
-    SavedModel )
-        python3 /scripts/convert/convert_keras.py --input_dir=$input_dir --output_dir=$output_dir
-        ;;
-    NetDef )
-        python3 /scripts/convert/convert_caffe.py --input_dir=$input_dir --output_dir=$output_dir # --input_value="[{\"Name\":\"data\",\"Dims\":[1,3,224,224],\"DataType\":\"float32\"}]"
-        ;;
-    esac
+    python3 /scripts/convert.py --input_dir=$input_dir --output_dir=$output_dir
+    checkOrExit $? $ormb_run_task_err
     
 fi
 

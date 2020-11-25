@@ -24,6 +24,8 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 const (
+	// SourceFormatEnvKey is the env key of source framework
+	SourceFormatEnvKey = "SOURCE_FORMAT"
 	// FrameworkEnvKey is the env key of framework
 	FrameworkEnvKey = "FRAMEWORK"
 	// FormatEnvKey is the env key of format
@@ -125,7 +127,7 @@ const (
 	FormatPMML        Format = "PMML"
 	FormatCaffeModel  Format = "CaffeModel"
 	FormatNetDef      Format = "NetDef"
-	FormatMXNETParams Format = "MXNETParams"
+	FormatMXNETParams Format = "MXNetParams"
 	FormatTorchScript Format = "TorchScript"
 	FormatGraphDef    Format = "GraphDef"
 	FormatTensorRT    Format = "TensorRT"

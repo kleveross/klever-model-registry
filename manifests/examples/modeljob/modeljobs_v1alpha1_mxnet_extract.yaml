@@ -7,4 +7,4 @@ spec:
   # Add fields here
   model: "harbor-harbor-core.kleveross-system/release/mxnet:v1"
   extraction:
-    format: "MXNETParams"
+    format: "MXNetParams"

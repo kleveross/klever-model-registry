@@ -9,5 +9,5 @@ spec:
   desiredTag: "harbor-harbor-core.kleveross-system/release/onnx_convert:v2"
   conversion:
     mmdnn:
-      from: "MXNETParams"
+      from: "MXNetParams"
       to: "ONNX"
