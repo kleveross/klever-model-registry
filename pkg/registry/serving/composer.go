@@ -239,9 +239,8 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 	container.Ports = ports
 
 	// Must set probe, otherwise the default probe by seldon's webhook will cause error.
-	probe := getDefaultProbe(modelFormat, sdep.Name)
-	container.ReadinessProbe = probe
-	container.LivenessProbe = probe
+	container.ReadinessProbe = getProbe(modelFormat, sdep.Name, false)
+	container.LivenessProbe = getProbe(modelFormat, sdep.Name, true)
 
 	// Set default env.
 	if len(container.Env) == 0 {
@@ -363,9 +362,12 @@ func getDefaultUserContainerPorts(format string) []corev1.ContainerPort {
 	return ports
 }
 
-// getDefaultProbe generate readiness and liveiness.
-func getDefaultProbe(format, servingName string) *corev1.Probe {
-	path := fmt.Sprintf("/v2/models/%v", servingName)
+// getProbe generate readiness and liveiness.
+func getProbe(format, servingName string, liveness bool) *corev1.Probe {
+	path := "/v2/health/ready"
+	if liveness == true {
+		path = "/v2/health/live"
+	}
 	port := defaultInferenceHTTPPort
 	if format == string(modeljobsv1alpha1.FormatPMML) {
 		path = fmt.Sprintf("/openscoring/model/%v", servingName)
