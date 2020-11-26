@@ -66,6 +66,7 @@ const (
 
 // validateComponentSpecs validate basic infomation in CRD, now, we are not support multi graph,
 // so the length for ComponentSpecs and Containers must be equal 1.
+// And the length of volummounts must not more than 1, because we only use the only one.
 func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
 	if len(p.ComponentSpecs) != 1 {
 		log.Warningf("Component's length must be equal 1 for simple model serving, the actual ComponentSpecs is %v", p.ComponentSpecs)
@@ -73,8 +74,13 @@ func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
 	}
 
 	if len(p.ComponentSpecs[0].Spec.Containers) != 1 {
-		log.Warningf("Component's length must be equal 1 for simple model serving, the actual Containers is %v", p.ComponentSpecs[0].Spec.Containers)
+		log.Warningf("Container's length must be equal 1 for simple model serving, the actual Containers is %v", p.ComponentSpecs[0].Spec.Containers)
 		return fmt.Errorf("Container's length must be equal 1 for simple model serving")
+	}
+
+	if len(p.ComponentSpecs[0].Spec.Containers[0].VolumeMounts) > 1 {
+		log.Warningf("VolumeMounts's length must not more than 1 for simple model serving, the actual VolumeMounts is %v", p.ComponentSpecs[0].Spec.Containers[0].VolumeMounts)
+		return fmt.Errorf("VolumeMounts's length must not more than 1 for simple model serving")
 	}
 
 	return nil
@@ -84,6 +90,11 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 	sdep.Spec.Name = sdep.ObjectMeta.Name
 
 	for i, p := range sdep.Spec.Predictors {
+		// We determine whether the predictor is new or old by judging whether the field exists.
+		// If added, we will compose it.
+		if _, ok := p.Annotations[seldonv1.ANNOTATION_NO_ENGINE]; ok {
+			continue
+		}
 		// Setup no-engine mode
 		setupNoEngineMode(&sdep.Spec.Predictors[i])
 
@@ -253,6 +264,7 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 		})
 	}
 
+	// If the incoming voluemounts is not nil, we will not change it, otherwise we will use the default configuration for it.
 	if len(container.VolumeMounts) == 0 {
 		modelMountPath := getModelMountPath(container, sdep.Name)
 		container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
@@ -281,6 +293,7 @@ func composeSeldonPodSpec(pu *seldonv1.PredictiveUnit, componentSpecMap map[stri
 
 	composeSchedulerName(seldonPodSpec)
 
+	// If the incoming Volumes is not nil, we will not change it, otherwise we will use the default configuration for it.
 	if len(seldonPodSpec.Spec.Volumes) == 0 {
 		seldonPodSpec.Spec.Volumes = append(seldonPodSpec.Spec.Volumes, []corev1.Volume{
 			{
@@ -462,6 +475,7 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 	}
 	userContainer := &p.Spec.Containers[0]
 
+	// The length of userContainer's volumeMounts must be equal to 1 after compose。
 	var volumeMounts []corev1.VolumeMount
 	if len(userContainer.VolumeMounts) != 0 {
 		volumeMounts = userContainer.VolumeMounts
