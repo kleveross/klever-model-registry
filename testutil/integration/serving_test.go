@@ -37,6 +37,11 @@ var _ = Describe("Model Registry", func() {
 	Context("Servings", func() {
 		name := "test"
 		It("Should create the Serving successfully", func() {
+			minReplicas := int32(1)
+			hpaSpec := seldonv1.SeldonHpaSpec{
+				MinReplicas: &minReplicas,
+				MaxReplicas: 2,
+			}
 			seldonCoreDeploy := &seldonv1.SeldonDeployment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: name,
@@ -59,6 +64,7 @@ var _ = Describe("Model Registry", func() {
 											},
 										},
 									},
+									HpaSpec: &hpaSpec,
 								},
 							},
 							Graph: seldonv1.PredictiveUnit{
@@ -89,29 +95,7 @@ var _ = Describe("Model Registry", func() {
 					JSON().Object().Value("items").Array().Length().Raw())
 			}, timeout, interval).Should(Equal(1))
 		})
-		It("Should update the Serving with HPA successfully", func() {
-			reqBody := []byte(`{
-				"spec": {
-					"predictors": [
-						{
-							"componentSpecs": [
-								{
-									"hpaSpec": {
-										"minReplicas": 2,
-										"maxReplicas": 4
-									}
-								}
-							]
-						}
-					]
-				}
-			}`)
-			Eventually(
-				func() int {
-					return e.PUT("/api/v1alpha1/namespaces/{namespace}/servings/{servingID}", "default", "test").
-						WithHeader("Content-Type", "application/json").WithBytes(reqBody).Expect().Raw().StatusCode
-				}, timeout, interval).Should(Equal(http.StatusOK))
-		})
+
 		It("Should get the updated Serving with correct HPA", func() {
 			Eventually(func() bool {
 				_, ok := e.GET("/api/v1alpha1/namespaces/{namespace}/servings/{servingID}", "default", "test").

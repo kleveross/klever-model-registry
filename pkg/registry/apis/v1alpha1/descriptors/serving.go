@@ -76,7 +76,7 @@ var updateServing = definition.Definition{
 		definition.BodyParameterFor("serving body"),
 	},
 	Results: definition.DataErrorResults("serving updated"),
-	Function: func(ctx context.Context, namespace string, servingID string, body []byte) (*seldonv1.SeldonDeployment, error) {
+	Function: func(ctx context.Context, namespace string, servingID string, body *seldonv1.SeldonDeployment) (*seldonv1.SeldonDeployment, error) {
 		return servingController.Update(namespace, servingID, body)
 	},
 }

@@ -66,6 +66,7 @@ const (
 
 // validateComponentSpecs validate basic infomation in CRD, now, we are not support multi graph,
 // so the length for ComponentSpecs and Containers must be equal 1.
+// And the length of volummounts must not more than 1, because we only use the only one.
 func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
 	if len(p.ComponentSpecs) != 1 {
 		log.Warningf("Component's length must be equal 1 for simple model serving, the actual ComponentSpecs is %v", p.ComponentSpecs)
@@ -73,8 +74,13 @@ func validateComponentSpecs(p *seldonv1.PredictorSpec) error {
 	}
 
 	if len(p.ComponentSpecs[0].Spec.Containers) != 1 {
-		log.Warningf("Component's length must be equal 1 for simple model serving, the actual Containers is %v", p.ComponentSpecs[0].Spec.Containers)
+		log.Warningf("Container's length must be equal 1 for simple model serving, the actual Containers is %v", p.ComponentSpecs[0].Spec.Containers)
 		return fmt.Errorf("Container's length must be equal 1 for simple model serving")
+	}
+
+	if len(p.ComponentSpecs[0].Spec.Containers[0].VolumeMounts) > 1 {
+		log.Warningf("VolumeMounts's length must not more than 1 for simple model serving, the actual VolumeMounts is %v", p.ComponentSpecs[0].Spec.Containers[0].VolumeMounts)
+		return fmt.Errorf("VolumeMounts's length must not more than 1 for simple model serving")
 	}
 
 	return nil
@@ -84,6 +90,11 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 	sdep.Spec.Name = sdep.ObjectMeta.Name
 
 	for i, p := range sdep.Spec.Predictors {
+		// We determine whether the predictor is new or old by judging whether the field exists.
+		// If added, we will compose it.
+		if _, ok := p.Annotations[seldonv1.ANNOTATION_NO_ENGINE]; ok {
+			continue
+		}
 		// Setup no-engine mode
 		setupNoEngineMode(&sdep.Spec.Predictors[i])
 
@@ -228,9 +239,8 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 	container.Ports = ports
 
 	// Must set probe, otherwise the default probe by seldon's webhook will cause error.
-	probe := getDefaultProbe(modelFormat, sdep.Name)
-	container.ReadinessProbe = probe
-	container.LivenessProbe = probe
+	container.ReadinessProbe = getProbe(modelFormat, sdep.Name, false)
+	container.LivenessProbe = getProbe(modelFormat, sdep.Name, true)
 
 	// Set default env.
 	if len(container.Env) == 0 {
@@ -253,16 +263,16 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 		})
 	}
 
+	// If the incoming volumemounts is not nil, we will not change it, otherwise we will use the default configuration for it.
 	if len(container.VolumeMounts) == 0 {
-		container.VolumeMounts = []corev1.VolumeMount{}
+		modelMountPath := getModelMountPath(container, sdep.Name)
+		container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
+			{
+				Name:      modelSharedMountName,
+				MountPath: modelMountPath,
+			},
+		}...)
 	}
-	modelMountPath := getModelMountPath(container, sdep.Name)
-	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
-		{
-			Name:      modelSharedMountName,
-			MountPath: modelMountPath,
-		},
-	}...)
 
 	for idx := range pu.Children {
 		err := composeDefaultUserContainer(sdep, &pu.Children[idx], componentSpecMap)
@@ -280,26 +290,19 @@ func composeSeldonPodSpec(pu *seldonv1.PredictiveUnit, componentSpecMap map[stri
 		return fmt.Errorf("can't find ComponentSpec for graph %v", pu.Name)
 	}
 
-	modelTag, err := getModelTag(pu.ModelURI)
-	if err != nil {
-		return err
-	}
-	podName := modelTag
-	seldonPodSpec.Metadata.Name = podName
-
 	composeSchedulerName(seldonPodSpec)
 
+	// If the incoming Volumes is not nil, we will not change it, otherwise we will use the default configuration for it.
 	if len(seldonPodSpec.Spec.Volumes) == 0 {
-		seldonPodSpec.Spec.Volumes = []corev1.Volume{}
-	}
-	seldonPodSpec.Spec.Volumes = append(seldonPodSpec.Spec.Volumes, []corev1.Volume{
-		{
-			Name: modelSharedMountName,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
+		seldonPodSpec.Spec.Volumes = append(seldonPodSpec.Spec.Volumes, []corev1.Volume{
+			{
+				Name: modelSharedMountName,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
 			},
-		},
-	}...)
+		}...)
+	}
 
 	for idx := range pu.Children {
 		err := composeSeldonPodSpec(&pu.Children[idx], componentSpecMap)
@@ -359,9 +362,12 @@ func getDefaultUserContainerPorts(format string) []corev1.ContainerPort {
 	return ports
 }
 
-// getDefaultProbe generate readiness and liveiness.
-func getDefaultProbe(format, servingName string) *corev1.Probe {
-	path := fmt.Sprintf("/v2/models/%v", servingName)
+// getProbe generate readiness and liveiness.
+func getProbe(format, servingName string, liveness bool) *corev1.Probe {
+	path := "/v2/health/ready"
+	if liveness == true {
+		path = "/v2/health/live"
+	}
 	port := defaultInferenceHTTPPort
 	if format == string(modeljobsv1alpha1.FormatPMML) {
 		path = fmt.Sprintf("/openscoring/model/%v", servingName)
@@ -420,16 +426,6 @@ func getUserContainerImage(format string) string {
 
 }
 
-// getModelTag gets model tag, eg: harbor.demo.io/release/savedmodel:v1, it will return `v1`.
-func getModelTag(modelUri string) (string, error) {
-	modelURISlice := strings.Split(modelUri, ":")
-	if len(modelURISlice) < 2 {
-		return "", fmt.Errorf("modelUri's format is error")
-	}
-
-	return modelURISlice[len(modelURISlice)-1], nil
-}
-
 // getModelMountPath will generate model mount path in container,
 // ormb-storage-initializer will pull and export model to this path.
 // For default image, it is /mnt/servingName
@@ -480,7 +476,15 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 		return fmt.Errorf("there are no container in SeldonPodSpec")
 	}
 	userContainer := &p.Spec.Containers[0]
-	modelMountPath := getModelMountPath(userContainer, sdep.Name)
+
+	// The length of userContainer's volumeMounts must be equal to 1 after compose。
+	var volumeMounts []corev1.VolumeMount
+	if len(userContainer.VolumeMounts) != 0 {
+		volumeMounts = userContainer.VolumeMounts
+	} else {
+		return fmt.Errorf("there are no volumeMounts in userContainer")
+	}
+	modelMountPath := volumeMounts[0].MountPath
 
 	initContainer := &corev1.Container{
 		// mimics the behavior of seldon model initializer for it will disable the default init container injection
