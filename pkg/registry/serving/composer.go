@@ -263,7 +263,7 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 		})
 	}
 
-	// If the incoming voluemounts is not nil, we will not change it, otherwise we will use the default configuration for it.
+	// If the incoming volumemounts is not nil, we will not change it, otherwise we will use the default configuration for it.
 	if len(container.VolumeMounts) == 0 {
 		modelMountPath := getModelMountPath(container, sdep.Name)
 		container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
