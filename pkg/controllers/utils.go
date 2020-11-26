@@ -53,7 +53,6 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 	var dstFormat modeljobsv1alpha1.Format
 	var dstFramework modeljobsv1alpha1.Framework
 	var srcFormat modeljobsv1alpha1.Format
-	var srcFramework modeljobsv1alpha1.Framework
 	var image string
 	var srcModelRef string
 	var dstModelRef string
@@ -72,7 +71,6 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
 		dstFramework = getFrameworkByFormat(dstFormat)
 		srcFormat = modeljob.Spec.Conversion.MMdnn.From
-		srcFramework = getFrameworkByFormat(srcFormat)
 		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(modeljob.Spec.Conversion.MMdnn.From))+"-convert"]
 	} else if modeljob.Spec.Extraction != nil {
 		ormbDomain = getORMBDomain(false)
@@ -80,7 +78,6 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		dstFormat = modeljob.Spec.Extraction.Format
 		dstFramework = getFrameworkByFormat(dstFormat)
 		srcFormat = dstFormat
-		srcFramework = dstFramework
 		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-extract"]
 	} else {
 		return nil, fmt.Errorf("%v", "not support source")
