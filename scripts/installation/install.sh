@@ -18,6 +18,9 @@ export HARBOR_PORT=30022
 export KLEVER_MODEL_REGISTRY_PORT=30100
 export KLEVER_WEB_PORT=30200
 
+# clone klever
+git clone https://github.com/kleveross/klever-model-registry.git
+
 # 
 # Go to manifests directory, it is workdir.
 CWD=$(pwd)
@@ -28,7 +31,7 @@ CWD=$(pwd)
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.2 sh -
 # If install patch in k8s 1.14.8
 # Please reference https://github.com/istio/istio/issues/22366
-cp -rf $CWD/patch/istio/istio-1.2.2/install/kubernetes/helm/istio/charts/gateways/templates/* $CWD/istio/istio-1.2.2/install/kubernetes/helm/istio/charts/gateways
+cp -rf $CWD/klever-model-registry/scripts/patch/istio/istio-1.2.2/install/kubernetes/helm/istio/charts/gateways/templates/* $CWD/istio/istio-1.2.2/install/kubernetes/helm/istio/charts/gateways
 kubectl create namespace istio-system
 helm template istio-init $CWD/istio-1.2.2/install/kubernetes/helm/istio-init --namespace istio-system | kubectl apply -f -
 kubectl get crds | grep 'istio.io\|certmanager.k8s.io' | wc -l
@@ -36,12 +39,13 @@ helm template istio $CWD/istio-1.2.2/install/kubernetes/helm/istio --namespace i
 
 #
 # Install harbor
-#
+# For klever, MUST use harbor as >= v2.1.0, but v2.1.x not design helm chart for low k8s version, so if we want to install 
+# it in this k8s v1.14.8, we can clone it and patch some incompatibility point.
+# patch point ref https://github.com/goharbor/harbor-helm/blob/v1.5.1/templates/core/core-dpl.yaml#L45-L52.
 kubectl create namespace harbor-system
-helm repo add harbor https://helm.goharbor.io
-helm repo update
-helm install harbor harbor --version=v1.4.2 \
-    --repo https://helm.goharbor.io \
+git clone https://github.com/goharbor/harbor-helm.git
+cp -rf $CWD/klever-model-registry/scripts/patch/harbor-helm/templates/core/* $CWD/harbor-helm/templates/core/
+helm install harbor ./harbor-helm \
     --set expose.nodePort.ports.http.nodePort=$HARBOR_PORT \
     --set expose.type=nodePort \
     --set expose.tls.enabled=false \
@@ -51,10 +55,7 @@ helm install harbor harbor --version=v1.4.2 \
     --set trivy.ignoreUnfixed=true \
     --set trivy.insecure=true \
     --set externalURL=http://$MASTER_IP:$HARBOR_PORT \
-    --set core.image.tag=v2.1.0 \
     --set harborAdminPassword="ORMBtest12345" \
-    --set storageInitializer.image=ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7 \
-    --set predictiveUnit.defaultEnvSecretRefName=ormb \
     --namespace harbor-system
 
 #
@@ -72,12 +73,13 @@ helm install seldon-core $CWD/seldon-core/helm-charts/seldon-core-operator \
     --set image.registry=ghcr.io \
     --set image.repository=kleveross/seldon-core-operator \
     --set image.tag=0.1.0 \
+    --set storageInitializer.image=ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7 \
+    --set predictiveUnit.defaultEnvSecretRefName=ormb \
     --namespace seldon-system
 
 #
 # Install Klever
 #
-git clone https://github.com/kleveross/klever-model-registry.git
 kubectl create namespace kleveross-system
 
 # Install Klever-modeljob-operator
