@@ -1,18 +1,18 @@
 apiVersion: v1
 data:
-  caffemodel-convert: '{{ .Values.docker.registry }}/{{ .Values.conversion.caffemodel }}'
-  mxnetparams-convert: '{{ .Values.docker.registry }}/{{ .Values.conversion.mxnetparams }}'
-  h5-convert: '{{ .Values.docker.registry }}/{{ .Values.conversion.h5 }}'
-  caffemodel-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.caffemodel }}'
-  netdef-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.netdef }}'
-  graphdef-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.graphdef }}'
-  h5-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.h5 }}'
-  mxnetparams-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.mxnetparams }}'
-  onnx-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.onnx }}'
-  savedmodel-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.savedmodel }}'
-  torchscript-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.torchscript }}'
-  pmml-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.pmml }}'
-  ormb-storage-initializer: "{{ .Values.docker.registry }}/{{ .Values.model.initializer  }}"
+  caffemodel-convert: '{{ .Values.docker.registry }}/{{ .Values.conversion.caffemodel-convert }}'
+  mxnetparams-convert: '{{ .Values.docker.registry }}/{{ .Values.conversion.mxnetparams-convert }}'
+  h5-convert: '{{ .Values.docker.registry }}/{{ .Values.conversion.h5-convert }}'
+  caffemodel-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.caffemodel-extract }}'
+  netdef-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.netdef-extract }}'
+  graphdef-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.graphdef-extract }}'
+  h5-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.h5-extract }}'
+  mxnetparams-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.mxnetparams-extract }}'
+  onnx-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.onnx-extract }}'
+  savedmodel-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.savedmodel-extract }}'
+  torchscript-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.torchscript-extract }}'
+  pmml-extract: '{{ .Values.docker.registry }}/{{ .Values.extraction.pmml-extract }}'
+  ormb-storage-initializer: "{{ .Values.docker.registry }}/{{ .Values.model.ormb-storage-initializer  }}"
 kind: ConfigMap
 metadata:
   name: modeljob-image-config
