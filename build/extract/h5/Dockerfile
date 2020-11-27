@@ -22,7 +22,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 COPY scripts/shell/run.sh /scripts/run.sh
 COPY scripts/extract  /scripts
 
-ENV EXTRACTOR=keras
+ENV EXTRACTOR=h5
 
 ENTRYPOINT ["sh","-c","/scripts/run.sh"]
 

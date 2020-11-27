@@ -23,6 +23,6 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 COPY scripts/shell/run.sh /scripts/run.sh
 COPY scripts/extract  /scripts
 
-ENV EXTRACTOR=mxnet
+ENV EXTRACTOR=mxnetparams
 
 ENTRYPOINT ["sh","-c","/scripts/run.sh"]
