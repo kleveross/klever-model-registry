@@ -106,11 +106,6 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 							Name:       "executor",
 							Image:      image,
 							WorkingDir: "/models",
-							Command:    []string{"sh"},
-							Args: []string{
-								"-c",
-								fmt.Sprintf("/scripts/run.sh"),
-							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								corev1.EnvVar{

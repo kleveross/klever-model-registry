@@ -11,6 +11,7 @@ BASE_REGISTRY ?= docker.io
 # Image URL to use all building/pushing image targets
 IMG ?= kleveross/modeljob-operator:latest
 
+ORMB_VERSION ?= $(strip 0.0.5)
 #
 # These variables should not need tweaking.
 #
@@ -150,10 +151,16 @@ docker-build: build-linux
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/$${target}/Dockerfile .;  \
 	done
+
+	# build nvcaffe: cpu
+	image=nvcaffe;   
+	tag=cpu-0.16.5;
+	docker build -t $(REGISTRY)/$${image}:$(tag) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/nvcaffe-cpu/Dockerfile  .; 
+
 	# build extractor
 	@for target in $(EXTRACT_TARGETS); do  \
 		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
-		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile .;  \
+		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile --build-arg ORMB_VERSION=${ORMB_VERSION} .;  \
 	done
 
 	# build convertor
@@ -174,6 +181,12 @@ docker-push:
 		image=$(IMAGE_PREFIX)$${target}$(IMAGE_SUFFIX);   \
 		docker push  $(REGISTRY)/$${image}:$(VERSION);  \
 	done
+
+	# push nvcaffe:cpu-0.16.5
+	image=nvcaffe;   
+	tag=cpu-0.16.5;
+	docker push  $(REGISTRY)/$${image}:$(tag); 
+
 	# push extractor
 	@for target in $(EXTRACT_TARGETS); do  \
 		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
@@ -199,10 +212,18 @@ klever-docker-build-push: build
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done
+
+	# build && push nvcaffe: cpu
+	image=nvcaffe;   
+	tag=cpu-0.16.5;
+	docker build -t $(REGISTRY)/$${image}:$(tag) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/nvcaffe-cpu/Dockerfile  .; 
+	docker push  $(REGISTRY)/$${image}:$(tag); 
+	docker rmi -f $(REGISTRY)/$${image}:$(tag); 
+
 	# build && push extractor
 	@for target in $(EXTRACT_TARGETS); do  \
 		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
-		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile .;  \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/extract/$${target}/Dockerfile --build-arg ORMB_VERSION=${ORMB_VERSION} .;  \
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done
