@@ -32,7 +32,7 @@ EXTRACT_TARGETS := caffe caffe2 graphdef h5 mxnetparams onnx pmml savedmodel tor
 EXTRACT_IMAGE_PREFIX ?= $(strip )
 EXTRACT_IMAGE_SUFFIX ?= $(strip -extract)
 
-CONVERT_TARGETS := caffemodel_to_netdef h5_to_savedmodel mxnetparams_to_onnx
+CONVERT_TARGETS := caffemodel_to_netdef h5_to_savedmodel mxnetparams_to_onnx netdef_to_onnx
 CONVERT_IMAGE_PREFIX ?= $(strip )
 CONVERT_IMAGE_SUFFIX ?= $(strip )
 
@@ -166,7 +166,7 @@ docker-build: build-linux
 	# build convertor
 	@for target in $(CONVERT_TARGETS); do  \
 		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
-		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile .;  \
+		docker build -t $(REGISTRY)/$${image}:$(VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile --build-arg ORMB_VERSION=${ORMB_VERSION} .;  \
 	done
 
 	# build serving
@@ -231,7 +231,7 @@ klever-docker-build-push: build
 	# build && push convertor
 	@for target in $(CONVERT_TARGETS); do  \
 		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
-		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile .;  \
+		docker build -t $(REGISTRY)/$${image}:$(RELEASE_VERSION) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/convert/$${target}/Dockerfile --build-arg ORMB_VERSION=${ORMB_VERSION} .;  \
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done

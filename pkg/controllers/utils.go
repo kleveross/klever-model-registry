@@ -52,6 +52,7 @@ func replaceModelRefDomain(inputModelRef, ormbDomain string) (string, error) {
 func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, error) {
 	var dstFormat modeljobsv1alpha1.Format
 	var dstFramework modeljobsv1alpha1.Framework
+	var srcFormat modeljobsv1alpha1.Format
 	var image string
 	var srcModelRef string
 	var dstModelRef string
@@ -69,12 +70,14 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		}
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
 		dstFramework = getFrameworkByFormat(dstFormat)
+		srcFormat = modeljob.Spec.Conversion.MMdnn.From
 		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(modeljob.Spec.Conversion.MMdnn.From))+"-convert"]
 	} else if modeljob.Spec.Extraction != nil {
 		ormbDomain = getORMBDomain(false)
 		dstModelRef = "empty"
 		dstFormat = modeljob.Spec.Extraction.Format
 		dstFramework = getFrameworkByFormat(dstFormat)
+		srcFormat = dstFormat
 		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-extract"]
 	} else {
 		return nil, fmt.Errorf("%v", "not support source")
@@ -115,6 +118,10 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.FormatEnvKey,
 									Value: string(dstFormat),
+								},
+								corev1.EnvVar{
+									Name:  modeljobsv1alpha1.SourceFormatEnvKey,
+									Value: string(srcFormat),
 								},
 								corev1.EnvVar{
 									Name:  modeljobsv1alpha1.SourceModelTagEnvKey,
