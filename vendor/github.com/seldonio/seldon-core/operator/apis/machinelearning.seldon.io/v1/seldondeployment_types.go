@@ -21,11 +21,13 @@ import (
 	"encoding/hex"
 	"strconv"
 
+	kedav1alpha1 "github.com/kedacore/keda/api/v1alpha1"
 	"github.com/seldonio/seldon-core/operator/constants"
 	istio_networking "istio.io/api/networking/v1alpha3"
 	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -52,6 +54,8 @@ const (
 	PODINFO_VOLUME_PATH     = "/etc/podinfo"
 
 	ENV_PREDICTIVE_UNIT_SERVICE_PORT         = "PREDICTIVE_UNIT_SERVICE_PORT"
+	ENV_PREDICTIVE_UNIT_HTTP_SERVICE_PORT    = "PREDICTIVE_UNIT_HTTP_SERVICE_PORT"
+	ENV_PREDICTIVE_UNIT_GRPC_SERVICE_PORT    = "PREDICTIVE_UNIT_GRPC_SERVICE_PORT"
 	ENV_PREDICTIVE_UNIT_SERVICE_PORT_METRICS = "PREDICTIVE_UNIT_METRICS_SERVICE_PORT"
 	ENV_PREDICTIVE_UNIT_METRICS_ENDPOINT     = "PREDICTIVE_UNIT_METRICS_ENDPOINT"
 	ENV_PREDICTIVE_UNIT_METRICS_PORT_NAME    = "PREDICTIVE_UNIT_METRICS_PORT_NAME"
@@ -165,17 +169,17 @@ func GetPredictiveUnit(pu *PredictiveUnit, name string) *PredictiveUnit {
 
 // if engine is not separated then this tells us which pu it should go on, as the mutating webhook handler has set host as localhost on the pu
 func GetEnginePredictiveUnit(pu *PredictiveUnit) *PredictiveUnit {
-	if pu.Endpoints != nil && pu.Endpoints[0].ServiceHost == "localhost" {
+	if pu.Endpoint != nil && pu.Endpoint.ServiceHost == "localhost" {
 		return pu
-	}
-	for i := 0; i < len(pu.Children); i++ {
-		found := GetEnginePredictiveUnit(&pu.Children[i])
-		if found != nil {
-			return found
+	} else {
+		for i := 0; i < len(pu.Children); i++ {
+			found := GetEnginePredictiveUnit(&pu.Children[i])
+			if found != nil {
+				return found
+			}
 		}
+		return nil
 	}
-	return nil
-
 }
 
 func GetPredictiveUnitList(p *PredictiveUnit) (list []*PredictiveUnit) {
@@ -214,6 +218,10 @@ type SeldonDeploymentSpec struct {
 	ServerType  ServerType        `json:"serverType,omitempty" protobuf:"bytes,8,opt,name=serverType"`
 }
 
+type SSL struct {
+	CertSecretName string `json:"certSecretName,omitempty" protobuf:"string,2,opt,name=certSecretName"`
+}
+
 type PredictorSpec struct {
 	Name            string                  `json:"name" protobuf:"string,1,opt,name=name"`
 	Graph           PredictiveUnit          `json:"graph" protobuf:"bytes,2,opt,name=predictiveUnit"`
@@ -227,6 +235,7 @@ type PredictorSpec struct {
 	TrafficMatchs   []HTTPMatchRequest      `json:"trafficMatchs,omitempty" protobuf:"bytes,9,opt,name=trafficMatchs"`
 	Explainer       *Explainer              `json:"explainer,omitempty" protobuf:"bytes,10,opt,name=explainer"`
 	Shadow          bool                    `json:"shadow,omitempty" protobuf:"bytes,11,opt,name=shadow"`
+	SSL             *SSL                    `json:"ssl,omitempty" protobuf:"bytes,11,opt,name=ssl"`
 }
 
 type Protocol string
@@ -234,6 +243,7 @@ type Protocol string
 const (
 	ProtocolSeldon     Protocol = "seldon"
 	ProtocolTensorflow Protocol = "tensorflow"
+	ProtocolKfserving  Protocol = "kfserving"
 )
 
 type Transport string
@@ -267,6 +277,7 @@ const (
 	AlibiKernelShapExplainer          AlibiExplainerType = "KernelShap"
 	AlibiIntegratedGradientsExplainer AlibiExplainerType = "IntegratedGradients"
 	AlibiALEExplainer                 AlibiExplainerType = "ALE"
+	AlibiTreeShap                     AlibiExplainerType = "TreeShap"
 )
 
 // HTTPMatchRequest specify rules to match requests. All rules are ANDed.
@@ -333,16 +344,50 @@ type Explainer struct {
 }
 
 type SeldonPodSpec struct {
-	Metadata metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	Spec     v1.PodSpec        `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
-	HpaSpec  *SeldonHpaSpec    `json:"hpaSpec,omitempty" protobuf:"bytes,3,opt,name=hpaSpec"`
-	Replicas *int32            `json:"replicas,omitempty" protobuf:"bytes,4,opt,name=replicas"`
+	Metadata metav1.ObjectMeta       `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Spec     v1.PodSpec              `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	HpaSpec  *SeldonHpaSpec          `json:"hpaSpec,omitempty" protobuf:"bytes,3,opt,name=hpaSpec"`
+	Replicas *int32                  `json:"replicas,omitempty" protobuf:"bytes,4,opt,name=replicas"`
+	KedaSpec *SeldonScaledObjectSpec `json:"kedaSpec,omitempty" protobuf:"bytes,5,opt,name=kedaSpec"`
+	PdbSpec  *SeldonPdbSpec          `json:"pdbSpec,omitempty" protobuf:"bytes,6,opt,name=pdbSpec"`
+}
+
+// SeldonScaledObjectSpec is the spec for a KEDA ScaledObject resource
+type SeldonScaledObjectSpec struct {
+	// +optional
+	PollingInterval *int32 `json:"pollingInterval,omitempty" protobuf:"int,1,opt,name=pollingInterval"`
+	// +optional
+	CooldownPeriod *int32 `json:"cooldownPeriod,omitempty" protobuf:"int,2,opt,name=cooldownPeriod"`
+	// +optional
+	MinReplicaCount *int32 `json:"minReplicaCount,omitempty" protobuf:"int,3,opt,name=minReplicaCount"`
+	// +optional
+	MaxReplicaCount *int32 `json:"maxReplicaCount,omitempty" protobuf:"int,4,opt,name=maxReplicaCount"`
+	// +optional
+	Advanced *kedav1alpha1.AdvancedConfig `json:"advanced,omitempty" protobuf:"bytes,5,opt,name=advanced"`
+	Triggers []kedav1alpha1.ScaleTriggers `json:"triggers" protobuf:"bytes,6,opt,name=triggers"`
 }
 
 type SeldonHpaSpec struct {
 	MinReplicas *int32                          `json:"minReplicas,omitempty" protobuf:"int,1,opt,name=minReplicas"`
 	MaxReplicas int32                           `json:"maxReplicas" protobuf:"int,2,opt,name=maxReplicas"`
 	Metrics     []autoscalingv2beta2.MetricSpec `json:"metrics,omitempty" protobuf:"bytes,3,opt,name=metrics"`
+}
+
+type SeldonPdbSpec struct {
+	// An eviction is allowed if at least "minAvailable" pods in the deployment
+	// corresponding to a componentSpec will still be available after the eviction, i.e. even in the
+	// absence of the evicted pod.  So for example you can prevent all voluntary
+	// evictions by specifying "100%".
+	// +optional
+	MinAvailable *intstr.IntOrString `json:"minAvailable,omitempty" protobuf:"bytes,1,opt,name=minAvailable"`
+
+	// An eviction is allowed if at most "maxUnavailable" pods in the deployment
+	// corresponding to a componentSpec are unavailable after the eviction, i.e. even in absence of
+	// the evicted pod. For example, one can prevent all voluntary evictions
+	// by specifying 0.
+	// MaxUnavailable and MinAvailable are mutually exclusive.
+	// +optional
+	MaxUnavailable *intstr.IntOrString `json:"maxUnavailable,omitempty" protobuf:"bytes,2,opt,name=maxUnavailable"`
 }
 
 type PredictiveUnitType string
@@ -387,6 +432,8 @@ type Endpoint struct {
 	ServiceHost string       `json:"service_host,omitempty" protobuf:"string,1,opt,name=service_host"`
 	ServicePort int32        `json:"service_port,omitempty" protobuf:"int32,2,opt,name=service_port"`
 	Type        EndpointType `json:"type,omitempty" protobuf:"int,3,opt,name=type"`
+	HttpPort    int32        `json:"httpPort,omitempty" protobuf:"int32,4,opt,name=httpPort"`
+	GrpcPort    int32        `json:"grpcPort,omitempty" protobuf:"int32,5,opt,name=grpcPort"`
 }
 
 type ParmeterType string
@@ -411,7 +458,7 @@ type PredictiveUnit struct {
 	Type               *PredictiveUnitType           `json:"type,omitempty" protobuf:"int,3,opt,name=type"`
 	Implementation     *PredictiveUnitImplementation `json:"implementation,omitempty" protobuf:"int,4,opt,name=implementation"`
 	Methods            *[]PredictiveUnitMethod       `json:"methods,omitempty" protobuf:"int,5,opt,name=methods"`
-	Endpoints          []Endpoint                    `json:"endpoints,omitempty" protobuf:"bytes,6,opt,name=endpoints"`
+	Endpoint           *Endpoint                     `json:"endpoint,omitempty" protobuf:"bytes,6,opt,name=endpoint"`
 	Parameters         []Parameter                   `json:"parameters,omitempty" protobuf:"bytes,7,opt,name=parameters"`
 	ModelURI           string                        `json:"modelUri,omitempty" protobuf:"bytes,8,opt,name=modelUri"`
 	ServiceAccountName string                        `json:"serviceAccountName,omitempty" protobuf:"bytes,9,opt,name=serviceAccountName"`

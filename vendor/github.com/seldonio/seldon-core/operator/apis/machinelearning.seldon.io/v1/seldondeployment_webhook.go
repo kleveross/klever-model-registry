@@ -17,10 +17,6 @@ limitations under the License.
 package v1
 
 import (
-	"log"
-	"os"
-	"strconv"
-
 	"github.com/seldonio/seldon-core/operator/constants"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,10 +24,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"log"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"strconv"
 )
 
 var (
@@ -39,7 +38,8 @@ var (
 	seldondeploymentlog                 = logf.Log.WithName("seldondeployment")
 	ControllerNamespace                 = GetEnv("POD_NAMESPACE", "seldon-system")
 	C                                   client.Client
-	envPredictiveUnitServicePort        = os.Getenv(ENV_PREDICTIVE_UNIT_SERVICE_PORT)
+	envPredictiveUnitHttpServicePort    = os.Getenv(ENV_PREDICTIVE_UNIT_HTTP_SERVICE_PORT)
+	envPredictiveUnitGrpcServicePort    = os.Getenv(ENV_PREDICTIVE_UNIT_GRPC_SERVICE_PORT)
 	envPredictiveUnitServicePortMetrics = os.Getenv(ENV_PREDICTIVE_UNIT_SERVICE_PORT_METRICS)
 	envPredictiveUnitMetricsPortName    = GetEnv(ENV_PREDICTIVE_UNIT_METRICS_PORT_NAME, constants.DefaultMetricsPortName)
 )
@@ -123,49 +123,21 @@ func addMetricsPortAndIncrement(nextMetricsPortNum *int32, con *corev1.Container
 }
 
 func (r *SeldonDeploymentSpec) setContainerPredictiveUnitDefaults(compSpecIdx int,
-	portNum int32, nextMetricsPortNum *int32, mldepName string, namespace string,
+	portNumHttp int32, portNumGrpc int32, nextMetricsPortNum *int32, mldepName string, namespace string,
 	p *PredictorSpec, pu *PredictiveUnit, con *corev1.Container) {
 
-	// Set ports and hostname in predictive unit so engine can read it from SDep
-	// if this is the first componentSpec then it's the one to put the engine in - note using outer loop counter here
-	serviceHost := ""
-	if _, hasSeparateEnginePod := r.Annotations[ANNOTATION_SEPARATE_ENGINE]; compSpecIdx == 0 && !hasSeparateEnginePod {
-		serviceHost = constants.DNSLocalHost
-	} else {
-		containerServiceValue := GetContainerServiceName(mldepName, *p, con)
-		serviceHost = containerServiceValue + "." + namespace + constants.DNSClusterLocalSuffix
+	if pu.Endpoint == nil {
+		pu.Endpoint = &Endpoint{}
 	}
 
-	if pu.Endpoints == nil {
-		for _, c := range con.Ports {
-			if c.Name == constants.GrpcPortName {
-				endpoint := Endpoint{ServiceHost: serviceHost,
-					ServicePort: c.ContainerPort,
-					Type:        GRPC,
-				}
-				pu.Endpoints = append(pu.Endpoints, endpoint)
-			}
-
-			if c.Name == constants.HttpPortName {
-				endpoint := Endpoint{ServiceHost: serviceHost,
-					ServicePort: c.ContainerPort,
-					Type:        REST,
-				}
-				pu.Endpoints = append(pu.Endpoints, endpoint)
-			}
-		}
-
-		if pu.Endpoints == nil {
-			if r.Transport == TransportGrpc {
-				pu.Endpoints = []Endpoint{{Type: GRPC, ServicePort: portNum, ServiceHost: serviceHost}}
-			} else {
-				pu.Endpoints = []Endpoint{{Type: REST, ServicePort: portNum, ServiceHost: serviceHost}}
-			}
-		}
+	existingHttpPort := GetPort(constants.HttpPortName, con.Ports)
+	if existingHttpPort != nil {
+		portNumHttp = existingHttpPort.ContainerPort
 	}
-	if pu.Endpoints[0].ServicePort == 0 {
-		pu.Endpoints[0].ServicePort = portNum
-		pu.Endpoints[0].ServiceHost = serviceHost
+
+	existingGrpcPort := GetPort(constants.GrpcPortName, con.Ports)
+	if existingGrpcPort != nil {
+		portNumGrpc = existingGrpcPort.ContainerPort
 	}
 
 	volFound := false
@@ -198,20 +170,55 @@ func (r *SeldonDeploymentSpec) setContainerPredictiveUnitDefaults(compSpecIdx in
 
 	//Add metrics port if missing
 	addMetricsPortAndIncrement(nextMetricsPortNum, con)
+
+	// Set ports and hostname in predictive unit so engine can read it from SDep
+	// if this is the first componentSpec then it's the one to put the engine in - note using outer loop counter here
+	if _, hasSeparateEnginePod := r.Annotations[ANNOTATION_SEPARATE_ENGINE]; compSpecIdx == 0 && !hasSeparateEnginePod {
+		pu.Endpoint.ServiceHost = constants.DNSLocalHost
+	} else {
+		containerServiceValue := GetContainerServiceName(mldepName, *p, con)
+		pu.Endpoint.ServiceHost = containerServiceValue + "." + namespace + constants.DNSClusterLocalSuffix
+	}
+
+	// Backwards compatibility. We set this to grpc port if that is specified otherwise go with http port
+	// The executor still uses this port to check for readiness and its needed for backwards compatibility
+	// for old images that only have 1 port for http or grpc open
+	// TODO: deprecate and remove and fix executor
+	if pu.Endpoint.Type == GRPC || r.Transport == TransportGrpc {
+		pu.Endpoint.ServicePort = portNumGrpc
+	} else {
+		pu.Endpoint.ServicePort = portNumHttp
+	}
+
+	pu.Endpoint.HttpPort = portNumHttp
+	pu.Endpoint.GrpcPort = portNumGrpc
+
 }
 
 func (r *SeldonDeploymentSpec) DefaultSeldonDeployment(mldepName string, namespace string) {
 
-	var firstPuPortNum int32 = constants.FirstPortNumber
-	if envPredictiveUnitServicePort != "" {
-		portNum, err := strconv.Atoi(envPredictiveUnitServicePort)
+	var firstHttpPuPortNum int32 = constants.FirstHttpPortNumber
+
+	if envPredictiveUnitHttpServicePort != "" {
+		portNum, err := strconv.Atoi(envPredictiveUnitHttpServicePort)
 		if err != nil {
-			seldondeploymentlog.Error(err, "Failed to decode predictive unit service port will use default", "envar", ENV_PREDICTIVE_UNIT_SERVICE_PORT, "value", envPredictiveUnitServicePort)
+			seldondeploymentlog.Error(err, "Failed to decode predictive unit service port will use default", "envar", ENV_PREDICTIVE_UNIT_HTTP_SERVICE_PORT, "value", envPredictiveUnitHttpServicePort)
 		} else {
-			firstPuPortNum = int32(portNum)
+			firstHttpPuPortNum = int32(portNum)
 		}
 	}
-	nextPortNum := firstPuPortNum
+	nextHttpPortNum := firstHttpPuPortNum
+
+	var firstGrpcPuPortNum int32 = constants.FirstGrpcPortNumber
+	if envPredictiveUnitGrpcServicePort != "" {
+		portNum, err := strconv.Atoi(envPredictiveUnitGrpcServicePort)
+		if err != nil {
+			seldondeploymentlog.Error(err, "Failed to decode grpc predictive unit service port will use default", "envar", ENV_PREDICTIVE_UNIT_GRPC_SERVICE_PORT, "value", envPredictiveUnitGrpcServicePort)
+		} else {
+			firstGrpcPuPortNum = int32(portNum)
+		}
+	}
+	nextGrpcPortNum := firstGrpcPuPortNum
 
 	var firstMetricsPuPortNum int32 = constants.FirstMetricsPortNumber
 	if envPredictiveUnitServicePortMetrics != "" {
@@ -223,7 +230,8 @@ func (r *SeldonDeploymentSpec) DefaultSeldonDeployment(mldepName string, namespa
 		}
 	}
 	nextMetricsPortNum := firstMetricsPuPortNum
-	portMap := map[string]int32{}
+	portMapHttp := map[string]int32{}
+	portMapGrpc := map[string]int32{}
 
 	for i := 0; i < len(r.Predictors); i++ {
 		p := r.Predictors[i]
@@ -245,13 +253,16 @@ func (r *SeldonDeploymentSpec) DefaultSeldonDeployment(mldepName string, namespa
 			for k := 0; k < len(cSpec.Spec.Containers); k++ {
 				con := &cSpec.Spec.Containers[k]
 
-				getUpdatePortNumMap(con.Name, &nextPortNum, portMap)
-				portNum := portMap[con.Name]
+				getUpdatePortNumMap(con.Name, &nextHttpPortNum, portMapHttp)
+				httpPortNum := portMapHttp[con.Name]
+
+				getUpdatePortNumMap(con.Name, &nextGrpcPortNum, portMapGrpc)
+				grpcPortNum := portMapGrpc[con.Name]
 
 				pu := GetPredictiveUnit(&p.Graph, con.Name)
 
 				if pu != nil {
-					r.setContainerPredictiveUnitDefaults(j, portNum, &nextMetricsPortNum, mldepName, namespace, &p, pu, con)
+					r.setContainerPredictiveUnitDefaults(j, httpPortNum, grpcPortNum, &nextMetricsPortNum, mldepName, namespace, &p, pu, con)
 				}
 			}
 		}
@@ -279,15 +290,20 @@ func (r *SeldonDeploymentSpec) DefaultSeldonDeployment(mldepName string, namespa
 					}
 				}
 
-				getUpdatePortNumMap(pu.Name, &nextPortNum, portMap)
-				portNum := portMap[pu.Name]
+				getUpdatePortNumMap(pu.Name, &nextHttpPortNum, portMapHttp)
+				httpPortNum := portMapHttp[pu.Name]
 
-				r.setContainerPredictiveUnitDefaults(0, portNum, &nextMetricsPortNum, mldepName, namespace, &p, pu, con)
+				getUpdatePortNumMap(con.Name, &nextGrpcPortNum, portMapGrpc)
+				grpcPortNum := portMapGrpc[con.Name]
+
+				r.setContainerPredictiveUnitDefaults(0, httpPortNum, grpcPortNum, &nextMetricsPortNum, mldepName, namespace, &p, pu, con)
 				//Only set image default for non tensorflow graphs
 				if r.Protocol != ProtocolTensorflow {
 					serverConfig := GetPrepackServerConfig(string(*pu.Implementation))
 					if serverConfig != nil {
-						SetImageNameForPrepackContainer(pu, con, serverConfig)
+						if con.Image == "" {
+							con.Image = serverConfig.PrepackImageName(r.Protocol, pu)
+						}
 					}
 				}
 
@@ -384,6 +400,9 @@ func checkTraffic(spec *SeldonDeploymentSpec, fldPath *field.Path, allErrs field
 
 		if p.Shadow == true {
 			shadows += 1
+			if shadows > 1 {
+				allErrs = append(allErrs, field.Invalid(fldPath, spec.Predictors[i].Name, "Multiple shadows are not allowed"))
+			}
 		}
 	}
 
@@ -411,12 +430,9 @@ func sizeOfGraph(p *PredictiveUnit) int {
 }
 
 func collectTransports(pu *PredictiveUnit, transportsFound map[EndpointType]bool) {
-	for _, t := range pu.Endpoints {
-		if t.Type != "" {
-			transportsFound[t.Type] = true
-		}
+	if pu.Endpoint != nil && pu.Endpoint.Type != "" {
+		transportsFound[pu.Endpoint.Type] = true
 	}
-
 	for _, c := range pu.Children {
 		collectTransports(&c, transportsFound)
 	}
@@ -463,7 +479,7 @@ func (r *SeldonDeploymentSpec) validateShadow(allErrs field.ErrorList) field.Err
 func (r *SeldonDeploymentSpec) ValidateSeldonDeployment() error {
 	var allErrs field.ErrorList
 
-	if r.Protocol != "" && !(r.Protocol == ProtocolSeldon || r.Protocol == ProtocolTensorflow) {
+	if r.Protocol != "" && !(r.Protocol == ProtocolSeldon || r.Protocol == ProtocolTensorflow || r.Protocol == ProtocolKfserving) {
 		fldPath := field.NewPath("spec")
 		allErrs = append(allErrs, field.Invalid(fldPath, r.Protocol, "Invalid protocol"))
 	}
@@ -508,14 +524,12 @@ func (r *SeldonDeploymentSpec) ValidateSeldonDeployment() error {
 		allErrs = r.checkPredictiveUnits(&p.Graph, &p, field.NewPath("spec").Child("predictors").Index(i).Child("graph"), allErrs)
 	}
 
-	if r.Transport != "" {
-		found := false
+	if len(transports) > 1 {
+		fldPath := field.NewPath("spec")
+		allErrs = append(allErrs, field.Invalid(fldPath, "", "Multiple endpoint.types found - can only have 1 type in graph. Please use spec.transport"))
+	} else if len(transports) == 1 && r.Transport != "" {
 		for k := range transports {
-			if (k == REST && r.Transport == TransportRest) || (k == GRPC && r.Transport == TransportGrpc) {
-				found = true
-				break
-			}
-			if !found {
+			if (k == REST && r.Transport != TransportRest) || (k == GRPC && r.Transport != TransportGrpc) {
 				fldPath := field.NewPath("spec")
 				allErrs = append(allErrs, field.Invalid(fldPath, "", "Mixed transport types found. Remove graph endpoint.types if transport set at deployment level"))
 			}

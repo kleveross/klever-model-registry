@@ -19,6 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"time"
 
 	v1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
@@ -71,7 +72,7 @@ func (c *modelJobs) Get(name string, options v1.GetOptions) (result *v1alpha1.Mo
 		Resource("modeljobs").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -88,7 +89,7 @@ func (c *modelJobs) List(opts v1.ListOptions) (result *v1alpha1.ModelJobList, er
 		Resource("modeljobs").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -105,7 +106,7 @@ func (c *modelJobs) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Resource("modeljobs").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(context.TODO())
 }
 
 // Create takes the representation of a modelJob and creates it.  Returns the server's representation of the modelJob, and an error, if there is any.
@@ -115,7 +116,7 @@ func (c *modelJobs) Create(modelJob *v1alpha1.ModelJob) (result *v1alpha1.ModelJ
 		Namespace(c.ns).
 		Resource("modeljobs").
 		Body(modelJob).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -128,7 +129,7 @@ func (c *modelJobs) Update(modelJob *v1alpha1.ModelJob) (result *v1alpha1.ModelJ
 		Resource("modeljobs").
 		Name(modelJob.Name).
 		Body(modelJob).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -144,7 +145,7 @@ func (c *modelJobs) UpdateStatus(modelJob *v1alpha1.ModelJob) (result *v1alpha1.
 		Name(modelJob.Name).
 		SubResource("status").
 		Body(modelJob).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -156,7 +157,7 @@ func (c *modelJobs) Delete(name string, options *v1.DeleteOptions) error {
 		Resource("modeljobs").
 		Name(name).
 		Body(options).
-		Do().
+		Do(context.TODO()).
 		Error()
 }
 
@@ -172,7 +173,7 @@ func (c *modelJobs) DeleteCollection(options *v1.DeleteOptions, listOptions v1.L
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(options).
-		Do().
+		Do(context.TODO()).
 		Error()
 }
 
@@ -185,7 +186,7 @@ func (c *modelJobs) Patch(name string, pt types.PatchType, data []byte, subresou
 		SubResource(subresources...).
 		Name(name).
 		Body(data).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
