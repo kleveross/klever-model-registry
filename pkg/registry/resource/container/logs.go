@@ -15,6 +15,7 @@
 package container
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 
@@ -38,7 +39,7 @@ type PodContainerList struct {
 
 // GetPodContainers returns containers that a pod has.
 func GetPodContainers(client kubernetes.Interface, namespace, podID string) (*PodContainerList, error) {
-	pod, err := client.CoreV1().Pods(namespace).Get(podID, metaV1.GetOptions{})
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), podID, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func GetPodContainers(client kubernetes.Interface, namespace, podID string) (*Po
 
 func GetLogDetails(client kubernetes.Interface, namespace, podID string, container string,
 	logSelector *logs.Selection, usePreviousLogs bool) (*logs.LogDetails, error) {
-	pod, err := client.CoreV1().Pods(namespace).Get(podID, metaV1.GetOptions{})
+	pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), podID, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func mapToLogOptions(container string, logSelector *logs.Selection, previous boo
 // Construct a request for getting the logs for a pod and retrieves the logs.
 func readRawLogs(client kubernetes.Interface, namespace, podID string, logOptions *v1.PodLogOptions) (
 	string, error) {
-	readCloser, err := client.CoreV1().Pods(namespace).GetLogs(podID, logOptions).Stream()
+	readCloser, err := client.CoreV1().Pods(namespace).GetLogs(podID, logOptions).Stream(context.TODO())
 	if err != nil {
 		return err.Error(), nil
 	}
@@ -119,7 +120,7 @@ func GetLogFile(client kubernetes.Interface, namespace, podID string, container 
 		Timestamps: false,
 	}
 
-	logStream, err := client.CoreV1().Pods(namespace).GetLogs(podID, logOptions).Stream()
+	logStream, err := client.CoreV1().Pods(namespace).GetLogs(podID, logOptions).Stream(context.TODO())
 	return logStream, err
 }
 

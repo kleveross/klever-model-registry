@@ -18,8 +18,10 @@ package app
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"io"
 	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path/filepath"
 
@@ -204,7 +206,7 @@ func ensureCRD(config *rest.Config) error {
 		return err
 	}
 	for _, crd := range crds {
-		_, err = client.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
+		_, err = client.ApiextensionsV1beta1().CustomResourceDefinitions().Create(context.TODO(), crd, metav1.CreateOptions{})
 		if err != nil {
 			if !errors.IsAlreadyExists(err) {
 				setupLog.Error(err, "unable to ensure crds")

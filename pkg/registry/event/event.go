@@ -16,6 +16,8 @@ limitations under the License.
 package event
 
 import (
+	"context"
+
 	"github.com/caicloud/nirvana/log"
 	seldonv1client "github.com/seldonio/seldon-core/operator/client/machinelearning.seldon.io/v1/clientset/versioned"
 	seldonscheme "github.com/seldonio/seldon-core/operator/client/machinelearning.seldon.io/v1/clientset/versioned/scheme"
@@ -96,7 +98,7 @@ func (e EventController) GetModelJobEvents(namespace, modeljobID string, opt *pa
 }
 
 func (e EventController) GetServingEvents(namespace, servingID string, opt *paging.ListOption) (*EventList, error) {
-	serving, err := e.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Get(servingID, metav1.GetOptions{})
+	serving, err := e.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Get(context.TODO(), servingID, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}

@@ -1,6 +1,7 @@
 package serving
 
 import (
+	"context"
 	"sort"
 
 	"github.com/caicloud/nirvana/log"
@@ -28,7 +29,7 @@ func (s ServingController) Create(namespace string, sdep *seldonv1.SeldonDeploym
 		return errors.RenderError(err)
 	}
 
-	_, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Create(sdep)
+	_, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Create(context.TODO(), sdep, metav1.CreateOptions{})
 	if err != nil {
 		log.Errorf("Failed to create the Seldon Deployment: %v", err)
 		return errors.RenderError(err)
@@ -38,7 +39,7 @@ func (s ServingController) Create(namespace string, sdep *seldonv1.SeldonDeploym
 }
 
 func (s ServingController) Get(namespace, sdepID string) (*seldonv1.SeldonDeployment, error) {
-	sdep, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Get(sdepID, metav1.GetOptions{})
+	sdep, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Get(context.TODO(), sdepID, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}
@@ -68,7 +69,7 @@ func toServingList(items []seldonv1.SeldonDeployment, opt *paging.ListOption) *S
 }
 
 func (s ServingController) List(namespace string, opt *paging.ListOption) (*ServingList, error) {
-	sdeps, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).List(metav1.ListOptions{})
+	sdeps, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}
@@ -87,7 +88,7 @@ func (s ServingController) Update(namespace string, sdepID string, sdep *seldonv
 	}
 
 	// 2. execute the update & return
-	result, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Update(sdep)
+	result, err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Update(context.TODO(), sdep, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}
@@ -95,7 +96,7 @@ func (s ServingController) Update(namespace string, sdepID string, sdep *seldonv
 }
 
 func (s ServingController) Delete(namespace, sdepID string) error {
-	err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Delete(sdepID, &metav1.DeleteOptions{})
+	err := s.seldonClient.MachinelearningV1().SeldonDeployments(namespace).Delete(context.TODO(), sdepID, metav1.DeleteOptions{})
 	if err != nil {
 		return errors.RenderError(err)
 	}

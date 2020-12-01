@@ -1,6 +1,7 @@
 package pod
 
 import (
+	"context"
 	"strings"
 
 	"github.com/caicloud/nirvana/log"
@@ -29,7 +30,7 @@ func (e PodController) GetPods(namespace string, filterBy string) (*corev1.PodLi
 		}
 	}
 
-	pods, err := e.kubeMainClient.CoreV1().Pods(namespace).List(seletor)
+	pods, err := e.kubeMainClient.CoreV1().Pods(namespace).List(context.TODO(), seletor)
 	if err != nil {
 		log.Errorf("failed to list pods, err: %v", err)
 		return nil, err
