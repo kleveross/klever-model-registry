@@ -1,4 +1,4 @@
-package serving_test
+package serving
 
 import (
 	"testing"
