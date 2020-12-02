@@ -485,6 +485,7 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 		return fmt.Errorf("there are no volumeMounts in userContainer")
 	}
 	modelMountPath := volumeMounts[0].MountPath
+	modelURI := rewriteModelURI(pu.Graph.ModelURI)
 
 	initContainer := &corev1.Container{
 		// mimics the behavior of seldon model initializer for it will disable the default init container injection
@@ -493,7 +494,7 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 		// https://github.com/SeldonIO/seldon-core/blob/0ef45fd234a674fc9b6c8d034cd2e42b4c9ebd05/operator/controllers/model_initializer_injector.go#L118
 		Name:  pu.Name + "-model-initializer",
 		Image: viper.GetString(envModelInitializerImage),
-		Args:  []string{pu.Graph.ModelURI, modelMountPath},
+		Args:  []string{modelURI, modelMountPath},
 		// Get username and password from environment
 		Env: []corev1.EnvVar{
 			{
@@ -525,6 +526,15 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 	p.Spec.InitContainers = []corev1.Container{*initContainer}
 
 	return nil
+}
+
+func rewriteModelURI(uri string) string {
+	uriSlice := strings.Split(uri, "/")
+	if len(uriSlice) == 2 {
+		return fmt.Sprintf("%v/%v", common.ORMBDomain, uri)
+	}
+
+	return uri
 }
 
 // composeSchedulerName set container for inference task.

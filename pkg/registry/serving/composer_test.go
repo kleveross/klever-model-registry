@@ -1,6 +1,8 @@
-package serving_test
+package serving
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	seldonv1 "github.com/seldonio/seldon-core/operator/apis/machinelearning.seldon.io/v1"
@@ -9,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kleveross/klever-model-registry/pkg/registry/serving"
+	"github.com/kleveross/klever-model-registry/pkg/common"
 )
 
 var sdepSingleGraph *seldonv1.SeldonDeployment
@@ -19,7 +21,7 @@ var sdepCustomImageGraph *seldonv1.SeldonDeployment
 var _ = Describe("Composer", func() {
 
 	It("Should compose single graph successfully", func() {
-		err := serving.Compose(sdepSingleGraph)
+		err := Compose(sdepSingleGraph)
 		Expect(err).To(BeNil())
 
 		Expect(sdepSingleGraph.Spec.Predictors[0].Name).Should(Equal(sdepSingleGraph.Spec.Predictors[0].Graph.Name))
@@ -36,7 +38,7 @@ var _ = Describe("Composer", func() {
 	})
 
 	It("Should compose double graph successfully", func() {
-		err := serving.Compose(sdepDoubleGraph)
+		err := Compose(sdepDoubleGraph)
 		Expect(err).To(BeNil())
 
 		Expect(sdepDoubleGraph.Spec.Predictors[0].Name).Should(Equal(sdepDoubleGraph.Spec.Predictors[0].Graph.Name))
@@ -54,7 +56,7 @@ var _ = Describe("Composer", func() {
 	})
 
 	It("Should compose custom image graph successfully", func() {
-		err := serving.Compose(sdepCustomImageGraph)
+		err := Compose(sdepCustomImageGraph)
 		Expect(err).To(BeNil())
 
 		Expect(sdepCustomImageGraph.Spec.Predictors[0].Name).Should(Equal(sdepCustomImageGraph.Spec.Predictors[0].Graph.Name))
@@ -255,3 +257,38 @@ var _ = BeforeEach(func() {
 		},
 	}
 })
+
+func Test_rewriteModelURI(t *testing.T) {
+	common.ORMBDomain = "domain"
+
+	type args struct {
+		uri string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "rewrite successfully",
+			args: args{
+				uri: "repo/savedmodel:v1",
+			},
+			want: "domain/repo/savedmodel:v1",
+		},
+		{
+			name: "rewrite failed",
+			args: args{
+				uri: "test/repo/savedmodel:v1",
+			},
+			want: "test/repo/savedmodel:v1",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := rewriteModelURI(tt.args.uri); got != tt.want {
+				t.Errorf("rewriteModelURI() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

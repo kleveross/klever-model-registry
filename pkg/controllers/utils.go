@@ -106,9 +106,9 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 					InitContainers: initContainers,
 					Containers: []corev1.Container{
 						{
-							Name:       "executor",
-							Image:      image,
-							WorkingDir: "/models",
+							Name:            "executor",
+							Image:           image,
+							WorkingDir:      "/models",
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								corev1.EnvVar{
