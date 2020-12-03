@@ -28,6 +28,8 @@ ROOT := github.com/kleveross/klever-model-registry
 # Target binaries. You can build multiple binaries for a single project.
 TARGETS := model-registry modeljob-operator
 
+CAFFE_IMAGE := nvcaffe
+CAFFE_TAG := cpu-0.16.5
 EXTRACT_TARGETS := caffe caffe2 graphdef h5 mxnetparams onnx pmml savedmodel torchscript
 EXTRACT_IMAGE_PREFIX ?= $(strip )
 EXTRACT_IMAGE_SUFFIX ?= $(strip -extract)
@@ -153,9 +155,8 @@ docker-build: build-linux
 	done
 
 	# build nvcaffe: cpu
-	image=nvcaffe;   
-	tag=cpu-0.16.5;
-	docker build -t $(REGISTRY)/$${image}:$(tag) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/nvcaffe-cpu/Dockerfile  .; 
+
+	docker build -t $(REGISTRY)/${CAFFE_IMAGE}:$(CAFFE_TAG) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/nvcaffe-cpu/Dockerfile  .; 
 
 	# build extractor
 	@for target in $(EXTRACT_TARGETS); do  \
@@ -183,9 +184,7 @@ docker-push:
 	done
 
 	# push nvcaffe:cpu-0.16.5
-	image=nvcaffe;   
-	tag=cpu-0.16.5;
-	docker push  $(REGISTRY)/$${image}:$(tag); 
+	docker push  $(REGISTRY)/${CAFFE_IMAGE}:$(CAFFE_TAG); 
 
 	# push extractor
 	@for target in $(EXTRACT_TARGETS); do  \
@@ -214,11 +213,9 @@ klever-docker-build-push: build
 	done
 
 	# build && push nvcaffe: cpu
-	image=nvcaffe;   
-	tag=cpu-0.16.5;
-	docker build -t $(REGISTRY)/$${image}:$(tag) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/nvcaffe-cpu/Dockerfile  .; 
-	docker push  $(REGISTRY)/$${image}:$(tag); 
-	docker rmi -f $(REGISTRY)/$${image}:$(tag); 
+	docker build -t $(REGISTRY)/${CAFFE_IMAGE}:$(CAFFE_TAG) --label $(DOCKER_LABELS)  -f $(BUILD_DIR)/nvcaffe-cpu/Dockerfile  .; 
+	docker push  $(REGISTRY)/${CAFFE_IMAGE}:$(CAFFE_TAG); 
+	docker rmi -f $(REGISTRY)/${CAFFE_IMAGE}:$(CAFFE_TAG); 
 
 	# build && push extractor
 	@for target in $(EXTRACT_TARGETS); do  \
