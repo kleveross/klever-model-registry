@@ -51,7 +51,7 @@ spec:
         initContainers:
         - name: model-initializer
           args: ["harbor-harbor-core.kleveross-system/release/netdef:v1", "/mnt/models"]
-          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.7
+          image: ghcr.io/kleveross/klever-ormb-storage-initializer:v0.0.8
           env:
           - name: AWS_ACCESS_KEY_ID
             value: admin

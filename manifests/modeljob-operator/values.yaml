@@ -85,7 +85,7 @@ docker:
 model:
   registry:
     address: klever-model-registry.kleveross-system:8080
-  initializer: "klever-ormb-storage-initializer:v0.0.7"
+  initializer: "klever-ormb-storage-initializer:v0.0.8"
 
 extraction:
   caffemodel: 'caffemodel-extract:v0.2.0'
