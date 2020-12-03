@@ -219,7 +219,7 @@ github.com/kedacore/keda/api/v1alpha1
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
-# github.com/kleveross/ormb v0.0.5
+# github.com/kleveross/ormb v0.0.8
 ## explicit
 github.com/kleveross/ormb/pkg/consts
 github.com/kleveross/ormb/pkg/exporter
