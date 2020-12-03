@@ -8,7 +8,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.1.0
 	github.com/go-logr/logr v0.2.0
 	github.com/golang/mock v1.4.4
-	github.com/kleveross/ormb v0.0.5
+	github.com/kleveross/ormb v0.0.8
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/onsi/ginkgo v1.14.1
