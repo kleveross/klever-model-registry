@@ -32,7 +32,7 @@ class PMMLExtractor(BaseExtrctor):
             for item in inputFields:
                 item['name'] = item['id']
                 item['dType'] = item['dataType']
-                item['optype'] = item['opType']
+                item['opType'] = item['opType']
                 del item['id']
                 del item['dataType']
                 del item['opType']
@@ -49,7 +49,7 @@ class PMMLExtractor(BaseExtrctor):
             for item in outputFields:
                 item['name'] = item['id']
                 item['dType'] = item['dataType']
-                item['optype'] = item['opType']
+                item['opType'] = item['opType']
                 del item['id']
                 del item['dataType']
                 del item['opType']
@@ -61,7 +61,7 @@ class PMMLExtractor(BaseExtrctor):
             for item in targetFields:
                 item['name'] = item['id']
                 item['dType'] = item['dataType']
-                item['optype'] = item['opType']
+                item['opType'] = item['opType']
                 del item['id']
                 del item['dataType']
                 del item['opType']
