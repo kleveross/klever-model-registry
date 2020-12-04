@@ -20,4 +20,13 @@ var (
 
 	// SchedulerNameEnvKey is the env key for scheduler name, it is set in Deployment
 	SchedulerNameEnvKey = "SCHEDULER_NAME"
+
+	// ModelInitializerCPUEnvKey defines the cpu env key for model initializer container.
+	ModelInitializerCPUEnvKey = "MODEL_INITIALIZER_CPU"
+	// ModelInitializerMEMEnvKey defines the mem env key for model initializer container.
+	ModelInitializerMEMEnvKey = "MODEL_INITIALIZER_MEM"
+	// ModelJobTaskCPUEnvKey defines the cpu env key for modeljob task container.
+	ModelJobTaskCPUEnvKey = "MODEL_INITIALIZER_CPU"
+	// ModelJobTaskMEMEnvKey defines the mem env key for modeljob task container.
+	ModelJobTaskMEMEnvKey = "MODEL_INITIALIZER_MEM"
 )
