@@ -1,5 +1,8 @@
 import os
+import json
 import yaml
+
+INPUTS_ENV = "INPUTS"
 
 
 class BaseConverter(object):
@@ -13,8 +16,12 @@ class BaseConverter(object):
             data = yaml.load(f)
 
         self.author = data.get('author', None)
-        self.input_value = data['signature']['inputs']
-        self.output_value = data['signature']['outputs']
+
+        # maybe can read inputs in env
+        self.input_value = json.loads(os.getenv(INPUTS_ENV, ''))
+        if 'signature' in data:
+            self.input_value = data['signature'].get('inputs', [])
+            self.output_value = data['signature'].get('outputs', [])
 
     def _write_output_ormbfile(self):
         output_ormbfile = dict()
