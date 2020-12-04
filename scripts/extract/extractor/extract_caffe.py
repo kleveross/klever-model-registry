@@ -19,7 +19,7 @@ class CaffeExtractor(BaseExtrctor):
             blob_data = self.model.blobs[input_name].data
             origin_inputs = {}
             origin_inputs['name'] = input_name
-            origin_inputs['dtype'] = blob_data.dtype.name
+            origin_inputs['dType'] = blob_data.dtype.name
             origin_inputs['size'] = list(blob_data.shape)
             inputs.append(origin_inputs)
         return inputs
@@ -30,7 +30,7 @@ class CaffeExtractor(BaseExtrctor):
             blob_data = self.model.blobs[output_name].data
             origin_outputs = {}
             origin_outputs['name'] = output_name
-            origin_outputs['dtype'] = blob_data.dtype.name
+            origin_outputs['dType'] = blob_data.dtype.name
             origin_outputs['size'] = list(blob_data.shape)
             outputs.append(origin_outputs)
         return outputs

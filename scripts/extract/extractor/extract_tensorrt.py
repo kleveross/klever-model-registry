@@ -19,7 +19,7 @@ class TensorrtExtractor(BaseExtrctor):
             if engine.binding_is_input(binding):
                 origin_inputs = {}
                 origin_inputs['name'] = binding
-                origin_inputs['dtype'] = trt.nptype(
+                origin_inputs['dType'] = trt.nptype(
                     engine.get_binding_dtype(binding)).__name__
                 origin_inputs['size'] = engine.get_binding_shape(binding)
                 inputs.append(origin_inputs)
@@ -32,7 +32,7 @@ class TensorrtExtractor(BaseExtrctor):
             if not engine.binding_is_input(binding):
                 origin_outputs = {}
                 origin_outputs['name'] = binding
-                origin_outputs['dtype'] = trt.nptype(
+                origin_outputs['dType'] = trt.nptype(
                     engine.get_binding_dtype(binding)).__name__
                 origin_outputs['size'] = engine.get_binding_shape(binding)
                 outputs.append(origin_outputs)
