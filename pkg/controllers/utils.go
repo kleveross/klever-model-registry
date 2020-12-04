@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
@@ -93,6 +94,17 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		return nil, err
 	}
 
+	cpu, mem := "", ""
+	for _, val := range modeljob.Spec.Env {
+		if val.Name == ModelJobTaskCPUEnvKey {
+			cpu = val.Value
+		}
+		if val.Name == ModelJobTaskMEMEnvKey {
+			mem = val.Value
+		}
+	}
+	resources := generateResources(cpu, mem)
+
 	schedulerName := getSchedulerName()
 	backoffLimit := int32(0)
 	job := &batchv1.Job{
@@ -162,6 +174,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 									MountPath: modeljobsv1alpha1.SourceModelPath,
 								},
 							},
+							Resources: *resources,
 						},
 					},
 					Volumes: []corev1.Volume{
@@ -197,6 +210,17 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 		return nil, fmt.Errorf("failed get ormb-storage-initializer image")
 	}
 
+	cpu, mem := "", ""
+	for _, val := range modeljob.Spec.Env {
+		if val.Name == ModelInitializerCPUEnvKey {
+			cpu = val.Value
+		}
+		if val.Name == ModelInitializerMEMEnvKey {
+			mem = val.Value
+		}
+	}
+	resources := generateResources(cpu, mem)
+
 	initContainers := []corev1.Container{
 		{
 			Name:  "model-initializer",
@@ -221,6 +245,7 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 					MountPath: modeljobsv1alpha1.SourceModelPath,
 				},
 			},
+			Resources:       *resources,
 			ImagePullPolicy: corev1.PullAlways,
 		},
 	}
@@ -235,4 +260,22 @@ func getSchedulerName() string {
 	}
 
 	return schedulerName
+}
+
+func generateResources(cpu, mem string) *corev1.ResourceRequirements {
+	if cpu == "" || mem == "" {
+		return &corev1.ResourceRequirements{}
+	}
+
+	cpuQuantity := resource.MustParse(cpu)
+	memQuantity := resource.MustParse(mem)
+
+	resourceList := corev1.ResourceList{
+		corev1.ResourceCPU:    cpuQuantity,
+		corev1.ResourceMemory: memQuantity,
+	}
+	return &corev1.ResourceRequirements{
+		Limits:   resourceList,
+		Requests: resourceList,
+	}
 }
