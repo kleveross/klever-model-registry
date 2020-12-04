@@ -28,7 +28,7 @@ class OnnxExtractor(BaseExtrctor):
             input_value = {
                 'size': [modefied_dynamic(dim) for dim in input.shape],
                 'name': input.name,
-                'dtype':
+                'dType':
                 modified2np(modified2np(input.type[7:-1]))  # tensor(float)
             }
             inputs.append(input_value)
@@ -40,7 +40,7 @@ class OnnxExtractor(BaseExtrctor):
             output_value = {
                 'size': [modefied_dynamic(dim) for dim in output.shape],
                 'name': output.name,
-                'dtype': modified2np(output.type[7:-1])  # tensor(float)
+                'dType': modified2np(output.type[7:-1])  # tensor(float)
             }
             outputs.append(output_value)
         return outputs

@@ -16,7 +16,7 @@ class KerasExtractor(BaseExtrctor):
         for tensor in self.models.inputs:
             origin_inputs = {}
             origin_inputs['name'] = tensor.name.split(':')[0]
-            origin_inputs['dtype'] = tensor.dtype.as_numpy_dtype.__name__
+            origin_inputs['dType'] = tensor.dtype.as_numpy_dtype.__name__
             origin_inputs['size'] = [
                 i.value if i.value else -1 for i in tensor.shape
             ]
@@ -28,7 +28,7 @@ class KerasExtractor(BaseExtrctor):
         for tensor in self.models.outputs:
             origin_outputs = {}
             origin_outputs['name'] = tensor.name.split(':')[0]
-            origin_outputs['dtype'] = tensor.dtype.as_numpy_dtype.__name__
+            origin_outputs['dType'] = tensor.dtype.as_numpy_dtype.__name__
             origin_outputs['size'] = [
                 i.value if i.value else -1 for i in tensor.shape
             ]
@@ -45,7 +45,7 @@ class KerasExtractor(BaseExtrctor):
         try:
             self.models = keras.models.load_model(path)
         except Exception as e:
-            raise IOError("Cannot read file %s: %s." % (path, str(e)))
+            raise IOError('Cannot read file %s: %s.' % (path, str(e)))
 
         with keras.backend.get_session() as sess:
             self.graph = sess.graph_def

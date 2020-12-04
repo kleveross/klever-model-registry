@@ -9,28 +9,28 @@ from utils.config_generator import TRTISConfigGenerator
 from utils.model_formatter import ModelFormatter
 from utils.help_functions import isTritonModel, isMLServerModel
 
-SKLEARN_MODEL = "model.joblib"
-XGBOOST_MODEL = "model.xgboost"
+SKLEARN_MODEL = 'model.joblib'
+XGBOOST_MODEL = 'model.xgboost'
 
 
 class Preprocessor:
-    """
+    '''
     Preprocessor formats its directory structure and
     generate 'config.pbtxt'
-    """
+    '''
     env_list = [
         'MODEL_STORE', 'SERVING_NAME'
     ]
 
     def __init__(self):
         def get_critical_env(env):
-            """
+            '''
             A more strict way to get critical environment variable
-            """
+            '''
             try:
                 var = os.environ[env]
             except KeyError:
-                logger.error(f"{env} not defined")
+                logger.error(f'{env} not defined')
                 sys.exit(1)
             else:
                 return var
@@ -41,7 +41,7 @@ class Preprocessor:
         self._trtis_conifig_generator = TRTISConfigGenerator()
         self.model_root_path = self._model_store
         self.model_path = os.path.join(
-            self.model_root_path, self._serving_name, "1")
+            self.model_root_path, self._serving_name, '1')
 
     def _extract_yaml(self):
         try:
@@ -86,9 +86,9 @@ class Preprocessor:
             }
         elif format == 'MLlib':
             try:
-                mllibformat = os.environ["MLLIB_FORMAT"]
+                mllibformat = os.environ['MLLIB_FORMAT']
             except KeyError:
-                logger.error("MLLIB_FORMAT not defined")
+                logger.error('MLLIB_FORMAT not defined')
                 sys.exit(1)
 
             setting = {
@@ -97,13 +97,13 @@ class Preprocessor:
                 'implementation': 'mlservermllib.models.MLLibModel',
                 'parameters': {
                     'uri': os.path.join(
-                        self.model_root_path, self._serving_name, "1"),
+                        self.model_root_path, self._serving_name, '1'),
                     'format': mllibformat
                 }
             }
 
         json_str = json.dumps(setting)
-        with open(os.path.join(self.model_root_path, "model-settings.json"), 'w') as json_file:
+        with open(os.path.join(self.model_root_path, 'model-settings.json'), 'w') as json_file:
             json_file.write(json_str)
 
     def _format_model(self, format):
@@ -118,7 +118,7 @@ class Preprocessor:
 
     def start(self):
         ormb_file_path = os.path.join(
-            self.model_root_path, self._serving_name, "ormbfile.yaml")
+            self.model_root_path, self._serving_name, 'ormbfile.yaml')
         if not os.path.exists(ormb_file_path):
             logger.error(f'{ormb_file_path} does not exist')
             return
@@ -128,7 +128,7 @@ class Preprocessor:
         if 'format' in yaml_data.items():
             logger.error('model format missing')
             return
-        format = yaml_data["format"]
+        format = yaml_data['format']
 
         # Phase 2: Generate 'config.pbtxt' for triton models
         if isTritonModel(format):
@@ -141,7 +141,7 @@ class Preprocessor:
 
             # get version from ormbfile
             if 'version' in yaml_data.items():
-                version = yaml_data["version"]
+                version = yaml_data['version']
             else:
                 version = 'v1.0.0'
 

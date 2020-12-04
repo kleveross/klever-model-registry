@@ -8,7 +8,7 @@ from mxnet.gluon import nn
 from .base_extract import BaseExtrctor
 
 MIN_OPS = 3
-MODEL_TYPE = "MXNet"
+MODEL_TYPE = 'MXNet'
 ExtenSymbol = 'symbol.json'
 ExtenParams = '.params'
 

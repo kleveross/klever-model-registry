@@ -7,7 +7,7 @@ from torch import jit
 
 from .base_extract import BaseExtrctor
 
-MODEL_TYPE = "TorchScript"
+MODEL_TYPE = 'TorchScript'
 EXTENSION = '.pt'
 
 

@@ -77,7 +77,7 @@ class TRTISConfigGenerator(object):
         xputs_str_list = [
             self.xput_template.format(
                 name=xput['name'],
-                dataType=TRTISConfigGenerator._dataType_dict[xput['dtype']],
+                dataType=TRTISConfigGenerator._dataType_dict[xput['dType']],
                 dims=str(xput['size'])) for xput in xputs
         ]
 
