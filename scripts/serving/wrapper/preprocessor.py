@@ -12,6 +12,10 @@ from utils.help_functions import isTritonModel, isMLServerModel
 SKLEARN_MODEL = 'model.joblib'
 XGBOOST_MODEL = 'model.xgboost'
 
+USING_ORMBFILE_ENV = "USING_ORMBFILE"
+INPUTS_ENV = "INPUTS"
+OUTPUTS_ENV = "OUTPUTS"
+FORMAT_ENV = "FORMAT"
 
 class Preprocessor:
     '''
@@ -37,7 +41,8 @@ class Preprocessor:
 
         for env in Preprocessor.env_list:
             setattr(self, '_' + env.lower(), get_critical_env(env))
-
+        
+        self.using_ormbfile = True if os.getenv(USING_ORMBFILE_ENV, '') else False
         self._trtis_conifig_generator = TRTISConfigGenerator()
         self.model_root_path = self._model_store
         self.model_path = os.path.join(
@@ -124,11 +129,22 @@ class Preprocessor:
             return
 
         # Phase 1: Extract model_format and yaml
-        yaml_data = self._extract_yaml()
-        if 'format' in yaml_data.items():
-            logger.error('model format missing')
-            return
-        format = yaml_data['format']
+        format = ""
+        yaml_data = {}
+        if self.using_ormbfile:
+            yaml_data = self._extract_yaml()
+            if 'format' in yaml_data.items():
+                logger.error('model format missing')
+                return
+            format = yaml_data["format"]
+        else:
+            inputs = os.getenv(INPUTS_ENV, "[]")
+            outputs = os.getenv(OUTPUTS_ENV, "[]")
+            format = os.getenv(FORMAT_ENV, "")
+            yaml_data["format"] = format
+            yaml_data["signature"] = {}
+            yaml_data["signature"]["inputs"] = json.loads(inputs)
+            yaml_data["signature"]["outputs"] = json.loads(outputs)
 
         # Phase 2: Generate 'config.pbtxt' for triton models
         if isTritonModel(format):
