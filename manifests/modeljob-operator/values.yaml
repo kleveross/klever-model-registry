@@ -88,7 +88,7 @@ model:
   initializer: "klever-ormb-storage-initializer:v0.0.8"
 
 extraction:
-  caffemodel: 'caffemodel-extract:v0.2.0'
+  caffemodel: 'caffe-extract:v0.2.0'
   netdef: 'netdef-extract:v0.2.0'
   graphdef: 'graphdef-extract:v0.2.0'
   h5: 'h5-extract:v0.2.0'
