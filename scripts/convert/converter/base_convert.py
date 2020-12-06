@@ -3,13 +3,16 @@ import json
 import yaml
 
 INPUTS_ENV = "INPUTS"
-
+OUTPUTS_ENV = "OUTPUTS"
+USING_ORMBFILE_ENV = "USING_ORMBFILE"
 
 class BaseConverter(object):
     def __init__(self, input_dir, output_dir):
         self.input_dir = input_dir
         self.output_dir = output_dir
         self._parase_modelfile()
+
+        self.using_ormbfile = True if os.getenv(USING_ORMBFILE_ENV, '') else False
 
     def _parase_modelfile(self):
         with open(os.path.join(self.input_dir, 'ormbfile.yaml'), 'r') as f:
@@ -18,13 +21,12 @@ class BaseConverter(object):
         self.author = data.get('author', None)
 
         # maybe can read inputs in env
-        self.input_value = json.loads(os.getenv(INPUTS_ENV, '[]'))
-        if 'signature' in data:
+        if self.using_ormbfile:
             self.input_value = data['signature'].get('inputs', [])
             self.output_value = data['signature'].get('outputs', [])
         else:
-            self.input_value = []
-            self.output_value = []
+            self.input_value = json.loads(os.getenv(INPUTS_ENV, '[]'))
+            self.output_value = json.loads(os.getenv(OUTPUTS_ENV, '[]'))
 
     def _write_output_ormbfile(self):
         output_ormbfile = dict()
