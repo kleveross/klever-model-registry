@@ -30,7 +30,7 @@ TARGETS := model-registry modeljob-operator
 
 CAFFE_IMAGE := nvcaffe
 CAFFE_TAG := cpu-0.16.5
-EXTRACT_TARGETS := caffe caffe2 graphdef h5 mxnetparams onnx pmml savedmodel torchscript
+EXTRACT_TARGETS := caffemodel netdef graphdef h5 mxnetparams onnx pmml savedmodel torchscript
 EXTRACT_IMAGE_PREFIX ?= $(strip )
 EXTRACT_IMAGE_SUFFIX ?= $(strip -extract)
 
