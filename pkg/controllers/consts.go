@@ -26,7 +26,7 @@ var (
 	// ModelInitializerMEMEnvKey defines the mem env key for model initializer container.
 	ModelInitializerMEMEnvKey = "MODEL_INITIALIZER_MEM"
 	// ModelJobTaskCPUEnvKey defines the cpu env key for modeljob task container.
-	ModelJobTaskCPUEnvKey = "MODEL_INITIALIZER_CPU"
+	ModelJobTaskCPUEnvKey = "MODELJOB_TASK_CPU"
 	// ModelJobTaskMEMEnvKey defines the mem env key for modeljob task container.
-	ModelJobTaskMEMEnvKey = "MODEL_INITIALIZER_MEM"
+	ModelJobTaskMEMEnvKey = "MODELJOB_TASK_MEM"
 )
