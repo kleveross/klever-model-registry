@@ -94,3 +94,4 @@ git clone https://github.com/kleveross/klever-web
 helm install klever-web $CWD/klever-web/manifests/klever-web \
     --namespace=kleveross-system \
     --set service.nodePort=$KLEVER_WEB_PORT
+    --set model.registry.address=http://$MASTER_IP:$KLEVER_MODEL_REGISTRY_PORT
