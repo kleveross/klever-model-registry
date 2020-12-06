@@ -18,10 +18,13 @@ class BaseConverter(object):
         self.author = data.get('author', None)
 
         # maybe can read inputs in env
-        self.input_value = json.loads(os.getenv(INPUTS_ENV, ''))
+        self.input_value = json.loads(os.getenv(INPUTS_ENV, '[]'))
         if 'signature' in data:
             self.input_value = data['signature'].get('inputs', [])
             self.output_value = data['signature'].get('outputs', [])
+        else:
+            self.input_value = []
+            self.output_value = []
 
     def _write_output_ormbfile(self):
         output_ormbfile = dict()

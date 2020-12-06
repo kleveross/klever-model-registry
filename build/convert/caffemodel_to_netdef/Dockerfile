@@ -6,8 +6,8 @@ ENV LC_ALL="C.UTF-8" \
 ARG ORMB_VERSION=0.0.8
 ARG ORMB_TAG=v${ORMB_VERSION}
 ARG ORMB_TAR_FILENAME=ormb_${ORMB_VERSION}_Linux_x86_64.tar.gz
-
-RUN apt update && apt install -y wget libgomp1 && \
+  
+RUN apt update && apt install -y wget libgomp1 git && \
     pip install --no-cache-dir \
                 tools \
                 grpcio-tools==1.26.0 \
@@ -23,6 +23,13 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 COPY scripts/shell/run.sh /scripts/run.sh
 COPY scripts/convert  /scripts
+
+RUN git clone https://github.com/NVIDIA/caffe.git /usr/src/caffe  -b 'v0.17.3'  &&  \
+    mkdir -p /scriptscaffe/proto &&  touch /scriptscaffe/__init__.py && \ 
+    touch /scripts/caffe/proto/__init__.py && \
+    python -m grpc_tools.protoc -I/usr/src/caffe/src/caffe/proto \
+                              --python_out=/scripts/caffe/proto \ 
+                              --grpc_python_out=/scripts/caffe/proto /usr/src/caffe/src/caffe/proto/*.proto
 
 ENTRYPOINT ["sh","-c","/scripts/run.sh"]
 
