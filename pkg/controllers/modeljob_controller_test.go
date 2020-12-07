@@ -21,7 +21,7 @@ import (
 
 var _ = Describe("Modeljob Controller", func() {
 	initGlobalVar()
-	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
+	test.InitPresetModelImage()
 	modeljobName := "test-modeljob"
 
 	req := ctrl.Request{

@@ -72,14 +72,24 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		dstFormat = modeljob.Spec.Conversion.MMdnn.To
 		dstFramework = getFrameworkByFormat(dstFormat)
 		srcFormat = modeljob.Spec.Conversion.MMdnn.From
-		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(modeljob.Spec.Conversion.MMdnn.From))+"-convert"]
+		if imageEnv, ok := presetImage[strings.ToLower(string(modeljob.Spec.Conversion.MMdnn.From))+"-convert"]; ok {
+			image = viper.GetString(imageEnv)
+		}
+		if image == "" {
+			return nil, fmt.Errorf("failed get %v model convert image", modeljob.Spec.Conversion.MMdnn.From)
+		}
 	} else if modeljob.Spec.Extraction != nil {
 		ormbDomain = getORMBDomain(false)
 		dstModelRef = "empty"
 		dstFormat = modeljob.Spec.Extraction.Format
 		dstFramework = getFrameworkByFormat(dstFormat)
 		srcFormat = dstFormat
-		image = PresetAnalyzeImageConfig.Data[strings.ToLower(string(dstFormat))+"-extract"]
+		if imageEnv, ok := presetImage[strings.ToLower(string(dstFormat))+"-extract"]; ok {
+			image = viper.GetString(imageEnv)
+		}
+		if image == "" {
+			return nil, fmt.Errorf("failed get %v model extract image", dstFormat)
+		}
 	} else {
 		return nil, fmt.Errorf("%v", "not support source")
 	}
@@ -207,8 +217,11 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 		return nil, nil
 	}
 
-	image, ok := PresetAnalyzeImageConfig.Data["ormb-storage-initializer"]
-	if !ok {
+	var image string
+	if imageEnv, ok := presetImage["initializer"]; ok {
+		image = viper.GetString(imageEnv)
+	}
+	if image == "" {
 		return nil, fmt.Errorf("failed get ormb-storage-initializer image")
 	}
 

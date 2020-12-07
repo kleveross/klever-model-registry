@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"os"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -9,14 +10,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func InitPresetModelImageConfigMap() *corev1.ConfigMap {
-	presetImageConfigMap := &corev1.ConfigMap{}
-	presetImageConfigMap.Data = map[string]string{
-		"savedmodel-extract":       "demo.goharbor.com/release/savedmodel:v0.2",
-		"ormb-storage-initializer": "demo.goharbor.com/release/savedmodel:v0.2",
-	}
-
-	return presetImageConfigMap
+func InitPresetModelImage() {
+	os.Setenv("SAVEDMODEL_EXTRACT_IMAGE", "demo.goharbor.com/release/savedmodel-extract:v0.2.0")
+	os.Setenv("H5_CONVERSION_IMAGE", "demo.goharbor.com/release/h5_to_savedmodel:v0.2.0")
+	os.Setenv("ORMB_INITIALIZER_IMAGE", "demo.goharbor.com/release/klever-ormb-storage-initializer:v0.0.8")
 }
 
 func CreateFailedPodForJob(c client.Client, job *batchv1.Job) error {
