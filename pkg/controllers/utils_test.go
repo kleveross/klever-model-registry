@@ -15,6 +15,10 @@ import (
 	test "github.com/kleveross/klever-model-registry/testutil"
 )
 
+func init() {
+	viper.AutomaticEnv()
+}
+
 func Test_getFrameworkByFormat(t *testing.T) {
 	initGlobalVar()
 
@@ -108,7 +112,7 @@ func Test_getFrameworkByFormat(t *testing.T) {
 
 func Test_generateJobResource(t *testing.T) {
 	initGlobalVar()
-	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
+	test.InitPresetModelImage()
 	conversionDesiredTag := "release/savedmodel:v2"
 
 	type args struct {
@@ -274,7 +278,7 @@ func Test_generateInitContainers(t *testing.T) {
 	os.Setenv(common.ORMBUsernameEnvkey, "ormbtest")
 	os.Setenv(common.ORMBPasswordEnvKey, "ORMBtest12345")
 	initGlobalVar()
-	PresetAnalyzeImageConfig = test.InitPresetModelImageConfigMap()
+  test.InitPresetModelImage()
 
 	type args struct {
 		modeljob *modeljobsv1alpha1.ModelJob

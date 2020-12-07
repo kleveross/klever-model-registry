@@ -30,6 +30,34 @@ spec:
           env:
             - name: SCHEDULER_NAME
               value: {{ .Values.scheduler.name }}
+            - name: CAFFE_EXTRACT_IMAGE
+              value: {{ .Values.extraction.caffemodel }}
+            - name: NETDEF_EXTRACT_IMAGE
+              value: {{ .Values.extraction.netdef }}
+            - name: GRAPHDEF_EXTRACT_IMAGE
+              value: {{ .Values.extraction.graphdef }}
+            - name: H5_EXTRACT_IMAGE
+              value: {{ .Values.extraction.h5 }}
+            - name: MXNETPARAMS_EXTRACT_IMAGE"
+              value: {{ .Values.extraction.mxnetparams }}
+            - name: ONNX_EXTRACT_IMAGE
+              value: {{ .Values.extraction.onnx }}
+            - name: SAVEDMODEL_EXTRACT_IMAGE
+              value: {{ .Values.extraction.savedmodel }}
+            - name: TORCHSCRIPT_EXTRACT_IMAGE
+              value: {{ .Values.extraction.torchscript }}
+            - name: PMML_EXTRACT_IMAGE
+              value: {{ .Values.extraction.pmml }}
+            - name: CAFFE_CONVERSION_IMAGE
+              value: {{ .Values.conversion.caffemodel }}
+            - name: MXNET_CONVERSION_IMAGE
+              value: {{ .Values.conversion.mxnet }}
+            - name: H5_CONVERSION_IMAGE
+              value: {{ .Values.conversion.h5 }}
+            - name: NETDEF_CONVERSION_IMAGE
+              value: {{ .Values.conversion.netdef }}
+            - name: ORMB_INITIALIZER_IMAGE
+              value: {{ .Values.model.initializer }}
             - name: KLEVER_MODEL_REGISTRY_ADDRESS
               value: {{ .Values.model.registry.address }}
             - name: SERVER_ORMB_DOMAIN

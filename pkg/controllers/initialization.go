@@ -1,11 +1,7 @@
 package controllers
 
 import (
-	"context"
 	"github.com/spf13/viper"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 	"github.com/kleveross/klever-model-registry/pkg/common"
@@ -34,23 +30,6 @@ func Initialization() error {
 	viper.AutomaticEnv()
 
 	initGlobalVar()
-
-	kubeconfigPath := viper.GetString("kubeconfig")
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-	if err != nil {
-		return err
-	}
-
-	kubeClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return err
-	}
-
-	PresetAnalyzeImageConfig, err = kubeClient.CoreV1().ConfigMaps("kleveross-system").Get(context.TODO(), "modeljob-image-config", metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
