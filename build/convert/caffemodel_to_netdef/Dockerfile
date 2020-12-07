@@ -25,7 +25,7 @@ COPY scripts/shell/run.sh /scripts/run.sh
 COPY scripts/convert  /scripts
 
 RUN git clone https://github.com/NVIDIA/caffe.git /usr/src/caffe  -b 'v0.17.3'  &&  \
-    mkdir -p /scriptscaffe/proto &&  touch /scriptscaffe/__init__.py && \ 
+    mkdir -p /scripts/caffe/proto &&  touch /scripts/caffe/__init__.py && \ 
     touch /scripts/caffe/proto/__init__.py && \
     python -m grpc_tools.protoc -I/usr/src/caffe/src/caffe/proto \
                               --python_out=/scripts/caffe/proto \ 

@@ -6,6 +6,10 @@ if dstFormat == 'ONNX':
         from .convert_mxnet import MXNetToONNX as Converter
     elif srcFormat == 'NetDef':
         from .convert_caffe2 import Caffe2ToONNX as Converter
+    else:
+        raise ImportError(
+        'When FORMAT is ONNX, SOURCE_FORMAT must in [ MXNetParams, NetDef ]'
+        )
 elif dstFormat == 'NetDef':
     from .convert_caffe import CaffeToCaffe2 as Converter
 elif dstFormat == 'SavedModel':
