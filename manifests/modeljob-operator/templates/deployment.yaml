@@ -38,7 +38,7 @@ spec:
               value: {{ .Values.extraction.graphdef }}
             - name: H5_EXTRACT_IMAGE
               value: {{ .Values.extraction.h5 }}
-            - name: MXNETPARAMS_EXTRACT_IMAGE"
+            - name: MXNETPARAMS_EXTRACT_IMAGE
               value: {{ .Values.extraction.mxnetparams }}
             - name: ONNX_EXTRACT_IMAGE
               value: {{ .Values.extraction.onnx }}
