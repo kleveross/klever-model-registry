@@ -44,7 +44,7 @@ helm install --namespace istio-system istio-ingress istio-1.8.0/manifests/charts
 git clone https://github.com/kleveross/klever-model-registry.git
 kubectl create namespace harbor-system
 
-helm install harbor $CWD/klever-model-registry/manifests/harbor-helm \
+helm install harbor $CWD/klever-model-registry/manifests/harbor \
     --set expose.nodePort.ports.http.nodePort=$HARBOR_PORT \
     --set expose.type=nodePort \
     --set expose.tls.enabled=false \
