@@ -193,6 +193,8 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 		},
 	}
 
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, modeljob.Spec.Env...)
+
 	return job, nil
 }
 
