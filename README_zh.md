@@ -83,8 +83,15 @@ $ make docker-build
 如果想快速部署验证，可使用脚本按照如下安装步骤安装。
 
 ```bash
-$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install.sh
-$ bash install.sh <master-ip>
+$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install-k8s-1.14.sh
+$ bash install-k8s-1.14.sh <master-ip>
+```
+
+或者
+
+```bash
+$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install-k8s-1.19.sh
+$ bash install-k8s-1.19.sh <master-ip>
 ```
 
 ## 社区
