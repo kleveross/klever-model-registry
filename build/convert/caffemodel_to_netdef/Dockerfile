@@ -21,7 +21,7 @@ RUN apt update && apt install -y wget libgomp1 git && \
 #Set timezone
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-COPY scripts/shell/run.sh /scripts/run.sh
+COPY scripts/shell/*.sh /scripts/
 COPY scripts/convert  /scripts
 
 RUN git clone https://github.com/NVIDIA/caffe.git /usr/src/caffe  -b 'v0.17.3'  &&  \
@@ -30,6 +30,9 @@ RUN git clone https://github.com/NVIDIA/caffe.git /usr/src/caffe  -b 'v0.17.3'  
     python -m grpc_tools.protoc -I/usr/src/caffe/src/caffe/proto \
                               --python_out=/scripts/caffe/proto \ 
                               --grpc_python_out=/scripts/caffe/proto /usr/src/caffe/src/caffe/proto/*.proto
+
+ENV SOURCE_FORMAT=CaffeModel
+ENV FORMAT=NetDef
 
 ENTRYPOINT ["sh","-c","/scripts/run.sh"]
 

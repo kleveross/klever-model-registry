@@ -19,10 +19,12 @@ RUN apt update && apt install -y wget && \
 #Set timezone
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
 
-COPY scripts/shell/run.sh /scripts/run.sh
+COPY scripts/shell/*.sh /scripts/
 COPY scripts/extract  /scripts
 
 ENV EXTRACTOR=h5
+ENV SOURCE_FORMAT=H5
+ENV FORMAT=H5
 
 ENTRYPOINT ["sh","-c","/scripts/run.sh"]
 
