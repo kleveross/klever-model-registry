@@ -16,9 +16,11 @@ RUN rpm  --import  /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7           && \
 COPY build/extract/pmml/application.conf /opt/openscoring/
 
 ADD ${openscore_url} /opt/openscoring
-COPY scripts/shell/run.sh /scripts/run.sh
-COPY scripts/extract  /scripts
+COPY scripts/shell/ /scripts/
+COPY scripts/extract/  /scripts/
 
 ENV EXTRACTOR=pmml
+ENV SOURCE_FORMAT=PMML
+ENV FORMAT=PMML
 
 ENTRYPOINT ["sh","-c","/scripts/run.sh"]

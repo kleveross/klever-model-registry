@@ -60,7 +60,7 @@ BUILD_DIR := ./build
 
 # Current version of the project.
 VERSION ?= $(shell git describe --tags --always --dirty)
-RELEASE_VERSION ?= $(shell git describe --tags)
+RELEASE_VERSION ?= $(VERSION)
 GITSHA ?= $(shell git rev-parse --short HEAD)
 
 # Available cpus for compiling, please refer to https://github.com/caicloud/engineering/issues/8186#issuecomment-518656946 for more information.
@@ -240,6 +240,40 @@ klever-docker-build-push: build
 		docker push  $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
 	done
+download_model:
+	wget -O ormb-${ORMB_VERSION}.zip https://codeload.github.com/kleveross/ormb/zip/v${ORMB_VERSION}
+	unzip -o ormb-${ORMB_VERSION}.zip  -d /tmp/
+
+klever-extract-convert-test: download_model
+	# build && push extractor
+	@for target in $(EXTRACT_TARGETS); do  \
+		image=$(EXTRACT_IMAGE_PREFIX)$${target}$(EXTRACT_IMAGE_SUFFIX);   \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		echo "test $(REGISTRY)/$${image}:$(RELEASE_VERSION)"; \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		docker run --rm -v /tmp/ormb-${ORMB_VERSION}/examples:/models --entrypoint /bin/bash $(REGISTRY)/$${image}:$(RELEASE_VERSION) /scripts/test.sh;  \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done
+
+	# build && push convertor
+	@for target in $(CONVERT_TARGETS); do  \
+		image=$(CONVERT_IMAGE_PREFIX)$${target}$(CONVERT_IMAGE_SUFFIX);   \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		echo "test $(REGISTRY)/$${image}:$(RELEASE_VERSION)"; \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		echo "**********************************************"; \
+		docker run --rm -v /tmp/ormb-${ORMB_VERSION}/examples:/models --entrypoint /bin/bash $(REGISTRY)/$${image}:$(RELEASE_VERSION) /scripts/test.sh;  \
+		docker rmi -f $(REGISTRY)/$${image}:$(RELEASE_VERSION); \
+	done	
+
+
 # find or download controller-gen
 # download controller-gen if necessary
 controller-gen:

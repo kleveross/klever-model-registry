@@ -38,3 +38,7 @@ jobs:
         run: |
           cd src/github.com/kleveross/klever-model-registry
           make klever-docker-build-push
+      - name: docker-build-test
+        run: |
+          cd src/github.com/kleveross/klever-model-registry
+          make klever-extract-convert-test    
