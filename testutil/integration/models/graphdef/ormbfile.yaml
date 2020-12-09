@@ -1,0 +1,18 @@
+author: "chenjun <chenjun@caicloud.io>"
+format: GraphDef
+framework: TensorFlow
+signature:
+  inputs:
+    - name: input_1
+      dType: float32
+      size:
+      - -1
+      - 224
+      - 224
+      - 3
+  outputs:
+    - name: Logits/Softmax
+      dType: float32
+      size:
+        - -1
+        - 1000

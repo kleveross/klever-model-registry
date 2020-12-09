@@ -926,6 +926,10 @@ github.com/klauspost/pgzip v1.2.1/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQ
 github.com/kleveross/goveralls v0.0.7-0.20200806062153-812c5f82e829/go.mod h1:2UbER5T0DZr1+9QY2pmXaHVP/U57FhOZgdnpNL9IU3o=
 github.com/kleveross/ormb v0.0.8 h1:ltZr8sVWEok2104IYDFtTAo9WDW2tV4rpJHXlLwkP7I=
 github.com/kleveross/ormb v0.0.8/go.mod h1:0hOUbkNHhDcgSzc9WtaLLiYLEsT/5aGlXsE/wxlaH0c=
+github.com/kleveross/ormb v0.0.9-0.20201209044358-aee808b4f213 h1:cu0mh9cGffzoASDJiraxioAl9G3CEXbnV6UIK6hpfyg=
+github.com/kleveross/ormb v0.0.9-0.20201209044358-aee808b4f213/go.mod h1:0hOUbkNHhDcgSzc9WtaLLiYLEsT/5aGlXsE/wxlaH0c=
+github.com/kleveross/ormb v0.0.9-0.20201210033557-6030dbaa388e h1:kih+oQ5Xhbpv7524K7g8gEeMlQTBg3fg71lyW8RLi58=
+github.com/kleveross/ormb v0.0.9-0.20201210033557-6030dbaa388e/go.mod h1:0hOUbkNHhDcgSzc9WtaLLiYLEsT/5aGlXsE/wxlaH0c=
 github.com/kleveross/seldon-core/operator v0.0.0-20201201025552-476d8293657d h1:/RB1LPcNDgOhjIc6Djhx1Usoapw43FAHtOgLVG84lLQ=
 github.com/kleveross/seldon-core/operator v0.0.0-20201201025552-476d8293657d/go.mod h1:GH+YR9sxC65raUx0xAGgvxLCxMvTn94h+IwGbOpgQNM=
 github.com/knative/build v0.1.2/go.mod h1:/sU74ZQkwlYA5FwYDJhYTy61i/Kn+5eWfln2jDbw3Qo=

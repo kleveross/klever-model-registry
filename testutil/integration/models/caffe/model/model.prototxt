@@ -1,0 +1,33 @@
+layer {
+  name: "X"
+  type: "Input"
+  top: "X"
+  input_param {
+    shape {
+      dim: 1
+      dim: 5
+    }
+  }
+}
+layer {
+  name: "Y"
+  type: "Input"
+  top: "Y"
+  input_param {
+    shape {
+      dim: 1
+      dim: 5
+    }
+  }
+}
+layer {
+  name: "Z"
+  type: "Eltwise"
+  bottom: "X"
+  bottom: "Y"
+  top: "Z"
+  eltwise_param {
+    operation: SUM
+  }
+}
+
