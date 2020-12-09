@@ -85,8 +85,15 @@ Please have a look at [docs/installation.md](docs/installation.md).
 If you want to trial quickly, you can run installation script as follow.
 
 ```bash
-$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install.sh
-$ bash install.sh <master-ip>
+$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install-k8s-1.14.sh
+$ bash install-k8s-1.14.sh <master-ip>
+```
+
+or 
+
+```bash
+$ wget https://raw.githubusercontent.com/kleveross/klever-model-registry/master/scripts/installation/install-k8s-1.19.sh
+$ bash install-k8s-1.19.sh <master-ip>
 ```
 
 ## Community
