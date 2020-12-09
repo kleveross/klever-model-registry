@@ -43,7 +43,7 @@ then
         EXTRACTOR=mxnetparams python /scripts/extract.py -d /models/MXNetParams-model/
         ;;  
     NetDef )
-        EXTRACTOR=netdef python /scripts/extract.py -d /models/NetDef-model/
+        EXTRACTOR=netdef python /scripts/extract.py -d /models/Caffe2-model/
         ;; 
     ONNX )
         EXTRACTOR=onnx python /scripts/extract.py -d /models/ONNX-model/
@@ -65,7 +65,7 @@ else
             INPUTS='[{"name":"data","size":[1,3,224,224],"dType":"float32"}]'  python /scripts/convert.py --input_dir=/models/MXNetParams-model/ --output_dir=$output_dir
             ;;
         NetDef )
-            INPUTS='[{"name":"data","size":[1,3,224,224],"dType":"float32"}]'  python /scripts/convert.py --input_dir=/models/NetDef-model/ --output_dir=$output_dir
+            INPUTS='[{"name":"data","size":[1,3,224,224],"dType":"float32"}]'  python /scripts/convert.py --input_dir=/models/Caffe2-model/ --output_dir=$output_dir
             ;;
         esac
         ;;
