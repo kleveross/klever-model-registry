@@ -1,0 +1,11 @@
+author: "chenjun <chenjun@caicloud.io>"
+format: MXNetParams
+signature:
+  inputs:
+    - name: data
+      size:
+        - 1
+        - 3
+        - 224
+        - 224
+      dType: float32

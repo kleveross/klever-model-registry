@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    {
+      "op": "null", 
+      "name": "data0", 
+      "inputs": []
+    }, 
+    {
+      "op": "null", 
+      "name": "data1", 
+      "inputs": []
+    }, 
+    {
+      "op": "elemwise_add", 
+      "name": "additionmodel_m0__plus0", 
+      "inputs": [[0, 0, 0], [1, 0, 0]]
+    }
+  ], 
+  "arg_nodes": [0, 1], 
+  "node_row_ptr": [0, 1, 2, 3], 
+  "heads": [[2, 0, 0]], 
+  "attrs": {"mxnet_version": ["int", 10600]}
+}
