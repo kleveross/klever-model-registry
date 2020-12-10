@@ -90,10 +90,10 @@ var _ = Describe("Model Registry", func() {
 				oras.ClientOptInsecure(insecureOpt),
 				)
 			for _, tt := range modelExtract{
-				dirtag := fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7], project, tt.model, tt.version)
+				dirtag := fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, tt.model, tt.version)
 				err = tool.Save("./models/"+tt.model, dirtag)
 				Expect(err).Should(BeNil())
-				err = tool.Push(dirtag, true)
+				err = tool.Push(dirtag)
 				Expect(err).Should(BeNil())
 
 				//check the models
@@ -110,14 +110,14 @@ var _ = Describe("Model Registry", func() {
 			It("Should create the ModelJobs successfully", func() {
 				for _, tt := range modelConvert {
 					name := tt.model+"2"+tt.tomodel
-					desiredtag := fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7], project, tt.tomodel, "new")
+					desiredtag := fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, tt.tomodel, "new")
 					job := modeljobsv1alpha1.ModelJob{
 						ObjectMeta: metav1.ObjectMeta{
 							Name: name,
 						},
 						Spec: modeljobsv1alpha1.ModelJobSpec{
 							// Use ModelRegistryHost/<project>/<model>:<version>.
-							Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7], project, tt.model, tt.version),
+							Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, tt.model, tt.version),
 							DesiredTag: &desiredtag,
 							ModelJobSource: modeljobsv1alpha1.ModelJobSource{
 								Conversion: &modeljobsv1alpha1.ConversionSource{
@@ -182,7 +182,7 @@ var _ = Describe("Model Registry", func() {
 						},
 						Spec: modeljobsv1alpha1.ModelJobSpec{
 							// Use ModelRegistryHost/<project>/<model>:<version>.
-							Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7], project, tt.model, tt.version),
+							Model: fmt.Sprintf("%s/%s/%s:%s", ModelRegistryHost[7:], project, tt.model, tt.version),
 							ModelJobSource: modeljobsv1alpha1.ModelJobSource{
 								Extraction: &modeljobsv1alpha1.ExtractionSource{
 									Format: tt.format,

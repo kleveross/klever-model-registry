@@ -158,7 +158,7 @@ func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *
 
 	modelRef := fmt.Sprintf("%v/%v/%v:%v", common.ORMBDomain, model.ProjectName,
 		model.ModelName, model.VersionName)
-	err = client.Pull(modelRef, true)
+	err = client.Pull(modelRef)
 	if err != nil {
 		return "", err
 	}
@@ -220,7 +220,7 @@ func uploadModelToHarbor(client ormb.Interface, zipFile string, model *Model) er
 		}
 	}()
 
-	err = client.Push(modelRef, true)
+	err = client.Push(modelRef)
 	if err != nil {
 		return err
 	}
