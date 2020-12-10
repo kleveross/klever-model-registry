@@ -193,17 +193,16 @@ func composeCustomesUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.
 	container.ReadinessProbe = probe
 	container.LivenessProbe = probe
 
-	// Set VolumeMounts
+	// If the incoming volumemounts is not nil, we will not change it, otherwise we will use the default configuration for it.
 	if len(container.VolumeMounts) == 0 {
-		container.VolumeMounts = []corev1.VolumeMount{}
+		modelMountPath := getModelMountPath(container, sdep.Name)
+		container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
+			{
+				Name:      modelSharedMountName,
+				MountPath: modelMountPath,
+			},
+		}...)
 	}
-	modelMountPath := getModelMountPath(container, sdep.Name)
-	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
-		{
-			Name:      modelSharedMountName,
-			MountPath: modelMountPath,
-		},
-	}...)
 
 	for idx := range pu.Children {
 		err := composeCustomesUserContainer(sdep, &pu.Children[idx], componentSpecMap)
@@ -510,12 +509,7 @@ func composeInitContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.Predicto
 				Value: modelStorePath,
 			},
 		},
-		VolumeMounts: []corev1.VolumeMount{
-			{
-				Name:      modelSharedMountName,
-				MountPath: modelMountPath,
-			},
-		},
+		VolumeMounts: volumeMounts,
 	}
 
 	err := composeModelInitailzerContainerResource(initContainer)
