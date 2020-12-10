@@ -30,7 +30,7 @@ def update_yaml(dir, res_dict):
         if len(res_dict['Outputs']) != 0:
             data['signature']['outputs'] = res_dict['Outputs']
         logging.info('save ormbfile.yaml: ' + json.dumps(data))
-        yaml.dump(data, f)
+        yaml.safe_dump(data, f)
 
 
 if __name__ == '__main__':

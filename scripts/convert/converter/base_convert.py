@@ -16,7 +16,7 @@ class BaseConverter(object):
 
     def _parase_modelfile(self):
         with open(os.path.join(self.input_dir, 'ormbfile.yaml'), 'r') as f:
-            data = yaml.load(f)
+            data = yaml.safe_load(f)
 
         self.author = data.get('author', None)
 
@@ -41,7 +41,7 @@ class BaseConverter(object):
         output_ormbfile['signature']['outputs'] = self.output_value
 
         with open(os.path.join(self.output_dir, 'ormbfile.yaml'), 'w') as f:
-            yaml.dump(output_ormbfile, f)
+            yaml.safe_dump(output_ormbfile, f)
 
     def _find_with_extension(self, extension):
         dir = os.path.join(self.input_dir, 'model')
