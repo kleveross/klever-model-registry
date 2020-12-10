@@ -1,6 +1,6 @@
 /*Case Range
 Model Extract：
-	DO Not Extract（TensorRT，非模型（待定））；
+	DO Not Extract（TensorRT）；
 	Do Extract (SavedModel,ONNX,GraphDef,NetDef,Keras H5, CaffeModel, TorchScript, MXNetParams, PMML)-create ModelJob automatically
 Model Convert:
 	Do Not Convert
