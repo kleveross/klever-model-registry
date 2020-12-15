@@ -62,6 +62,9 @@ const (
 
 	// modelStorePath is tritonserver param --model-repository path.
 	modelStorePath = "/mnt"
+
+	// modelSubPath is the default volumeMount's subPath.
+	modelSubPath = "serving/%s/%s/modeldir"
 )
 
 // validateComponentSpecs validate basic infomation in CRD, now, we are not support multi graph,
@@ -204,6 +207,11 @@ func composeCustomesUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.
 		}...)
 	}
 
+	// Must ensure that all subpaths of volumemount use the default rule like "serving/{sdepName}/{PredictorName}/modeldir".
+	for i := 0; i < len(container.VolumeMounts); i++ {
+		container.VolumeMounts[i].SubPath = fmt.Sprintf(modelSubPath, sdep.Name, pu.Name)
+	}
+
 	for idx := range pu.Children {
 		err := composeCustomesUserContainer(sdep, &pu.Children[idx], componentSpecMap)
 		if err != nil {
@@ -271,6 +279,11 @@ func composeDefaultUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.P
 				MountPath: modelMountPath,
 			},
 		}...)
+	}
+
+	// Must ensure that all subpaths of volumemount use the default rule like "serving/{sdepName}/{PredictorName}/modeldir".
+	for i := 0; i < len(container.VolumeMounts); i++ {
+		container.VolumeMounts[i].SubPath = fmt.Sprintf(modelSubPath, sdep.Name, pu.Name)
 	}
 
 	for idx := range pu.Children {
