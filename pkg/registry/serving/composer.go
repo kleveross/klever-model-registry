@@ -130,8 +130,10 @@ func Compose(sdep *seldonv1.SeldonDeployment) error {
 				return err
 			}
 
-			// Conpose init container for pod
-			composeInitContainer(sdep, &sdep.Spec.Predictors[i])
+			// Compose init container for pod
+			if sdep.Spec.Predictors[i].ComponentSpecs != nil && sdep.Spec.Predictors[i].ComponentSpecs[0].Spec.InitContainers == nil {
+				composeInitContainer(sdep, &sdep.Spec.Predictors[i])
+			}
 		}
 	}
 
