@@ -18,7 +18,7 @@ class TensorflowExtractor(BaseExtrctor):
                 origin_inputs = {}
                 origin_inputs['name'] = node.name
                 origin_inputs['dType'] = tf.DType(
-                    node.attr['dType'].type).as_numpy_dtype.__name__
+                    node.attr['dtype'].type).as_numpy_dtype.__name__
                 dim = node.attr['shape'].shape.dim
                 origin_inputs['size'] = [dim[i].size for i in range(len(dim))]
                 inputs.append(origin_inputs)
