@@ -74,7 +74,7 @@ class TFGraphDefFormatter(ModelFormatInterface):
     _target_graphdef_filename = 'model.graphdef'
 
     def execute(self, target_dir):
-        pb_file = hp.find_file_ends_with(target_dir, '.pb')
+        pb_file = hp.find_file_ends_with(target_dir, '.graphdef')
         assert len(pb_file) == 1
         hp.rename(target_dir, pb_file[0],
                   TFGraphDefFormatter._target_graphdef_filename)
