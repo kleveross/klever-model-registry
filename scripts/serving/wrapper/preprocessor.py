@@ -125,7 +125,12 @@ class Preprocessor:
         ormb_file_path = os.path.join(
             self.model_root_path, self._serving_name, 'ormbfile.yaml')
         if not os.path.exists(ormb_file_path):
-            logger.error(f'{ormb_file_path} does not exist')
+            logger.warn(f'{ormb_file_path} does not exist')
+            return
+
+        old_model_path = os.path.join(self.model_root_path, self._serving_name, 'model')
+        if not os.path.isdir(old_model_path):
+            logger.warn(f'{old_model_path} does not exist')
             return
 
         # Phase 1: Extract model_format and yaml
@@ -164,10 +169,8 @@ class Preprocessor:
             self._generate_model_setting(format, version)
 
         # Phase 4: Re-organize directory format
+        os.rename(old_model_path, self.model_path)
         self._format_model(format)
-
-        os.remove(ormb_file_path)
-
 
 if __name__ == '__main__':
     p = Preprocessor()
