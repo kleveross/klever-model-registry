@@ -16,6 +16,7 @@ limitations under the License.
 package modeljob
 
 import (
+	"context"
 	"sort"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,7 +52,7 @@ func (m ModelJobController) Create(namespace string, modeljob *modeljobsv1alpha1
 	}
 	modeljob.ObjectMeta.Labels[convertLabelKey] = "true"
 
-	result, err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Create(modeljob)
+	result, err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Create(context.Background(), modeljob, metav1.CreateOptions{})
 	if err != nil {
 		return nil, errors.RenderError(err)
 	}
@@ -69,7 +70,7 @@ func (m ModelJobController) Get(namespace, modeljobID string) (*modeljobsv1alpha
 }
 
 func (m ModelJobController) Delete(namespace, modeljobID string) error {
-	err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Delete(modeljobID, &metav1.DeleteOptions{})
+	err := m.kleverossClient.KleverossV1alpha1().ModelJobs(namespace).Delete(context.Background(), modeljobID, metav1.DeleteOptions{})
 	if err != nil {
 		return errors.RenderError(err)
 	}

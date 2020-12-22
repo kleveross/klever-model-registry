@@ -9,6 +9,7 @@ import (
 	"path"
 
 	"github.com/caicloud/nirvana/log"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
@@ -106,7 +107,7 @@ func UploadFile(ctx context.Context, tenant, user, projectName, modelName, versi
 
 		if modeljob.IsExtractModel(model.Format) {
 			modeljobObj := modeljob.GenerateExtractionModelJob(common.ORMBDomain, projectName, modelName, versionName, model.Format)
-			_, err = client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
+			_, err = client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(context.Background(), modeljobObj, metav1.CreateOptions{})
 			if err != nil {
 				return errors.RenderInternalServerError(err)
 			}
