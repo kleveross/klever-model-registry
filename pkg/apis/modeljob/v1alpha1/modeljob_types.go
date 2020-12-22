@@ -76,6 +76,9 @@ type ModelJobSpec struct {
 	// Env defines the env for modeljob.
 	Env []corev1.EnvVar `json:"env,omitempty"`
 
+	// InitContainer is the init container, we can use it to pull model by custome.
+	InitContainer []corev1.Container `json:"initContainer,omitempty"`
+
 	// ModelJobSource is model job source.
 	ModelJobSource `json:",inline"`
 }

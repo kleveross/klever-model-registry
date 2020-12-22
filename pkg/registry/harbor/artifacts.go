@@ -1,6 +1,7 @@
 package harbor
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/caicloud/nirvana/log"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
@@ -81,7 +83,7 @@ func (p *proxy) createModelJob(path string, byteManifests []byte) error {
 		}
 
 		modeljobObj := modeljob.GenerateExtractionModelJob(p.Domain, projectName, modelName, versionName, format.(string))
-		_, err := client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(modeljobObj)
+		_, err := client.GetKubeKleverOssClient().KleverossV1alpha1().ModelJobs("default").Create(context.Background(), modeljobObj, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}

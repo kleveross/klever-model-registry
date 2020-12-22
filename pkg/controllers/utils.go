@@ -210,6 +210,10 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 
 // generateInitContainers will pull model from harbor and export the model to /models/input path
 func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Container, error) {
+	if modeljob.Spec.InitContainer != nil {
+		return modeljob.Spec.InitContainer, nil
+	}
+
 	ormbDomain := viper.GetString(common.ORMBDomainEnvKey)
 	ormbUsername := viper.GetString(common.ORMBUsernameEnvkey)
 	ormbPassword := viper.GetString(common.ORMBPasswordEnvKey)
