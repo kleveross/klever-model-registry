@@ -21,11 +21,12 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path/filepath"
 
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -53,7 +54,7 @@ const (
 	// CustomResourceDefinitionKind is the kind of resource customresourcedefinition.
 	CustomResourceDefinitionKind = "CustomResourceDefinition"
 	// CustomResourceDefinitionPath is the path of crd yaml.
-	CustomResourceDefinitionPath = "crds"
+	CustomResourceDefinitionPath = "/crds"
 )
 
 func init() {
@@ -112,7 +113,7 @@ func Run(opt *options.ServerOption) error {
 	return nil
 }
 
-func renderCRDs(crdpath string) ([]*apiextensionsv1beta1.CustomResourceDefinition, error) {
+func renderCRDs(crdpath string) ([]*apiextensionsv1.CustomResourceDefinition, error) {
 	var (
 		info  os.FileInfo
 		files []os.FileInfo
@@ -137,8 +138,8 @@ func renderCRDs(crdpath string) ([]*apiextensionsv1beta1.CustomResourceDefinitio
 }
 
 // readCRDs reads the CRDs from files and Unmarshals them into structs
-func readCRDs(basePath string, files []os.FileInfo) ([]*apiextensionsv1beta1.CustomResourceDefinition, error) {
-	crds := make([]*apiextensionsv1beta1.CustomResourceDefinition, 0, len(files))
+func readCRDs(basePath string, files []os.FileInfo) ([]*apiextensionsv1.CustomResourceDefinition, error) {
+	crds := make([]*apiextensionsv1.CustomResourceDefinition, 0, len(files))
 	crdExts := sets.NewString(".yaml", ".yml")
 	for _, file := range files {
 		// Only parse allowed file types
@@ -153,7 +154,7 @@ func readCRDs(basePath string, files []os.FileInfo) ([]*apiextensionsv1beta1.Cus
 		}
 
 		for _, doc := range docs {
-			crd := &apiextensionsv1beta1.CustomResourceDefinition{}
+			crd := &apiextensionsv1.CustomResourceDefinition{}
 			if err = yaml.Unmarshal(doc, crd); err != nil {
 				return nil, err
 			}
@@ -206,7 +207,7 @@ func ensureCRD(config *rest.Config) error {
 		return err
 	}
 	for _, crd := range crds {
-		_, err = client.ApiextensionsV1beta1().CustomResourceDefinitions().Create(context.TODO(), crd, metav1.CreateOptions{})
+		_, err = client.ApiextensionsV1().CustomResourceDefinitions().Create(context.TODO(), crd, metav1.CreateOptions{})
 		if err != nil {
 			if !errors.IsAlreadyExists(err) {
 				setupLog.Error(err, "unable to ensure crds")

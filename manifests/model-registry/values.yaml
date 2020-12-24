@@ -90,16 +90,16 @@ model:
   serving:
     trt:
       image: ghcr.io/kleveross/tritonserver
-      tag: v0.2.0
+      tag: v0.3.0-alpha.1
     pmml:
       image: ghcr.io/kleveross/openscoring
-      tag: v0.2.0
+      tag: v0.3.0-alpha.1
     mlserver:
       image: ghcr.io/kleveross/mlserver
-      tag: v0.2.0
+      tag: v0.3.0-alpha.1
     initializer:
       image: ghcr.io/kleveross/klever-ormb-storage-initializer
-      tag: v0.0.7
+      tag: v0.0.8
 
 #
 # set Pod SchedulerName.

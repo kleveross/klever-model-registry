@@ -31,33 +31,33 @@ spec:
             - name: SCHEDULER_NAME
               value: {{ .Values.scheduler.name }}
             - name: CAFFE_EXTRACT_IMAGE
-              value: {{ .Values.extraction.caffemodel }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.caffemodel }}"
             - name: NETDEF_EXTRACT_IMAGE
-              value: {{ .Values.extraction.netdef }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.netdef }}"
             - name: GRAPHDEF_EXTRACT_IMAGE
-              value: {{ .Values.extraction.graphdef }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.graphdef }}"
             - name: H5_EXTRACT_IMAGE
-              value: {{ .Values.extraction.h5 }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.h5 }}"
             - name: MXNETPARAMS_EXTRACT_IMAGE
-              value: {{ .Values.extraction.mxnetparams }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.mxnetparams }}"
             - name: ONNX_EXTRACT_IMAGE
-              value: {{ .Values.extraction.onnx }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.onnx }}"
             - name: SAVEDMODEL_EXTRACT_IMAGE
-              value: {{ .Values.extraction.savedmodel }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.savedmodel }}"
             - name: TORCHSCRIPT_EXTRACT_IMAGE
-              value: {{ .Values.extraction.torchscript }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.torchscript }}"
             - name: PMML_EXTRACT_IMAGE
-              value: {{ .Values.extraction.pmml }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.extraction.pmml }}"
             - name: CAFFE_CONVERSION_IMAGE
-              value: {{ .Values.conversion.caffemodel }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.conversion.caffemodel }}"
             - name: MXNET_CONVERSION_IMAGE
-              value: {{ .Values.conversion.mxnet }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.conversion.mxnet }}"
             - name: H5_CONVERSION_IMAGE
-              value: {{ .Values.conversion.h5 }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.conversion.h5 }}"
             - name: NETDEF_CONVERSION_IMAGE
-              value: {{ .Values.conversion.netdef }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.conversion.netdef }}"
             - name: ORMB_INITIALIZER_IMAGE
-              value: {{ .Values.model.initializer }}
+              value: "{{ .Values.docker.registry }}/{{ .Values.model.initializer }}"
             - name: KLEVER_MODEL_REGISTRY_ADDRESS
               value: {{ .Values.model.registry.address }}
             - name: SERVER_ORMB_DOMAIN
