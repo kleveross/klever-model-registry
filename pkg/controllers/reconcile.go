@@ -57,16 +57,12 @@ func (r *ModelJobReconciler) reconcileJob(modeljob *modeljobsv1alpha1.ModelJob) 
 		if errors.IsNotFound(err) {
 			job, err := generateJobResource(modeljob)
 			if err != nil {
-				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-				r.Log.Error(err, "New job failed")
-				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("New jod failed"))
+				r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobFailed, corev1.EventTypeWarning, ModelJobReasonFailed, "failed to generate job", err)
 				return nil
 			}
 
 			if err := controllerutil.SetControllerReference(modeljob, job, r.Scheme); err != nil {
-				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-				r.Log.Error(err, "Set job ownreference failed")
-				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Set job ownreference failed"))
+				r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobFailed, corev1.EventTypeWarning, ModelJobReasonFailed, "failed to set job ownreference failed", err)
 				return nil
 			}
 
@@ -74,9 +70,7 @@ func (r *ModelJobReconciler) reconcileJob(modeljob *modeljobsv1alpha1.ModelJob) 
 				if errors.IsAlreadyExists(err) {
 					return nil
 				}
-				modeljob.Status.Phase = modeljobsv1alpha1.ModelJobFailed
-				r.Log.Error(err, "Create job failed")
-				r.Event(modeljob, "Error", "Failed", fmt.Sprintf("Create job failed"))
+				r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobFailed, corev1.EventTypeWarning, ModelJobReasonFailed, "failed to create job", err)
 				return nil
 			}
 
@@ -96,20 +90,17 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 	}
 
 	if job.Status.StartTime == nil {
-		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobPending
-		r.Event(modeljob, "Normal", "Pending", "ModelJob Pending")
+		r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobPending, corev1.EventTypeNormal, ModelJobReasonPending, "modeljob pending", nil)
 		return
 	}
 
 	if job.Status.Active != 0 {
-		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobRunning
-		r.Event(modeljob, "Normal", "StartRunning", "ModelJob running")
+		r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobRunning, corev1.EventTypeNormal, ModelJobReasonStartRunning, "modelJob start running", nil)
 		return
 	}
 
 	if job.Status.Succeeded != 0 {
-		modeljob.Status.Phase = modeljobsv1alpha1.ModelJobSucceeded
-		r.Event(modeljob, "Normal", "Succeed", "ModelJob run successfully")
+		r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobSucceeded, corev1.EventTypeNormal, ModelJobReasonSucceded, "modelJob run successfully", nil)
 		return
 	}
 
@@ -123,8 +114,7 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 		}
 		err := r.List(context.TODO(), &pods, &opt)
 		if err != nil {
-			r.Log.Error(err, fmt.Sprintf("Get pod for modeljob %v", modeljob.Name))
-			r.Event(modeljob, "Warning", "Failed", "ModelJob failed")
+			r.recordStatus(modeljob, "", corev1.EventTypeWarning, "", "failed to get pod for modeljob", err)
 			return
 		}
 
@@ -133,6 +123,24 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 	}
 
 	return
+}
+
+func (r *ModelJobReconciler) recordStatus(modeljob *modeljobsv1alpha1.ModelJob, phase modeljobsv1alpha1.ModelJobPhase,
+	eventType, reason, message string, err error) {
+	if phase != "" {
+		modeljob.Status.Phase = phase
+
+	}
+	modeljob.Status.Message = message
+
+	if err != nil {
+		message := fmt.Sprintf("%v, err: %v", message, err)
+		r.Log.Error(err, message, "modelJobName", modeljob.Name)
+	} else if eventType == corev1.EventTypeWarning {
+		r.Log.Info(message, "modelJobName", modeljob.Name)
+	}
+
+	r.Event(modeljob, eventType, reason, message)
 }
 
 func getModelJobFailedMesage(pods *corev1.PodList) string {

@@ -8,14 +8,20 @@ var (
 	// ModelFormatToFrameworkMapping is the map for model's format to model's framework.
 	ModelFormatToFrameworkMapping map[modeljobsv1alpha1.Format]modeljobsv1alpha1.Framework
 
-	// KleverModelRegistryAddressEnvKey is the address of klever-model-registry
+	// KleverModelRegistryAddressEnvKey is the address of klever-model-registry.
 	KleverModelRegistryAddressEnvKey = "KLEVER_MODEL_REGISTRY_ADDRESS"
 
-	// DefaultSchedulerName is default scheduler name
+	// DefaultSchedulerName is default scheduler name.
 	DefaultSchedulerName = "default-scheduler"
 
-	// SchedulerNameEnvKey is the env key for scheduler name, it is set in Deployment
+	// SchedulerNameEnvKey is the env key for scheduler name, it is set in Deployment.
 	SchedulerNameEnvKey = "SCHEDULER_NAME"
+
+	// ModelJobSharedVolumeName is a shared volume between extract & convert container with init container.
+	ModelJobSharedVolumeName = "model"
+
+	// ModelJobWorkDir is the workdir for extract & convert container and init container.
+	ModelJobWorkDir = "/models"
 
 	// ModelInitializerCPUEnvKey defines the cpu env key for model initializer container.
 	ModelInitializerCPUEnvKey = "MODEL_INITIALIZER_CPU"
@@ -25,6 +31,11 @@ var (
 	ModelJobTaskCPUEnvKey = "MODELJOB_TASK_CPU"
 	// ModelJobTaskMEMEnvKey defines the mem env key for modeljob task container.
 	ModelJobTaskMEMEnvKey = "MODELJOB_TASK_MEM"
+
+	ModelJobReasonPending      = "Pending"
+	ModelJobReasonStartRunning = "StartRunning"
+	ModelJobReasonSucceded     = "Succeded"
+	ModelJobReasonFailed       = "Failed"
 )
 
 var presetImage = map[string]string{
