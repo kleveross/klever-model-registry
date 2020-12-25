@@ -22,7 +22,6 @@ echo "model output dir: $output_dir"
 echo "model format: $format"
 echo "ORMB domain: $SERVER_ORMB_DOMAIN"
 echo "ORMB username: $SERVER_ORMB_USERNAME"
-echo "ORMB password: $SERVER_ORMB_PASSWORD"
 echo "#####################################################"
 
 
