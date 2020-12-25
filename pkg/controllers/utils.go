@@ -130,7 +130,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 						{
 							Name:            "executor",
 							Image:           image,
-							WorkingDir:      "/models",
+							WorkingDir:      ModelJobWorkDir,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								corev1.EnvVar{
@@ -180,7 +180,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 							},
 							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:      "model",
+									Name:      ModelJobSharedVolumeName,
 									MountPath: modeljobsv1alpha1.SourceModelPath,
 								},
 							},
@@ -189,7 +189,7 @@ func generateJobResource(modeljob *modeljobsv1alpha1.ModelJob) (*batchv1.Job, er
 					},
 					Volumes: []corev1.Volume{
 						{
-							Name: "model",
+							Name: ModelJobSharedVolumeName,
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
@@ -247,7 +247,7 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 			// Set --relayout=false, only pull and export model, not move any file
 			// please refenrence https://github.com/kleveross/ormb/blob/master/cmd/ormb-storage-initializer/cmd/pull-and-export.go
 			Args:       []string{modeljob.Spec.Model, modeljobsv1alpha1.SourceModelPath, "--relayout=false"},
-			WorkingDir: "/models",
+			WorkingDir: ModelJobWorkDir,
 			Env: []corev1.EnvVar{
 				corev1.EnvVar{
 					Name:  "ORMB_USERNAME",
@@ -260,7 +260,7 @@ func generateInitContainers(modeljob *modeljobsv1alpha1.ModelJob) ([]corev1.Cont
 			},
 			VolumeMounts: []corev1.VolumeMount{
 				{
-					Name:      "model",
+					Name:      ModelJobSharedVolumeName,
 					MountPath: modeljobsv1alpha1.SourceModelPath,
 				},
 			},
