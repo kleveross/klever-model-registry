@@ -133,7 +133,7 @@ deploy: manifests kustomize
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=kleveross-role webhook paths="./..." output:crd:artifacts:config=manifests/modeljob-operator/crds
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=kleveross-role webhook paths="./..." output:crd:artifacts:config=crds
 
 # Run go fmt against code
 fmt:
