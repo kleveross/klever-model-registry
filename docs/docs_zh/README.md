@@ -49,6 +49,7 @@ Klever Model Registry 是一个开源项目，遵循 [Apache 2.0 开源协议](h
   - MXNetParams 转为 ONNX
   - Keras H5 转为 SavedModel
   - CaffeModel 转为 NetDef
+  - NetDef 转为 ONNX
 
 同样借助于 `ModelJob` 这个 `CRD`，用户可以通过调用 API 的形式来创建用于模型转换的 `ModelJob`。通过指定 `ModelJob.Spec.Conversion.Mmdnn.From` 和 `ModelJob.Spec.Conversion.Mmdnn.To` 来确定模型转换的原格式和目标格式。模型的具体转换过程由 `ModelJob` 生成并控制的 `Job` 的镜像来完成，在转换完毕后会生成更新后的 `ormbfile.yaml` 并推送到 `Harbor`。镜像中的转换脚本代码详见 [convert](/scripts/convert/base_convert/base_convert.py)。
 
