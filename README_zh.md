@@ -40,6 +40,7 @@ Klever Model Registry 的特性包括：
     - MXNetParams 转为 ONNX
     - Keras H5 转为 SavedModel
     - CaffeModel 转为 NetDef
+    - NetDef 转为 ONNX
 
 查看我们的 [官方文档](/docs/docs_zh/README.md) 获取更多信息。
 

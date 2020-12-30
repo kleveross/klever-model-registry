@@ -42,6 +42,7 @@ Klever Model Registry's features:
     - MXNetParams to ONNX
     - Keras H5 to SavedModel
     - CaffeModel to NetDef
+    - NetDef to ONNX
 
 See our [official documentations](/docs/README.md) for more information。
 
