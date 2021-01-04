@@ -207,15 +207,16 @@ func GetContainerServiceName(mlDepName string, predictorSpec PredictorSpec, c *v
 // SeldonDeploymentSpec defines the desired state of SeldonDeployment
 type SeldonDeploymentSpec struct {
 	//Name is Deprecated will be removed in future
-	Name        string            `json:"name,omitempty" protobuf:"string,1,opt,name=name"`
-	Predictors  []PredictorSpec   `json:"predictors" protobuf:"bytes,2,opt,name=name"`
-	OauthKey    string            `json:"oauth_key,omitempty" protobuf:"string,3,opt,name=oauth_key"`
-	OauthSecret string            `json:"oauth_secret,omitempty" protobuf:"string,4,opt,name=oauth_secret"`
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,5,opt,name=annotations"`
-	Protocol    Protocol          `json:"protocol,omitempty" protobuf:"bytes,6,opt,name=protocol"`
-	Transport   Transport         `json:"transport,omitempty" protobuf:"bytes,7,opt,name=transport"`
-	Replicas    *int32            `json:"replicas,omitempty" protobuf:"bytes,8,opt,name=replicas"`
-	ServerType  ServerType        `json:"serverType,omitempty" protobuf:"bytes,8,opt,name=serverType"`
+	Name             string            `json:"name,omitempty" protobuf:"string,1,opt,name=name"`
+	DefaultPredictor string            `json:"defaultPredictor,omitempty" protobuf:"string,1,opt,name=name"`
+	Predictors       []PredictorSpec   `json:"predictors" protobuf:"bytes,2,opt,name=name"`
+	OauthKey         string            `json:"oauth_key,omitempty" protobuf:"string,3,opt,name=oauth_key"`
+	OauthSecret      string            `json:"oauth_secret,omitempty" protobuf:"string,4,opt,name=oauth_secret"`
+	Annotations      map[string]string `json:"annotations,omitempty" protobuf:"bytes,5,opt,name=annotations"`
+	Protocol         Protocol          `json:"protocol,omitempty" protobuf:"bytes,6,opt,name=protocol"`
+	Transport        Transport         `json:"transport,omitempty" protobuf:"bytes,7,opt,name=transport"`
+	Replicas         *int32            `json:"replicas,omitempty" protobuf:"bytes,8,opt,name=replicas"`
+	ServerType       ServerType        `json:"serverType,omitempty" protobuf:"bytes,8,opt,name=serverType"`
 }
 
 type SSL struct {
