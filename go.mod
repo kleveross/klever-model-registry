@@ -28,7 +28,7 @@ require (
 replace (
 	github.com/docker/docker => github.com/docker/docker v1.4.2-0.20200203170920-46ec8731fbce
 	github.com/go-logr/logr => github.com/go-logr/logr v0.1.0
-	github.com/seldonio/seldon-core/operator => github.com/kleveross/seldon-core/operator v0.0.0-20201214071233-b0fc794d2e91
+	github.com/seldonio/seldon-core/operator => github.com/kleveross/seldon-core/operator v0.0.0-20210104113126-6f7991a6877f
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6
 	k8s.io/client-go => k8s.io/client-go v0.19.3
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.1.0
