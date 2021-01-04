@@ -4,6 +4,19 @@ import (
 	modeljobsv1alpha1 "github.com/kleveross/klever-model-registry/pkg/apis/modeljob/v1alpha1"
 )
 
+const (
+	// ReasonImagePull pull image error.
+	ReasonImagePull = "ErrImagePull"
+	// ReasonImagePullBackOff ImagePullBackOff.
+	ReasonImagePullBackOff = "ImagePullBackOff"
+	// ReasonOOMKilled OOM killed.
+	ReasonOOMKilled = "OOMKilled"
+	// ReasonCrashLoopBackOff CrashLoopBackOff.
+	ReasonCrashLoopBackOff = "CrashLoopBackOff"
+	// ReasonContainerCreating ContainerCreating.
+	ReasonContainerCreating = "ContainerCreating"
+)
+
 var (
 	// ModelFormatToFrameworkMapping is the map for model's format to model's framework.
 	ModelFormatToFrameworkMapping map[modeljobsv1alpha1.Format]modeljobsv1alpha1.Framework
