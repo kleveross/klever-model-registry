@@ -24,8 +24,8 @@ class TensorflowExtractor(BaseExtrctor):
         v = self.signature
         for key in v.inputs:
             origin_inputs = {}
-            origin_inputs['signatureConst'] = key
-            origin_inputs['name'] = v.inputs[key].name
+            origin_inputs['tensorName'] = v.inputs[key].name
+            origin_inputs['name'] = key
             origin_inputs['dType'] = tf.DType(
                 v.inputs[key].dtype).as_numpy_dtype.__name__
             dim = v.inputs[key].tensor_shape.dim
@@ -38,8 +38,8 @@ class TensorflowExtractor(BaseExtrctor):
         v = self.signature
         for key in v.outputs:
             origin_outputs = {}
-            origin_outputs['signatureConst'] = key
-            origin_outputs['name'] = v.outputs[key].name
+            origin_outputs['tensorName'] = v.outputs[key].name
+            origin_outputs['name'] = key
             origin_outputs['dType'] = tf.DType(
                 v.outputs[key].dtype).as_numpy_dtype.__name__
             dim = v.outputs[key].tensor_shape.dim
