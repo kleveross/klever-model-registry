@@ -142,8 +142,12 @@ func (r *ModelJobReconciler) getModelJobMesage(modeljob *modeljobsv1alpha1.Model
 		return "", err
 	}
 
+	return getModelJobMesageByPods(&pods)
+}
+
+func getModelJobMesageByPods(pods *corev1.PodList) (string, error) {
 	if len(pods.Items) == 0 {
-		return "waiting pod to creat", nil
+		return "waiting pod to create", nil
 	}
 
 	// For pod condition.
