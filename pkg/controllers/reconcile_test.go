@@ -6,7 +6,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func Test_getModelJobFailedMesage(t *testing.T) {
+func Test_getModelJobMesageByPods(t *testing.T) {
 	type args struct {
 		pods *corev1.PodList
 	}
@@ -22,7 +22,7 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{},
 				},
 			},
-			want: "",
+			want: "waiting pod to create",
 		},
 		{
 			name: "ormb login err",
@@ -31,6 +31,15 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{
 						{
 							Status: corev1.PodStatus{
+								InitContainerStatuses: []corev1.ContainerStatus{
+									{
+										State: corev1.ContainerState{
+											Terminated: &corev1.ContainerStateTerminated{
+												ExitCode: 0,
+											},
+										},
+									},
+								},
 								ContainerStatuses: []corev1.ContainerStatus{
 									{
 										State: corev1.ContainerState{
@@ -45,7 +54,7 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					},
 				},
 			},
-			want: "ormb login error",
+			want: "failed to login model registry",
 		},
 		{
 			name: "ormb pull model error",
@@ -54,6 +63,15 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{
 						{
 							Status: corev1.PodStatus{
+								InitContainerStatuses: []corev1.ContainerStatus{
+									{
+										State: corev1.ContainerState{
+											Terminated: &corev1.ContainerStateTerminated{
+												ExitCode: 0,
+											},
+										},
+									},
+								},
 								ContainerStatuses: []corev1.ContainerStatus{
 									{
 										State: corev1.ContainerState{
@@ -68,7 +86,7 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					},
 				},
 			},
-			want: "ormb pull model error",
+			want: "failed to pull model from model registry",
 		},
 		{
 			name: "ormb export model error",
@@ -77,6 +95,15 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{
 						{
 							Status: corev1.PodStatus{
+								InitContainerStatuses: []corev1.ContainerStatus{
+									{
+										State: corev1.ContainerState{
+											Terminated: &corev1.ContainerStateTerminated{
+												ExitCode: 0,
+											},
+										},
+									},
+								},
 								ContainerStatuses: []corev1.ContainerStatus{
 									{
 										State: corev1.ContainerState{
@@ -91,7 +118,7 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					},
 				},
 			},
-			want: "ormb export model error",
+			want: "failed to export model to local",
 		},
 		{
 			name: "run task error",
@@ -100,6 +127,15 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{
 						{
 							Status: corev1.PodStatus{
+								InitContainerStatuses: []corev1.ContainerStatus{
+									{
+										State: corev1.ContainerState{
+											Terminated: &corev1.ContainerStateTerminated{
+												ExitCode: 0,
+											},
+										},
+									},
+								},
 								ContainerStatuses: []corev1.ContainerStatus{
 									{
 										State: corev1.ContainerState{
@@ -114,7 +150,7 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					},
 				},
 			},
-			want: "run task error",
+			want: "failed to run extract/convert task",
 		},
 		{
 			name: "ormb save model error",
@@ -123,6 +159,15 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{
 						{
 							Status: corev1.PodStatus{
+								InitContainerStatuses: []corev1.ContainerStatus{
+									{
+										State: corev1.ContainerState{
+											Terminated: &corev1.ContainerStateTerminated{
+												ExitCode: 0,
+											},
+										},
+									},
+								},
 								ContainerStatuses: []corev1.ContainerStatus{
 									{
 										State: corev1.ContainerState{
@@ -137,7 +182,7 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					},
 				},
 			},
-			want: "ormb save model error",
+			want: "failed to save model to localhost",
 		},
 		{
 			name: "ormb push model error",
@@ -146,6 +191,15 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					Items: []corev1.Pod{
 						{
 							Status: corev1.PodStatus{
+								InitContainerStatuses: []corev1.ContainerStatus{
+									{
+										State: corev1.ContainerState{
+											Terminated: &corev1.ContainerStateTerminated{
+												ExitCode: 0,
+											},
+										},
+									},
+								},
 								ContainerStatuses: []corev1.ContainerStatus{
 									{
 										State: corev1.ContainerState{
@@ -160,13 +214,13 @@ func Test_getModelJobFailedMesage(t *testing.T) {
 					},
 				},
 			},
-			want: "ormb push model error",
+			want: "failed to push model to model registry",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getModelJobFailedMesage(tt.args.pods); got != tt.want {
-				t.Errorf("getModelJobFailedMesage() = %v, want %v", got, tt.want)
+			if got, _ := getModelJobMesageByPods(tt.args.pods); got != tt.want {
+				t.Errorf("getModelJobMesage() = %v, want %v", got, tt.want)
 			}
 		})
 	}
