@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import shutil
 from loguru import logger
 
 from utils.get_model import check_model
@@ -138,7 +139,7 @@ class Preprocessor:
         yaml_data = {}
         if self.using_ormbfile:
             yaml_data = self._extract_yaml()
-            if 'format' in yaml_data.items():
+            if 'format' not in yaml_data.items():
                 logger.error('model format missing')
                 return
             format = yaml_data["format"]
@@ -169,6 +170,8 @@ class Preprocessor:
             self._generate_model_setting(format, version)
 
         # Phase 4: Re-organize directory format
+        if os.path.isdir(self.model_path):
+            shutil.rmtree(self.model_path)
         os.rename(old_model_path, self.model_path)
         self._format_model(format)
 
