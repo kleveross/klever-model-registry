@@ -22,7 +22,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					Items: []corev1.Pod{},
 				},
 			},
-			want: "waiting pod to create",
+			want: errContainerCreating,
 		},
 		{
 			name: "ormb login err",
@@ -54,7 +54,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					},
 				},
 			},
-			want: "failed to login model registry",
+			want: errORMBLogin,
 		},
 		{
 			name: "ormb pull model error",
@@ -86,7 +86,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					},
 				},
 			},
-			want: "failed to pull model from model registry",
+			want: errORMBPull,
 		},
 		{
 			name: "ormb export model error",
@@ -118,7 +118,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					},
 				},
 			},
-			want: "failed to export model to local",
+			want: errORMBExport,
 		},
 		{
 			name: "run task error",
@@ -150,7 +150,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					},
 				},
 			},
-			want: "failed to run extract/convert task",
+			want: errRunTask,
 		},
 		{
 			name: "ormb save model error",
@@ -182,7 +182,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					},
 				},
 			},
-			want: "failed to save model to localhost",
+			want: errORMBSave,
 		},
 		{
 			name: "ormb push model error",
@@ -214,7 +214,7 @@ func Test_getModelJobMesageByPods(t *testing.T) {
 					},
 				},
 			},
-			want: "failed to push model to model registry",
+			want: errORMBPush,
 		},
 	}
 	for _, tt := range tests {

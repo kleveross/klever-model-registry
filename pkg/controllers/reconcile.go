@@ -92,7 +92,7 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 		message, err := r.getModelJobMesage(modeljob)
 		if err != nil || message != "" {
 			r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobPending, corev1.EventTypeWarning, ModelJobReasonPending, message, err)
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true, RequeueAfter: 15 * time.Second}, nil
 		}
 
 		r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobRunning, corev1.EventTypeNormal, ModelJobReasonStartRunning, "modelJob start running", nil)
@@ -147,7 +147,7 @@ func (r *ModelJobReconciler) getModelJobMesage(modeljob *modeljobsv1alpha1.Model
 
 func getModelJobMesageByPods(pods *corev1.PodList) (string, error) {
 	if len(pods.Items) == 0 {
-		return "waiting pod to create", nil
+		return errContainerCreating, nil
 	}
 
 	// For pod condition.
@@ -158,29 +158,18 @@ func getModelJobMesageByPods(pods *corev1.PodList) (string, error) {
 	}
 
 	// deal common error
-	// 1. pull image error.
-	// 2. container is out of memory.
-	// 3. container is crashoff.
 	dealCommonErr := func(containerStatus *corev1.ContainerStatus) string {
 		if containerStatus.LastTerminationState.Waiting != nil {
-			switch containerStatus.State.Waiting.Reason {
-			case ReasonImagePull, ReasonImagePullBackOff:
-				return "failed to pull image"
-			case ReasonOOMKilled:
-				return "container is out of memory"
-			case ReasonContainerCreating:
-				return "container is creating"
+			errMsg := convertPodReasonToMessage(containerStatus.LastTerminationState.Waiting.Reason)
+			if errMsg != "" {
+				return errMsg
 			}
 		}
 
 		if containerStatus.State.Waiting != nil {
-			switch containerStatus.State.Waiting.Reason {
-			case ReasonImagePull, ReasonImagePullBackOff:
-				return "failed to pull image"
-			case ReasonCrashLoopBackOff:
-				return "container is crash"
-			case ReasonContainerCreating:
-				return "container is creating"
+			errMsg := convertPodReasonToMessage(containerStatus.State.Waiting.Reason)
+			if errMsg != "" {
+				return errMsg
 			}
 		}
 
@@ -189,7 +178,7 @@ func getModelJobMesageByPods(pods *corev1.PodList) (string, error) {
 
 	// For init container.
 	if len(pods.Items[0].Status.InitContainerStatuses) == 0 {
-		return "init container is creating", nil
+		return errContainerCreating, nil
 	}
 	for _, cs := range pods.Items[0].Status.InitContainerStatuses {
 		errMsg := dealCommonErr(&cs)
@@ -198,13 +187,13 @@ func getModelJobMesageByPods(pods *corev1.PodList) (string, error) {
 		}
 
 		if cs.State.Terminated != nil && cs.State.Terminated.ExitCode != 0 {
-			return "failed to pull model", nil
+			return errORMBPull, nil
 		}
 	}
 
 	// For task container.
 	if len(pods.Items[0].Status.ContainerStatuses) == 0 {
-		return "container is creating", nil
+		return errContainerCreating, nil
 	}
 	for _, cs := range pods.Items[0].Status.ContainerStatuses {
 		errMsg := dealCommonErr(&cs)
@@ -215,21 +204,38 @@ func getModelJobMesageByPods(pods *corev1.PodList) (string, error) {
 		if cs.State.Terminated != nil {
 			switch cs.State.Terminated.ExitCode {
 			case ErrORMBLogin:
-				return "failed to login model registry", nil
+				return errORMBLogin, nil
 			case ErrORMBPullModel:
-				return "failed to pull model from model registry", nil
+				return errORMBPull, nil
 			case ErrORMBExportModel:
-				return "failed to export model to local", nil
+				return errORMBExport, nil
 			case ErrRunTask:
-				return "failed to run extract/convert task", nil
+				return errRunTask, nil
 			case ErrORMBSaveModel:
-				return "failed to save model to localhost", nil
+				return errORMBSave, nil
 			case ErrORMBPushModel:
-				return "failed to push model to model registry", nil
+				return errORMBPush, nil
 			default:
 				return fmt.Sprintf("unknow error, err code: %v", cs.State.Terminated.ExitCode), nil
 			}
 		}
 	}
 	return "", nil
+}
+
+func convertPodReasonToMessage(reason string) string {
+	switch reason {
+	case ReasonImagePull, ReasonImagePullBackOff:
+		return errPullImage
+	case ReasonOOMKilled:
+		return errContainerOutOfMemory
+	case ReasonContainerCreating:
+		return errContainerCreating
+	case ReasonCrashLoopBackOff:
+		return errContainerCrashed
+	case ReasonInvalidImageName:
+		return errContainerImageInvalid
+	}
+
+	return ""
 }
