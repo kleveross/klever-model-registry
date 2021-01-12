@@ -7,6 +7,8 @@ import (
 const (
 	// ReasonImagePull pull image error.
 	ReasonImagePull = "ErrImagePull"
+	// ReasonInvalidImageName invalied image name.
+	ReasonInvalidImageName = "InvalidImageName"
 	// ReasonImagePullBackOff ImagePullBackOff.
 	ReasonImagePullBackOff = "ImagePullBackOff"
 	// ReasonOOMKilled OOM killed.
@@ -15,6 +17,21 @@ const (
 	ReasonCrashLoopBackOff = "CrashLoopBackOff"
 	// ReasonContainerCreating ContainerCreating.
 	ReasonContainerCreating = "ContainerCreating"
+)
+
+// defines the error message
+const (
+	errPullImage             = "failed to pull image"
+	errContainerCreating     = "container is creating"
+	errContainerOutOfMemory  = "container out of memory"
+	errContainerImageInvalid = "container image invalid"
+	errContainerCrashed      = "container crashed"
+	errORMBPull              = "failed to pull model"
+	errORMBLogin             = "failed to login model registry"
+	errORMBSave              = "failed to save model to localhost"
+	errORMBPush              = "failed to push model to model registry"
+	errORMBExport            = "failed to export model to local"
+	errRunTask               = "failed to run extract/convert task"
 )
 
 var (
