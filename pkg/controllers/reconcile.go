@@ -34,16 +34,17 @@ func (r *ModelJobReconciler) reconcile(modeljob *modeljobsv1alpha1.ModelJob) (ct
 	// Get a local copy of modeljob's instance.
 	oldModelJob := modeljob.DeepCopy()
 
-	result, err := r.reconcileJob(modeljob)
-	if err != nil || result.Requeue {
-		return result, nil
-	}
+	reconcileJobResult, err := r.reconcileJob(modeljob)
 
 	// Update modeljob's status.
 	if !equality.Semantic.DeepEqual(modeljob.Status, oldModelJob.Status) {
 		if err := r.Status().Update(context.Background(), modeljob); err != nil {
 			return reconcile.Result{Requeue: true, RequeueAfter: 10 * time.Second}, err
 		}
+	}
+
+	if err != nil || reconcileJobResult.Requeue {
+		return reconcileJobResult, nil
 	}
 
 	return reconcile.Result{}, nil
@@ -95,7 +96,7 @@ func (r *ModelJobReconciler) updateModelJobStatus(job *batchv1.Job, modeljob *mo
 			return ctrl.Result{Requeue: true, RequeueAfter: 15 * time.Second}, nil
 		}
 
-		r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobRunning, corev1.EventTypeNormal, ModelJobReasonStartRunning, "modelJob start running", nil)
+		r.recordStatus(modeljob, modeljobsv1alpha1.ModelJobRunning, corev1.EventTypeNormal, ModelJobReasonStartRunning, "modelJob running", nil)
 		return ctrl.Result{Requeue: true, RequeueAfter: 15 * time.Second}, nil
 	}
 
