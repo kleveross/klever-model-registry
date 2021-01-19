@@ -123,17 +123,6 @@ class Preprocessor:
             sys.exit(1)
 
     def start(self):
-        ormb_file_path = os.path.join(
-            self.model_root_path, self._serving_name, 'ormbfile.yaml')
-        if not os.path.exists(ormb_file_path):
-            logger.warn(f'{ormb_file_path} does not exist')
-            return
-
-        old_model_path = os.path.join(self.model_root_path, self._serving_name, 'model')
-        if not os.path.isdir(old_model_path):
-            logger.warn(f'{old_model_path} does not exist')
-            return
-
         # Phase 1: Extract model_format and yaml
         format = ""
         yaml_data = {}
