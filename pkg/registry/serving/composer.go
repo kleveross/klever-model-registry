@@ -172,17 +172,6 @@ func composeCustomesUserContainer(sdep *seldonv1.SeldonDeployment, pu *seldonv1.
 	container := &seldonPodSpec.Spec.Containers[0]
 	container.Name = pu.Name
 
-	// Set default env.
-	if len(container.Env) == 0 {
-		container.Env = []corev1.EnvVar{}
-	}
-	container.Env = append(container.Env, []corev1.EnvVar{
-		{
-			Name:  "SERVING_NAME",
-			Value: sdep.Name,
-		},
-	}...)
-
 	// Set Probe
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{

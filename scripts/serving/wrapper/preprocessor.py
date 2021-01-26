@@ -46,6 +46,7 @@ class Preprocessor:
         self.using_ormbfile = True if os.getenv(USING_ORMBFILE_ENV, '') else False
         self._trtis_conifig_generator = TRTISConfigGenerator()
         self.model_root_path = self._model_store
+        self.old_model_path = os.path.join(self.model_root_path, self._serving_name, 'model')
         self.model_path = os.path.join(
             self.model_root_path, self._serving_name, '1')
 
@@ -161,7 +162,7 @@ class Preprocessor:
         # Phase 4: Re-organize directory format
         if os.path.isdir(self.model_path):
             shutil.rmtree(self.model_path)
-        os.rename(old_model_path, self.model_path)
+        os.rename(self.old_model_path, self.model_path)
         self._format_model(format)
 
 if __name__ == '__main__':
