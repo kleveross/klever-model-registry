@@ -88,21 +88,21 @@ model:
   initializer: "klever-ormb-storage-initializer:v0.0.10"
 
 extraction:
-  caffemodel: 'caffemodel-extract:v0.3.0-alpha.2'
-  netdef: 'netdef-extract:v0.3.0-alpha.2'
-  graphdef: 'graphdef-extract:v0.3.0-alpha.2'
-  h5: 'h5-extract:v0.3.0-alpha.2'
-  mxnetparams: 'mxnetparams-extract:v0.3.0-alpha.2'
-  onnx: 'onnx-extract:v0.3.0-alpha.2'
-  savedmodel: 'savedmodel-extract:v0.3.0-alpha.2'
-  torchscript: 'torchscript-extract:v0.3.0-alpha.2'
-  pmml: 'pmml-extract:v0.3.0-alpha.2'
+  caffemodel: 'caffemodel-extract:v0.3.0-rc.1'
+  netdef: 'netdef-extract:v0.3.0-rc.1'
+  graphdef: 'graphdef-extract:v0.3.0-rc.1'
+  h5: 'h5-extract:v0.3.0-rc.1'
+  mxnetparams: 'mxnetparams-extract:v0.3.0-rc.1'
+  onnx: 'onnx-extract:v0.3.0-rc.1'
+  savedmodel: 'savedmodel-extract:v0.3.0-rc.1'
+  torchscript: 'torchscript-extract:v0.3.0-rc.1'
+  pmml: 'pmml-extract:v0.3.0-rc.1'
 
 conversion:
-  caffemodel: 'caffemodel_to_netdef:v0.3.0-alpha.2'
-  mxnetparams: 'mxnetparams_to_onnx:v0.3.0-alpha.2'
-  h5: 'h5_to_savedmodel:v0.3.0-alpha.2'
-  netdef: 'netdef_to_onnx:v0.3.0-alpha.2'
+  caffemodel: 'caffemodel_to_netdef:v0.3.0-rc.1'
+  mxnetparams: 'mxnetparams_to_onnx:v0.3.0-rc.1'
+  h5: 'h5_to_savedmodel:v0.3.0-rc.1'
+  netdef: 'netdef_to_onnx:v0.3.0-rc.1'
     
   
 scheduler:
