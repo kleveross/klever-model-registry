@@ -11,7 +11,7 @@ BASE_REGISTRY ?= docker.io
 # Image URL to use all building/pushing image targets
 IMG ?= kleveross/modeljob-operator:latest
 
-ORMB_VERSION ?= $(strip 0.0.10)
+ORMB_VERSION ?= $(strip 0.0.11)
 #
 # These variables should not need tweaking.
 #
