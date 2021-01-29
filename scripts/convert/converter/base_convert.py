@@ -36,9 +36,6 @@ class BaseConverter(object):
             output_ormbfile['author'] = self.author
 
         output_ormbfile['format'] = os.environ['FORMAT']
-        output_ormbfile['signature'] = {}
-        output_ormbfile['signature']['inputs'] = self.input_value
-        output_ormbfile['signature']['outputs'] = self.output_value
 
         with open(os.path.join(self.output_dir, 'ormbfile.yaml'), 'w') as f:
             yaml.safe_dump(output_ormbfile, f)
