@@ -4,17 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kleveross/klever-model-registry/pkg/common"
+	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
 	"io"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"path"
 
 	"github.com/caicloud/nirvana/log"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/kleveross/klever-model-registry/pkg/common"
 	"github.com/kleveross/klever-model-registry/pkg/registry/client"
 	"github.com/kleveross/klever-model-registry/pkg/registry/errors"
-	"github.com/kleveross/klever-model-registry/pkg/registry/modeljob"
 	"github.com/kleveross/klever-model-registry/pkg/util"
 )
 
@@ -127,7 +126,7 @@ func DownloadFile(ctx context.Context, tenant, user, projectName, modelName, ver
 	if err != nil {
 		return errors.RenderInternalServerError(err)
 	}
-
+	defer os.RemoveAll(zipFileName)
 	file, err := os.Open(zipFileName)
 	if err != nil {
 		return errors.RenderInternalServerError(err)

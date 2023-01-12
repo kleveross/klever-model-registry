@@ -179,7 +179,7 @@ func downloadModelFromHarbor(client ormb.Interface, tenant, user string, model *
 	if err != nil {
 		return "", err
 	}
-	defer os.RemoveAll(zipFileName)
+	//defer os.RemoveAll(zipFileName)
 
 	return zipFileName, nil
 }
@@ -284,7 +284,7 @@ func writeORMBFile(filePath string, model *Model) error {
 		Author:      "",
 		Description: model.Description,
 		Format:      model.Format,
-		Framework:   model.Format,
+		Framework:   model.FrameWork,
 		Signature: &ormbmodel.Signature{
 			Inputs:  model.Inputs,
 			Outputs: model.Outputs,

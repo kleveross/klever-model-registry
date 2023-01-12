@@ -4,5 +4,6 @@ FROM debian:stretch
 
 WORKDIR /
 COPY bin/model-registry  /model-registry
+RUN chmod 755 /model-registry
 
 ENTRYPOINT ["/model-registry"]
